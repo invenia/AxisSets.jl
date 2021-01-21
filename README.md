@@ -7,14 +7,92 @@
 [![ColPrac: Contributor's Guide on Collaborative Practices for Community Packages](https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviolet)](https://github.com/SciML/ColPrac)
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
+## Key Objectives
 
-1. Container Dataset type which stores multiple `KeyedArray{T,N,<:NamedDimsArray}`s with shared axes.
-2. Perform dimensional operations over multiple arrays while maintaining axis consistency
+- Wrap multiple `KeyedArray{T,N,<:NamedDimsArray}`s with shared axes
+- Support dimensional operations over multiple arrays while maintaining axis consistency
 
-# Operations
+About the shared axes:
+- Methods for our `Dataset` guarantee shared axes consistency
+- Low level manipulation of the raw components are out-of-scope
+  - We minimize this risk by returning ReadOnlyArrays for shared keys to protect users from themselves
+- Shared dimensions don't require matching orientations, just key values (`M[time, obj]` and `N[obj, time]` is fine))
+- Component `KeyedArray`s can have non-shared dimensions and do not need to have all of the shared dimensions.
 
-1. Filter along a dimension across multiple arrays. For example, remove labelled features from `train_X` or `predict_X` if we're missing too much data in either.
-2. Reorder values in multiple arrays based on re-ordering the shared axis values.
-3. Apply any other axis mutations to all shared arrays at once.
-4. Ability to easily merge and component arrays at once
-5. Supports the tables API
+## Implemented Operations
+
+All operations provide two main benefits:
+
+1. Avoids needing to manually find and manipulate each `KeyedArray` containing a given shared dimension
+2. Ensures that the shared dimension remains consistent across all components
+
+### Filter
+
+```julia
+julia> Impute.filter(ds; dims=:time)
+```
+
+Removes all slices along the `:time` dimension containing a missing in any internal component `KeyedArray`.
+
+### Permute
+
+```julia
+julia> AxisSets.permutekey!(ds, :obj, [1, 3, 2])
+```
+
+If the `:obj` dimension values are `[:a, :b, :c]` then this would reorder them and their
+corresponding array slices to `[:a, :c, :b]` for each internal component `KeyedArray`.
+
+### Rekey
+
+```julia
+AxisSets.remapkey!(dt -> ZonedDateTime(dt, tz"UTC"), ds, :time)
+```
+
+Applies the mutation function (`ZonedDateTime` conversion) to all `:time` axis key values.
+
+### Split/join
+
+```julia
+AxisSets.join(ds, (:loc, :obj))
+```
+Joins the `:loc` and `:obj` dimensions into one `:locᵡobj` axis and merges the keys into
+a tuple of `(loc_key, obj_key)`.
+
+```julia
+AxisSets.split(ds, :locᵡobj)
+```
+Splits any `:locᵡobj` dimensions into separate dimensions.
+Assuming the key values are tuples the each corresponding element will be split into each
+independent axis key value.
+
+Similar to the other operations, these are done for all components that share these dimensions.
+
+### Tables
+
+Constructing Datasets from a table with key columns and one or more value columns
+```julia
+# Table with time, loc, obj, val1, and val2 columns
+# Reminder the table could be a dataframe, csv, or libpq results
+ds = Dataset(table, :time, :loc, :obj)
+```
+You could also construct a `Dataset` by calling:
+```julia
+key = (:time, :loc, :obj)
+ds = Dataset(
+    key...;
+    val1=AxisKeys.wrapdims(table, :val1, key...),
+    val2=AxisKeys.wrapdims(table, :val2, key...),
+)
+```
+The later is particulary useful if you want to combine datasets that should still have
+matching (or partially matching) key values.
+
+Likewise a Dataset implements the tables interface, meaning that you can call
+`Tables.row` and `Tables.columns` functions on it can be used with packages like:
+
+1. PrettyTables.jl
+2. TableOperations.jl
+3. StatsPlots.jl
+
+NOTE: Needs some examples
