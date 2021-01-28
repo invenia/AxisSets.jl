@@ -269,10 +269,80 @@ using AxisSets: Dataset
 
     @testset "Merge" begin
         # Test destructive merging of valid and invalid datasets
+        @testset "additive" begin
+            ds1 = Dataset(
+                :val1 => KeyedArray(
+                    rand(4, 3, 2);
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                )
+            )
+
+            ds2 = Dataset(
+                :val2 => KeyedArray(
+                    rand(4, 3, 2) .+ 1.0;
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                )
+            )
+            ds = merge(ds1, ds2)
+            @test issetequal(keys(ds), [:val1, :val2])
+        end
+        @testset "replace" begin
+            ds1 = Dataset(
+                :val1 => KeyedArray(
+                    rand(4, 3, 2);
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                )
+            )
+
+            ds2 = Dataset(
+                :val1 => KeyedArray(
+                    rand(4, 3, 2) .+ 1.0;
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                )
+            )
+            ds = merge(ds1, ds2)
+            @test issetequal(keys(ds), [:val1])
+            @test all(x -> x >= 1.0, ds.val1)
+        end
+        @testset "key mismatch" begin
+            ds1 = Dataset(
+                :val1 => KeyedArray(
+                    rand(4, 3, 2);
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                )
+            )
+
+            ds2 = Dataset(
+                :val2 => KeyedArray(
+                    rand(4, 2, 2) .+ 1.0;
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:2,
+                    obj=[:a, :b],
+                )
+            )
+            @test_throws ArgumentError merge(ds1, ds2)
+        end
+    end
+
+    @testset "Join" begin
+        # TODO: I'm not sure yet, but we might want some sort of non-destructive join
+        # operation that can do right, left, inner or outer joins on axis keys.
     end
 
     @testset "Tables" begin
         # Test writing to a table (e.g., pretty_table)
+        # NOTE: I'm not sure if we want this for the Dataset type or just for the
+        # component KeyedArrays (already supported)?
     end
 
     @testset "Impute" begin
@@ -312,5 +382,8 @@ using AxisSets: Dataset
 
     @testset "Add components" begin
         # Support adding and removing components with the dict like syntax
+        # I'm not entirely sold that we need this if we have merge operations?
+        # How would this operation compare to a potential `join` operation that can handle
+        # right, left, inner or outer joins on axis keys?
     end
 end
