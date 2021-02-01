@@ -40,6 +40,30 @@ end
 # Utility kwargs constructor.
 Dataset(; dims=(), kwargs...) = Dataset(kwargs...; dims=dims)
 
+Tables.istable(::Type{<:Dataset{Symbol}}) = true
+
+# Inefficient row iterator
+Tables.rowaccess(::Type{<:Dataset{Symbol}}) = true
+function Tables.rows(ds::Dataset)
+    names = tuple(ds.dims..., keys(ds)...)
+    idx_names = Tuple(ds.dims)
+    # NOTE: We probably want to cache the indices rather than doing
+    # value lookups for each row.
+    return map(Iterators.product(axiskeys(ds)...)) do idx
+        kwargs = NamedTuple{idx_names}(idx)
+        vals = map(values(ds.data)) do a
+            dnames = tuple(intersect(idx_names, dimnames(a))...)
+            # TODO: Throw error if component array has non-shared dimensions
+            first(a(; NamedTuple{dnames}(kwargs)...))
+        end
+        return NamedTuple{names}(tuple(idx..., vals...))
+    end
+end
+
+# Lazy columns implementation
+Tables.columnaccess(ds::Dataset{Symbol}) = Tables.columnaccess(first(values(ds.data)))
+Tables.columns(ds::Dataset) = Tables.columns(Tables.rows(ds))
+
 function Base.show(io::IO, ds::Dataset{K, V}) where {K, V}
     dims = tuple(ds.dims...)
     n = length(ds.data)
@@ -65,6 +89,16 @@ end
 function _getaxes(ds::Dataset, name::Symbol)
     return [getproperty(a, name) for a in values(ds.data) if name in dimnames(a)]
 end
+
+function AxisKeys.axiskeys(ds::Dataset, name::Symbol)
+    for a in values(ds.data)
+        if name in dimnames(a)
+            return axiskeys(a, name)
+        end
+    end
+end
+
+AxisKeys.axiskeys(ds::Dataset) = Tuple(axiskeys(ds, name) for name in ds.dims)
 
 Base.keys(ds::Dataset) = keys(ds.data)
 Base.values(ds::Dataset) = values(ds.data)

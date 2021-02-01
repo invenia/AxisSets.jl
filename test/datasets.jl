@@ -340,9 +340,38 @@ using AxisSets: Dataset
     end
 
     @testset "Tables" begin
-        # Test writing to a table (e.g., pretty_table)
-        # NOTE: I'm not sure if we want this for the Dataset type or just for the
-        # component KeyedArrays (already supported)?
+        key_cols = Iterators.product(
+            DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+            1:3,
+            [:a, :b]
+        )
+        # We'll just start with a basic rowtable
+        table = map(key_cols) do t
+            vals = (t..., rand(), rand() + 1)
+            return NamedTuple{(:time, :loc, :obj, :val1, :val2)}(vals)
+        end |> vec
+
+        @test Tables.isrowtable(table)
+        # Construct our Dataset
+
+        # Test constructing AxisSet from table
+        ds = Dataset(table; dims=(:time, :loc, :obj))
+
+        # Test that we successfully extracted the dims
+        @test issetequal([:time, :loc, :obj], ds.dims)
+
+        # Test that we have a data dict entry for each value column
+        @test issetequal([:val1, :val2], keys(ds.data))
+
+        # Test that the dataset is also a table
+        @test Tables.rowaccess(ds)
+        @test Tables.columnaccess(ds)
+
+        # Just compare the set of rows as we don't guarantee ordering.
+        @test issetequal(Tables.rows(ds), table)
+        # Add a test for cases where:
+        # 1. the dataset doesn't describe a single dataset and should errors
+        # 2. the dataset has components on a subset of shared dimensions (just :time x :loc)
     end
 
     @testset "Impute" begin
