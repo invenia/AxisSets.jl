@@ -16,7 +16,7 @@ using Impute:
 # Short hand type for complicated union of nested Keyed or NamedDims arrays
 XArray{L, T, N} = Union{NamedDimsArray{L,T,N,<:KeyedArray}, KeyedArray{T,N,<:NamedDimsArray}}
 
-include("utils.jl")
+include("flatten.jl")
 include("datasets.jl")
 
 end

@@ -12,7 +12,7 @@ function Dataset(pairs::Pair{K}...; dims=()) where K
     dimset = OrderedSet(isempty(dims) ? Iterators.flatten(dimnames.(values(data))) : dims)
 
     result = Dataset(dimset, data)
-    _isvalid(result) || throw(ArgumentError("Shared axes don't match."))
+    _isvalid(result)
     return result
 end
 
@@ -33,7 +33,7 @@ function Dataset(table; dims=())
     result = Dataset(dimset, data)
 
     # This shouldn't be necessary because we're using the same axes for all components.
-    _isvalid(result) || throw(ArgumentError("Shared axes don't match."))
+    _isvalid(result)
     return result
 end
 
@@ -81,9 +81,9 @@ _isvalid(ds::Dataset) = all([_isvalid(ds, name) for name in ds.dims])
 function _isvalid(ds::Dataset, name::Symbol)
     ax = _getaxes(ds, name)
     # @show ax
-    isempty(ax) && return false
+    isempty(ax) && throw(ArgumentError("Dimension $name does not exist"))
     f, r = firstrest(ax)
-    return all(x -> x == f, r)
+    all(x -> x == f, r) || throw(ArgumentError("Shared axes don't match"))
 end
 
 function _getaxes(ds::Dataset, name::Symbol)
@@ -110,7 +110,7 @@ function Base.merge(ds::Dataset, others::Dataset...)
         union(ds.dims, getfield.(others, :dims)...),
         merge(ds.data, getfield.(others, :data)...),
     )
-    _isvalid(result) || throw(ArgumentError("Shared axes don't match."))
+    _isvalid(result)
     return result
 end
 

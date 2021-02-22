@@ -12,6 +12,6 @@ using TimeZones
 using AxisSets: Dataset, flatten
 
 @testset "AxisSets.jl" begin
-    include("utils.jl")
+    include("flatten.jl")
     include("datasets.jl")
 end
