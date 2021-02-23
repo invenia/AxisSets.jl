@@ -167,8 +167,8 @@ end
 Base.getindex(ds::Dataset{T}, key::T) where {T} = _getindex(ds, key)
 Base.getindex(ds::Dataset{T}, key::T) where {T<:Tuple} = _getindex(ds, key)
 # I'm not sure this is the best idea, but it would be convenient
-function Base.getindex(ds::Dataset{T}, inds...) where T<:Tuple
-    selected = filter(k -> inds ⊆ k, keys(ds.data))
+function Base.getindex(ds::Dataset{T}, key...) where T<:Tuple
+    selected = filter(k -> key ⊆ k, keys(ds.data))
 
     # We call `ds[k]` for each selected key to ensure that shared axis are made ReadOnly,
     # avoiding accidental axis key mutations.

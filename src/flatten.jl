@@ -5,8 +5,13 @@ isassociative(x::Iterators.Pairs) = true
 isassociative(x::Vector{<:Pair}) = true
 isassociative(x) = false
 
+# We'll try and use a relatively distinctive delimeter that's less likely to be confused
+# with common key characters
+# https://github.com/mcabbott/NamedPlus.jl/blob/master/src/reshape.jl#L165
+const DEFAULT_DELIM = :ᵡ
+
 # NOTE: NamedTuples only support symbol names, so we use a delimiter to combine them.
-function flatten(x::NamedTuple; delim=:_)::NamedTuple
+function flatten(x::NamedTuple; delim=DEFAULT_DELIM)::NamedTuple
     kwargs = map(flatten(pairs(x))) do (k, v)
         _k = isa(k, Tuple) ? join(k, delim) : k
         return Symbol(_k) => v
@@ -50,3 +55,52 @@ end
 
 # Fallback if delim is nothing is just the single argument form
 flatten(x::Vector{<:Pair}, delim::Nothing) = flatten(x)
+
+function flatten(A::XArray, dims::Tuple, delim=DEFAULT_DELIM)
+    new_name = Symbol(join(dims, delim))
+    flatten(A, dims => new_name, delim)
+end
+
+function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
+    fd = sort!(collect(NamedDims.dim(A, first(dims))))
+    maximum(diff(fd)) == 1 || throw(ArgumentError("Flatten dimensions must be consecutive"))
+
+    offset = length(first(dims)) - 1
+    n = ndims(A) - offset
+    _size = collect(size(A))
+    _names = collect(NamedDims.dimnames(A))
+    _keys = collect(axiskeys(A))
+
+    sz = ntuple(n) do d
+        if d < first(fd)
+            _size[d]
+        elseif d == first(fd)
+            *(_size[fd]...)
+        else
+            _size[d + offset]
+        end
+    end
+
+    nm = ntuple(n) do d
+        if d < first(fd)
+            _names[d]
+        elseif d == first(fd)
+            last(dims)
+        else
+            _names[d + offset]
+        end
+    end
+
+    keys = ntuple(n) do d
+        if d < first(fd)
+            _keys[d]
+        elseif d == first(fd)
+            tuples = Iterators.product(_keys[fd]...)
+            [delim === nothing ? t : Symbol(join(t, delim)) for t in tuples][:]
+        else
+            _keys[d + offset]
+        end
+    end
+
+    return KeyedArray(reshape(parent(parent(A)), sz); NamedTuple{nm}(keys)...)
+end

@@ -55,7 +55,7 @@ using AxisSets: Dataset
             # to construct a Datasets from an existing nested structure of KeyedArrays.
             @testset "NamedTuples" begin
                 # In this case, the resulting keys from flatten need to be symbols with
-                # an `:_` delimiter
+                # an `:ᵡ` delimiter
                 data = (
                     group1 = (
                         a = KeyedArray(
@@ -90,7 +90,7 @@ using AxisSets: Dataset
                 @test issetequal([:time, :loc, :obj, :label], ds.dims)
 
                 # Test that we successfully extracted the flattened kwargs.
-                @test issetequal([:group1_a, :group1_b, :group2_a, :group2_b], keys(ds.data))
+                @test issetequal([:group1ᵡa, :group1ᵡb, :group2ᵡa, :group2ᵡb], keys(ds.data))
             end
 
             @testset "Pairs" begin
