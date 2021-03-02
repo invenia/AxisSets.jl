@@ -4,6 +4,7 @@ using AxisKeys
 using Dates
 using Impute
 using Missings
+using OrderedCollections
 using ReadOnlyArrays
 using Tables
 using Test

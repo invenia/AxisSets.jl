@@ -47,10 +47,10 @@ using AxisSets: flatten
             )
             # Expected names for NamedTuple must be symbols. Default delimiter is `:_`
             expected = (
-                val1ᵡa1 = 1,
-                val1ᵡa2 = 2,
-                val2ᵡb1 = 11,
-                val2ᵡb2 = 22,
+                val1⁻a1 = 1,
+                val1⁻a2 = 2,
+                val2⁻b1 = 11,
+                val2⁻b2 = 22,
                 val3 = [111, 222],
                 val4 = 4.3,
             )
@@ -72,6 +72,7 @@ using AxisSets: flatten
                     time=dt,
                     locᵡobj=[Symbol(join((l, o), :ᵡ)) for l in 1:3, o in [:a, :b]][:],
                 )
+                @show dimnames(flatten(A, (:loc, :obj)))
                 @test flatten(A, (:loc, :obj)) == expected
             end
 
@@ -81,6 +82,7 @@ using AxisSets: flatten
                     timeᵡloc=[Symbol(join((t, l), :ᵡ)) for t in dt, l in 1:3][:],
                     obj=[:a, :b],
                 )
+                @show dimnames(flatten(A, (:time, :loc)))
                 @test flatten(A, (:time, :loc)) == expected
             end
 

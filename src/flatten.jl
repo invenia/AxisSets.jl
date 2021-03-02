@@ -5,13 +5,8 @@ isassociative(x::Iterators.Pairs) = true
 isassociative(x::Vector{<:Pair}) = true
 isassociative(x) = false
 
-# We'll try and use a relatively distinctive delimeter that's less likely to be confused
-# with common key characters
-# https://github.com/mcabbott/NamedPlus.jl/blob/master/src/reshape.jl#L165
-const DEFAULT_DELIM = :ᵡ
-
-# NOTE: NamedTuples only support symbol names, so we use a delimiter to combine them.
-function flatten(x::NamedTuple; delim=DEFAULT_DELIM)::NamedTuple
+# NOTE: NamedTuples only support symbol names, so we use a simple :_ delimiter
+function flatten(x::NamedTuple; delim=DEFAULT_FLATTEN_DELIM)::NamedTuple
     kwargs = map(flatten(pairs(x))) do (k, v)
         _k = isa(k, Tuple) ? join(k, delim) : k
         return Symbol(_k) => v
@@ -56,7 +51,7 @@ end
 # Fallback if delim is nothing is just the single argument form
 flatten(x::Vector{<:Pair}, delim::Nothing) = flatten(x)
 
-function flatten(A::XArray, dims::Tuple, delim=DEFAULT_DELIM)
+function flatten(A::XArray, dims::Tuple, delim=DEFAULT_PROD_DELIM)
     new_name = Symbol(join(dims, delim))
     flatten(A, dims => new_name, delim)
 end

@@ -1,73 +1,48 @@
-struct Dataset{K, T<:XArray}
-    # Dims are restricted to symbols because that's a NamedDims requirement
-    dims::OrderedSet{Symbol}
+struct Dataset{T<:XArray}
+    # Our constraints are a collection of pseudo path tuples typically with 1 or
+    # more `:_` wildcard components
+    constraints::OrderedSet{Pattern}
     # Data lookup can be by any type, but typically it'll either be symbol or tuple.
-    data::LittleDict{K, T}
+    data::LittleDict{Tuple{Vararg{Symbol}}, T}
+end
+
+function Dataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
+    data = LittleDict{Tuple{Vararg{Symbol}}, XArray}(pairs...)
+
+    # If no constraints have been specified then we default to (:__, dimname)
+    constraint_set = if isempty(constraints)
+        OrderedSet{Pattern}(
+            Pattern(:__, d) for d in Iterators.flatten(dimnames.(values(data)))
+        )
+    else
+        OrderedSet{Pattern}(constraints)
+    end
+
+    result = Dataset(constraint_set, data)
+    validate(result)
+    return result
 end
 
 # Taking pairs is the most general constructor as it doesn't make assumptions about the
 # data key type.
-function Dataset(pairs::Pair{K}...; dims=()) where K
-    data = LittleDict{K, XArray}(pairs...)
-    dimset = OrderedSet(isempty(dims) ? Iterators.flatten(dimnames.(values(data))) : dims)
+function Dataset(pairs::Pair{Symbol}...; constraints=Pattern[])
+    data = (
+        Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
+        for (k, v) in pairs
+    )
 
-    result = Dataset(dimset, data)
-    _isvalid(result)
-    return result
-end
-
-# dataset(table, dims::Symbol...) -> Dataset(dims, arrays for each remaining value columns)
-function Dataset(table; dims=())
-    data = LittleDict{Symbol, XArray}()
-    # We need to extrac the columns to so we can isolate all values columns
-    cols = Tables.columns(table)
-    valcols = setdiff(Tables.columnnames(cols), dims)
-
-    # It'd be faster to just make a copy after the first value column since the axes
-    # shouldn't be changing
-    for c in valcols
-        data[c] = wrapdims(table, c, dims...; default=missing, sort=true, force=true)
-    end
-
-    dimset = OrderedSet(isempty(dims) ? Iterators.flatten(dimnames.(values(data))) : dims)
-    result = Dataset(dimset, data)
-
-    # This shouldn't be necessary because we're using the same axes for all components.
-    _isvalid(result)
-    return result
+    return Dataset(data...; constraints=constraints)
 end
 
 # Utility kwargs constructor.
-Dataset(; dims=(), kwargs...) = Dataset(kwargs...; dims=dims)
+Dataset(; constraints=Pattern[], kwargs...) = Dataset(kwargs...; constraints=constraints)
 
-Tables.istable(::Type{<:Dataset{Symbol}}) = true
-
-# Inefficient row iterator
-Tables.rowaccess(::Type{<:Dataset{Symbol}}) = true
-function Tables.rows(ds::Dataset)
-    names = tuple(ds.dims..., keys(ds)...)
-    idx_names = Tuple(ds.dims)
-    # NOTE: We probably want to cache the indices rather than doing
-    # value lookups for each row.
-    return map(Iterators.product(axiskeys(ds)...)) do idx
-        kwargs = NamedTuple{idx_names}(idx)
-        vals = map(values(ds.data)) do a
-            dnames = tuple(intersect(idx_names, dimnames(a))...)
-            # TODO: Throw error if component array has non-shared dimensions
-            first(a(; NamedTuple{dnames}(kwargs)...))
-        end
-        return NamedTuple{names}(tuple(idx..., vals...))
-    end
-end
-
-# Lazy columns implementation
-Tables.columnaccess(ds::Dataset{Symbol}) = Tables.columnaccess(first(values(ds.data)))
-Tables.columns(ds::Dataset) = Tables.columns(Tables.rows(ds))
-
-function Base.show(io::IO, ds::Dataset{K, V}) where {K, V}
-    dims = tuple(ds.dims...)
+function Base.show(io::IO, ds::Dataset{T}) where T
     n = length(ds.data)
-    print(io, "Dataset{$K}(; dims=$dims) with $n entries:")
+    print(io, "Dataset{$T} with $n entries:")
+    for c in ds.constraints
+        print(io, "\n  ", c)
+    end
     for (k, v) in ds.data
         printstyled(io, "\n  ", k, " => "; color=:cyan)
         printstyled(io, replace(sprint(Base.summary, v), "\n" => "\n    "); color=:cyan)
@@ -75,173 +50,209 @@ function Base.show(io::IO, ds::Dataset{K, V}) where {K, V}
     end
 end
 
-# Some utility methods for ensure axis alignments
-_isvalid(ds::Dataset) = all([_isvalid(ds, name) for name in ds.dims])
-
-function _isvalid(ds::Dataset, name::Symbol)
-    ax = _getaxes(ds, name)
-    # @show ax
-    isempty(ax) && throw(ArgumentError("Dimension $name does not exist"))
-    f, r = firstrest(ax)
-    all(x -> x == f, r) || throw(ArgumentError("Shared axes don't match"))
-end
-
-function _getaxes(ds::Dataset, name::Symbol)
-    return [getproperty(a, name) for a in values(ds.data) if name in dimnames(a)]
-end
-
-function AxisKeys.axiskeys(ds::Dataset, name::Symbol)
-    for a in values(ds.data)
-        if name in dimnames(a)
-            return axiskeys(a, name)
-        end
-    end
-end
-
-AxisKeys.axiskeys(ds::Dataset) = Tuple(axiskeys(ds, name) for name in ds.dims)
-
+#################
+# Dict iterators
+#################
 Base.keys(ds::Dataset) = keys(ds.data)
 Base.values(ds::Dataset) = values(ds.data)
 Base.pairs(ds::Dataset) = pairs(ds.data)
 
-# Merging dataset contents in a potentially destructive way
+#####################################
+# Dimension paths, names and keys
+# - dimpaths
+# - dimnames
+# - axiskeys
+#####################################
+dimpaths(ds::Dataset, pattern::Pattern) = filter(in(pattern), dimpaths(ds))
+function dimpaths(ds::Dataset)
+    paths = Iterators.flatten(((k..., d) for d in dimnames(v)) for (k, v) in ds.data)
+    return collect(paths)
+end
+
+function constraintmap(ds::Dataset)
+    items = dimpaths(ds)
+    return LittleDict{Pattern, Set{Tuple{Vararg{Symbol}}}}(
+        c => Set(filter(in(c), items)) for c in ds.constraints
+    )
+end
+
+# dimnames on a dataset returns the unique dimnames
+function NamedDims.dimnames(ds::Dataset)
+    return unique(Iterators.flatten(dimnames(a) for a in values(ds)))
+end
+
+# axiskeys on a dataset returns the unique key values
+function AxisKeys.axiskeys(ds::Dataset)
+    return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds))))
+end
+
+function AxisKeys.axiskeys(ds::Dataset, dimpath::Tuple{Vararg{Symbol}})
+    key, dim = dimpath[1:end-1], dimpath[end]
+    component = ds.data[key]
+    return axiskeys(component, dim)
+end
+
+function AxisKeys.axiskeys(ds::Dataset, pattern::Pattern)
+    return Tuple(axiskeys(ds, p) for p in dimpaths(ds, pattern))
+end
+
+AxisKeys.axiskeys(ds::Dataset, dim::Symbol) = axiskeys(ds, Pattern(:__, dim))
+
+#############
+# Validation
+#############
+function validate(ds::Dataset)
+    for (k, v) in constraintmap(ds::Dataset)
+        validate(ds, k, v)
+    end
+end
+
+function validate(ds::Dataset, constraint::Pattern)
+    paths = filter(in(constraint), dimpaths(ds))
+    validate(ds, constraint, paths)
+end
+
+function validate(ds::Dataset, constraint::Pattern, paths::Set{Tuple{Vararg{Symbol}}})
+    if isempty(paths)
+        @debug("No dimensions match the constraint $constraint")
+    else
+        f, r = firstrest(axiskeys(ds, p) for p in paths)
+        all(==(f), r) || throw(ArgumentError("Shared dimensions don't have matching keys"))
+    end
+end
+
+########
+# Merge
+########
 function Base.merge(ds::Dataset, others::Dataset...)
     result = Dataset(
-        union(ds.dims, getfield.(others, :dims)...),
+        union(ds.constraints, getfield.(others, :constraints)...),
         merge(ds.data, getfield.(others, :data)...),
     )
-    _isvalid(result)
+
+    validate(result)
     return result
 end
 
-# NOTE: I think this can probably be deleted as we can probably just call flatten before
-# calling a constructor.
-# function flatten(pairs::Pair{T, <:Dataset{T}}...; delim=nothing) where T<:Union{Symbol, AbstractString}
-#     dims = union(getfield.(last.(pairs), :dims)...)
-#     data = LittleDict{T, XArray}(flatten([k => v.data for (k, v) in pairs], delim))
-#     result = Dataset(dims, data)
-#     _isvalid(result) || throw(ArgumentError("Shared axes don't match."))
-#     return result
-# end
-
-# function flatten(pairs::Pair{T, <:Dataset{K}}...) where {T, K}
-#     dims = union(getfield.(last.(pairs), :dims)...)
-#     data = LittleDict{Tuple, XArray}(flatten([k => v.data for (k, v) in pairs]))
-#     result = Dataset(dims, data)
-#     _isvalid(result) || throw(ArgumentError("Shared axes don't match."))
-#     return result
-# end
-
-# Should be able to merge subcomponents with a `cat` like function along dimensions.
+######################
+# Indexing and Lookup
+######################
 function Base.getproperty(ds::Dataset, sym::Symbol)
-    # Early exit for the actual fields
-    sym in fieldnames(Dataset) && return getfield(ds, sym)
-
-    # If we try to access the component keyed arrays then we need to wrap the shared axes
-    # in a readonly array to avoid invalid mutations
-    haskey(ds.data, sym) && return ds[sym]
-
-    # If we're trying to grab a shared axis then find the first example of it in the data
-    sym in ds.dims || throw(ErrorException("type Dataset has no field $sym"))
-
-    for a in values(ds.data)
-        if sym in dimnames(a)
-            return ReadOnlyArray(getproperty(a, sym))
-        end
+    symkey = (sym,)
+    if sym in fieldnames(Dataset)
+        # Fields take priority
+        getfield(ds, sym)
+    elseif sym in dimnames(ds)
+        # If we're looking up key then return a ReadOnlyArray of it.
+        # If folks want to mutate it then they're going to need to access it through
+        # the nested interface.
+        ReadOnlyArray(first(axiskeys(ds, sym)))
+    elseif haskey(ds.data, symkey)
+        # If the symkey is in the data dict then return that
+        ds[symkey]
+    else
+        throw(ErrorException("type Dataset has no field $sym"))
     end
-    return nothing
 end
 
-# The internal method is needed to avoid ambiguities.
-function _getindex(ds::Dataset, key)
+# getindex always returns a KeyedArray with shared keys wrapped in a ReadOnlyArray.
+Base.getindex(ds::Dataset, key::Symbol) = getindex(ds, (key,))
+function Base.getindex(ds::Dataset, key::Tuple)
     A = ds.data[key]
     names = dimnames(A)
     keys = map(zip(names, axiskeys(A))) do (n, k)
-        n in ds.dims ? ReadOnlyArray(k) : k
+        p = (key..., n)
+        any(c -> p in c, ds.constraints) ? ReadOnlyArray(k) : k
     end
 
     kw = NamedTuple{dimnames(A)}(keys)
     return KeyedArray(parent(A); kw...)
 end
 
-Base.getindex(ds::Dataset{T}, key::T) where {T} = _getindex(ds, key)
-Base.getindex(ds::Dataset{T}, key::T) where {T<:Tuple} = _getindex(ds, key)
-# I'm not sure this is the best idea, but it would be convenient
-function Base.getindex(ds::Dataset{T}, key...) where T<:Tuple
-    selected = filter(k -> key ⊆ k, keys(ds.data))
-
-    # We call `ds[k]` for each selected key to ensure that shared axis are made ReadOnly,
-    # avoiding accidental axis key mutations.
-    data = [k => ds[k] for k in selected]
-    dims = intersect(ds.dims, dimnames.(last.(data))...)
-    return Dataset(data...; dims=dims)
+# Callable syntax is reserved for any kind of filtering of components
+# where a Dataset is returned.
+# NOTE: Maybe we need a SubDataset type to ensure that these selection also
+# can't violate our constraints?
+(ds::Dataset)(args...) = filterset(ds, args...)
+filterset(ds::Dataset, key...) = filterset(ds, key)
+filterset(ds::Dataset, key::Tuple) = filterset(ds, Pattern(key))
+filterset(ds::Dataset, key::Pattern) = filterset(ds, in(key))
+function filterset(ds::Dataset, f::Function)
+    data = filter(p -> f(first(p)), pairs(ds))
+    paths = collect(Iterators.flatten(((k..., d) for d in dimnames(v)) for (k, v) in data))
+    constraints = filter(c -> any(in(c), paths), ds.constraints)
+    result = Dataset(constraints, data)
+    validate(result)
+    return result
 end
 
-#=
-NOTE: Not sure if these should mutate the underlying fields or just create a new Datset.
-The later would be more functional and possibly less error prone?
-=#
+# Generally, we want to apply batch operations to some subset of the dataset
+# We define our own mapset! function which will perform the operations and then validate the
+# resulting state to ensure that we have violated any of our constraints.
+mapset!(f::Function, ds::Dataset) = mapset!(f, nothing, ds)
+function mapset!(op::Function, f::Union{Function, Nothing}, ds::Dataset)
+    for (k, v) in ds.data
+        if f === nothing || f(k)
+            ds.data[k] = op(v)
+        end
+    end
+    validate(ds)
+end
 
-# We apply a function with `rekey!` to avoid inadvertently reordering or resizing the key.
-function remapkey!(f::Function, ds::Dataset, name::Symbol)
-    # Only consider components with that named dimension
-    selection = filter(p -> name in dimnames(last(p)), ds.data)
-    arrays = values(selection)
+rekey!(f::Function, ds::Dataset, name::Symbol) = rekey!(f, ds, Pattern(:__, name))
+function rekey!(f::Function, ds::Dataset, pattern::Pattern)
+    for p in filter(in(pattern), dimpaths(ds))
+        k, d = p[1:end-1], p[end]
+        a = ds.data[k]
 
-    # We assume that all keys for the named dims match already
-    key = getproperty(first(arrays), name)
-    new_key = map(f, key)
-
-    for (k, v) in selection
-        names = dimnames(v)
-        keys = map(zip(names, axiskeys(v))) do (n, k)
-            n === name ? new_key : k
+        names = dimnames(a)
+        keys = map(zip(names, axiskeys(a))) do (n, vals)
+            n === d ? f(vals) : vals
         end
 
-        kw = NamedTuple{dimnames(v)}(keys)
-        ds.data[k] = KeyedArray(parent(v); kw...)
+        kw = NamedTuple{names}(keys)
+        ds.data[k] = KeyedArray(parent(a); kw...)
     end
-
-    return ds
-end
-
-addkey!(ds::Dataset, name::Symbol) = push!(ds.dims, name)
-rmkey!(ds::Dataset, name::Symbol) = delete!(ds.dims, name)
-
-function permutekey!(ds::Dataset, name::Symbol, v)
-    # Maybe we could handle multiple dims at the same time and take kwargs...?
-    kw = NamedTuple{(name,)}((v,))
-    for (k, v) in filter(p -> name in dimnames(last(p)), ds.data)
-        ds.data[k] = getindex(v; kw...)
-    end
+    validate(ds)
     return ds
 end
 
 # Extend Impute.jl behaviours to work across multiple components at once
 function Impute.validate(ds::Dataset, validator::Validator; dims=:)
-    selection = dims === Colon() ? ds.data : filter(p -> dims in dimnames(last(p)), ds.data)
-
-    for (k, v) in selection
+    mapset!(dims === Colon() ? in(Pattern(:__, dims)) : nothing, ds) do v
         Impute.validate(v, validator; dims=dims)
     end
 end
 
+# mapset! won't work here because we need to use a multi-pass alg.
 function Impute.apply!(ds::Dataset, f::Filter; dims)
-    # Only consider components with that named dimension
-    selection = filter(p -> dims in dimnames(last(p)), ds.data)
-    mask = trues(length(getproperty(last(first(selection)), dims)))
+    # Limit our constraint map to paths containing the supplied dim
+    cmap = filter(p -> last(first(p).segments) === dims, constraintmap(ds))
 
-    # First pass to determine our shared key mask
-    for (k, v) in selection
-        for (i, s) in enumerate(eachslice(v; dims=dims))
-            mask[i] &= f.func(s)
+    # Apply our shared filter mask for each set of constrained paths
+    # NOTE: We're assuming that the constrained paths are mutually exclusive, but in theory
+    # the same component could be processed twice
+    for (constraint, paths) in cmap
+        @debug "$constraint => $paths"
+        # We're assuming this dataset has already been validated so all dimpaths are
+        # already equal
+        mask = trues(length(axiskeys(ds, first(paths))))
+
+        # Pre-extract our component keys and values
+        selection = [p[1:end-1] => ds.data[p[1:end-1]] for p in paths]
+
+        # First pass to determine our shared key mask
+        for (k, v) in selection
+            for (i, s) in enumerate(eachslice(v; dims=dims))
+                mask[i] &= f.func(s)
+            end
         end
-    end
 
-    # Second pass to use selectdim on each component with our mask
-    for (k, v) in selection
-        # copy is so we don't change the data element type to a view
-        ds.data[k] = copy(selectdim(v, NamedDims.dim(dimnames(v), dims), mask))
+        # Second pass to use selectdim on each component with our mask
+        for (k, v) in selection
+            # copy is so we don't change the data element type to a view
+            ds.data[k] = copy(selectdim(v, NamedDims.dim(dimnames(v), dims), mask))
+        end
     end
 
     return ds

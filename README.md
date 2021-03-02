@@ -51,22 +51,27 @@ AxisSets.remapkey!(dt -> ZonedDateTime(dt, tz"UTC"), ds, :time)
 
 Applies the mutation function (`ZonedDateTime` conversion) to all `:time` axis key values.
 
-### Split/join
+### Flatten
 
 ```julia
-AxisSets.join(ds, (:loc, :obj))
+AxisSets.flatten(ds, (:loc, :obj))
 ```
-Joins the `:loc` and `:obj` dimensions into one `:locᵡobj` axis and merges the keys into
-a tuple of `(loc_key, obj_key)`.
+Combines the `:loc` and `:obj` dimensions into one `:locᵡobj` axis and merges the keys into
+a Symbol of `:<loc_key>ᵡ<obj_key>)`.
 
+Different delimiter
 ```julia
-AxisSets.split(ds, :locᵡobj)
+AxisSets.flatten(ds, (:loc, :obj), :_)
 ```
-Splits any `:locᵡobj` dimensions into separate dimensions.
-Assuming the key values are tuples the each corresponding element will be split into each
-independent axis key value.
+
+Get new key as tuples rather than symbols:
+```julia
+AxisSets.flatten(ds, (:loc, :obj) => :feature)
+```
 
 Similar to the other operations, these are done for all components that share these dimensions.
+
+TODO: Support `unflatten`
 
 ### Tables
 

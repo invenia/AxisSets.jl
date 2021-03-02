@@ -1,4 +1,4 @@
-using AxisSets: Dataset
+using AxisSets: Dataset, Pattern, constraintmap
 
 @testset "Datasets" begin
     @testset "Construction" begin
@@ -15,39 +15,21 @@ using AxisSets: Dataset
                     time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
                     loc=1:3,
                     obj=[:a, :b],
-                );
-                dims=(:time, :loc, :obj),
+                ),
             )
 
             # Test that we successfully extracted the dims
-            @test issetequal([:time, :loc, :obj], ds.dims)
+            @test issetequal([:time, :loc, :obj], dimnames(ds))
 
-            # Test that we have a data dict entry for each value column
-            @test issetequal([:val1, :val2], keys(ds.data))
-        end
-
-        @testset "Tables" begin
-            key_cols = Iterators.product(
-                DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-                1:3,
-                [:a, :b]
+            # Test generated constraints
+            @test constraintmap(ds) == LittleDict(
+                Pattern((:__, :time)) => Set([(:val1, :time), (:val2, :time)]),
+                Pattern((:__, :loc)) => Set([(:val1, :loc), (:val2, :loc)]),
+                Pattern((:__, :obj)) => Set([(:val1, :obj), (:val2, :obj)]),
             )
-            # We'll just start with a basic rowtable
-            table = map(key_cols) do t
-                vals = (t..., rand(), rand() + 1)
-                return NamedTuple{(:time, :loc, :obj, :val1, :val2)}(vals)
-            end |> vec
-
-            @test Tables.isrowtable(table)
-
-            # Test constructing AxisSet from table
-            ds = Dataset(table; dims=(:time, :loc, :obj))
-
-            # Test that we successfully extracted the dims
-            @test issetequal([:time, :loc, :obj], ds.dims)
 
             # Test that we have a data dict entry for each value column
-            @test issetequal([:val1, :val2], keys(ds.data))
+            @test issetequal([(:val1,), (:val2,)], keys(ds.data))
         end
 
         @testset "Flatten" begin
@@ -84,13 +66,51 @@ using AxisSets: Dataset
                         )
                     )
                 )
-                ds = Dataset(; dims=(:time, :loc, :obj, :label), flatten(data)...)
+                ds = Dataset(; flatten(data)...)
 
                 # Test that we successfully extracted the dims
-                @test issetequal([:time, :loc, :obj, :label], ds.dims)
+                @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
+
+                # Test generated constraints
+                @test constraintmap(ds) == LittleDict(
+                    Pattern((:__, :time)) => Set([
+                        (:group1, :a, :time),
+                        (:group1, :b, :time),
+                        (:group2, :a, :time),
+                        (:group2, :b, :time),
+                    ]),
+                    Pattern((:__, :loc)) => Set([(:group1, :a, :loc), (:group2, :a, :loc)]),
+                    Pattern((:__, :obj)) => Set([(:group1, :a, :obj), (:group2, :a, :obj)]),
+                    Pattern((:__, :label)) => Set([
+                        (:group1, :b, :label),
+                        (:group2, :b, :label),
+                    ]),
+                )
 
                 # Test that we successfully extracted the flattened kwargs.
-                @test issetequal([:group1ᵡa, :group1ᵡb, :group2ᵡa, :group2ᵡb], keys(ds.data))
+                @test issetequal(
+                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds)
+                )
+
+                # Test an example where we don't use the default delimiter
+                ds = Dataset(; flatten(data; delim=:_)...)
+
+                @test constraintmap(ds) == LittleDict(
+                    Pattern((:__, :time)) => Set([
+                        (:group1_a, :time),
+                        (:group1_b, :time),
+                        (:group2_a, :time),
+                        (:group2_b, :time),
+                    ]),
+                    Pattern((:__, :loc)) => Set([(:group1_a, :loc), (:group2_a, :loc)]),
+                    Pattern((:__, :obj)) => Set([(:group1_a, :obj), (:group2_a, :obj)]),
+                    Pattern((:__, :label)) => Set([(:group1_b, :label), (:group2_b, :label)]),
+                )
+
+                @test issetequal(
+                    [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
+                )
+
             end
 
             @testset "Pairs" begin
@@ -124,20 +144,23 @@ using AxisSets: Dataset
                         )
                     ]
                 ]
-                ds = Dataset(flatten(data)...; dims=(:time, :loc, :obj, :label))
+                ds = Dataset(flatten(data)...)
 
                 # Test that we successfully extracted the dims
-                @test issetequal([:time, :loc, :obj, :label], ds.dims)
+                @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
 
                 # Test that we successfully extracted the flattened pairs as tuples.
+                @show keys(ds)
                 @test issetequal(
-                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)],
-                    keys(ds.data)
+                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds)
                 )
 
                 # We can still choose to flatten to a single symbol if we want.
-                ds = Dataset(flatten(data, :_)...; dims=(:time, :loc, :obj, :label))
-                @test issetequal([:group1_a, :group1_b, :group2_a, :group2_b], keys(ds.data))
+                ds = Dataset(flatten(data, :_)...)
+                @show keys(ds)
+                @test issetequal(
+                    [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
+                )
             end
         end
     end
@@ -171,14 +194,14 @@ using AxisSets: Dataset
                 )
             ]
         ]
-        ds = Dataset(flatten(data)...; dims=(:time, :loc, :obj, :label))
+        ds = Dataset(flatten(data)...)
 
         grp1a = ds[(:group1, :a)]
         @test isa(grp1a, KeyedArray)
 
-        A = ds[:a]
+        A = ds(:_, :a)
         @test isa(A, Dataset)
-        @test issetequal([(:group1, :a), (:group2, :a)], keys(A.data))
+        @test issetequal([(:group1, :a), (:group2, :a)], keys(A))
         # Test that key mutation operations on the returned dataset will fail
         # Add a couple missing values to test filtering across different dims
         A[(:group1, :a)][3, 2, 2] = missing
@@ -204,7 +227,7 @@ using AxisSets: Dataset
                 loc=1:3,
                 obj=[:a, :b],
             );
-            dims=(:time, :loc),
+            constraints=Pattern[(:__, :time), (:__, :loc)],
         )
 
         @test isa(ds.time, ReadOnlyArray)
@@ -216,27 +239,6 @@ using AxisSets: Dataset
         # Test that we can still modify non-shared keys
         ds.val1.obj[2] = :d
         @test ds.val1.obj[2] === :d
-    end
-
-    @testset "Re-order Axis" begin
-        ds = Dataset(
-            :val1 => KeyedArray(
-                rand(4, 3, 2);
-                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-                loc=1:3,
-                obj=[:a, :b],
-            ),
-            :val2 => KeyedArray(
-                rand(4, 3, 2) .+ 1.0;
-                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-                loc=1:3,
-                obj=[:a, :b],
-            );
-            dims=(:time, :loc, :obj),
-        )
-
-        AxisSets.permutekey!(ds, :obj, [2, 1])
-        @test ds.obj == [:b, :a]
     end
 
     @testset "Mutate Axis Values" begin
@@ -253,15 +255,14 @@ using AxisSets: Dataset
                 loc=1:3,
                 obj=[:a, :b],
             );
-            dims=(:time, :loc, :obj),
         )
 
-        AxisSets.remapkey!(dt -> ZonedDateTime(dt, tz"UTC"), ds, :time)
+        AxisSets.rekey!(k -> ZonedDateTime.(k, tz"UTC"), ds, :time)
         @test eltype(ds.time) <: ZonedDateTime
         @test eltype(ds.val1.time) <: ZonedDateTime
         @test eltype(ds.val2.time) <: ZonedDateTime
 
-        AxisSets.remapkey!(x -> x + 1, ds, :loc)
+        AxisSets.rekey!(k -> k .+ 1, ds, :loc)
         @test ds.loc == 2:4
         @test ds.loc == 2:4
         @test ds.loc == 2:4
@@ -288,7 +289,7 @@ using AxisSets: Dataset
                 )
             )
             ds = merge(ds1, ds2)
-            @test issetequal(keys(ds), [:val1, :val2])
+            @test issetequal(keys(ds), [(:val1,), (:val2,)])
         end
         @testset "replace" begin
             ds1 = Dataset(
@@ -309,7 +310,7 @@ using AxisSets: Dataset
                 )
             )
             ds = merge(ds1, ds2)
-            @test issetequal(keys(ds), [:val1])
+            @test issetequal(keys(ds), [(:val1,)])
             @test all(x -> x >= 1.0, ds.val1)
         end
         @testset "key mismatch" begin
@@ -334,46 +335,6 @@ using AxisSets: Dataset
         end
     end
 
-    @testset "Join" begin
-        # TODO: I'm not sure yet, but we might want some sort of non-destructive join
-        # operation that can do right, left, inner or outer joins on axis keys.
-    end
-
-    @testset "Tables" begin
-        key_cols = Iterators.product(
-            DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-            1:3,
-            [:a, :b]
-        )
-        # We'll just start with a basic rowtable
-        table = map(key_cols) do t
-            vals = (t..., rand(), rand() + 1)
-            return NamedTuple{(:time, :loc, :obj, :val1, :val2)}(vals)
-        end |> vec
-
-        @test Tables.isrowtable(table)
-        # Construct our Dataset
-
-        # Test constructing AxisSet from table
-        ds = Dataset(table; dims=(:time, :loc, :obj))
-
-        # Test that we successfully extracted the dims
-        @test issetequal([:time, :loc, :obj], ds.dims)
-
-        # Test that we have a data dict entry for each value column
-        @test issetequal([:val1, :val2], keys(ds.data))
-
-        # Test that the dataset is also a table
-        @test Tables.rowaccess(ds)
-        @test Tables.columnaccess(ds)
-
-        # Just compare the set of rows as we don't guarantee ordering.
-        @test issetequal(Tables.rows(ds), table)
-        # Add a test for cases where:
-        # 1. the dataset doesn't describe a single dataset and should errors
-        # 2. the dataset has components on a subset of shared dimensions (just :time x :loc)
-    end
-
     @testset "Impute" begin
         @testset "Filter Axis" begin
             ds = Dataset(
@@ -387,8 +348,7 @@ using AxisSets: Dataset
                     allowmissing(rand(4, 3) .+ 1.0);
                     time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
                     loc=1:3,
-                );
-                dims=(:time, :loc),
+                )
             )
 
             # Add a couple missing values to test filtering across different dims
