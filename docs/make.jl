@@ -20,4 +20,6 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/invenia/AxisSets.jl",
+    devbranch = "main",
+    push_preview = true,
 )
