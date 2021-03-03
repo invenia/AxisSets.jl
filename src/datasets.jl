@@ -269,6 +269,23 @@ function Impute.impute!(ds::Dataset, imp::Imputor; dims, kwargs...)
     end
 end
 
+###########
+# flatten!
+###########
+function flatten!(ds::Dataset, dims::Tuple, delim=DEFAULT_PROD_DELIM)
+    new_name = Symbol(join(dims, delim))
+    flatten!(ds, dims => new_name, delim)
+end
+
+function flatten!(ds::Dataset, dims::Pair{<:Tuple, Symbol}, delim=DEFAULT_PROD_DELIM)
+    for (k, v) in ds.data
+        if first(dims) ⊆ dimnames(v)
+            ds.data[k] = flatten(v, dims, delim)
+            # TODO: Add algorithm to generate a new constraint on the flattened components.
+        end
+    end
+    return ds
+end
 
 # TODO
 # Wrap a bunch of the functions from AxisKeys (e.g., sortkeys, mapreduce, eachslice) and have it work across multiple data components?

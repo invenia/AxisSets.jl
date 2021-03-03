@@ -187,20 +187,20 @@ AxisSets.rekey!(k -> ZonedDateTime.(k, tz"UTC"), ds, :time)
 
 Optionally, we could also choose to flatten our inputs/ouputs into 2-d matrices which is what many ML algorithms expect.
 ```@repl demo
-# NIY
-# flatten!(ds, (:id, :lag) => :id)
+AxisSets.flatten!(ds, (:id, :lag) => :id)
 ```
 
 Okay, so now that all of our data manipulation is complete we might want to collapse this back to a named tuple of X and y values to fit the usual ML notation.
 
 ```@repl demo
-# Also NIY
-# (
-#     X = hcat(values(ds[:train, :input]...),
-#     y = ds[:train, :output, :price],
-#     X̂ = hcat(values(ds[:predict, :input]...),
-#     ŷ = ds[:predict, :output, :price],
-# )
+results = (
+    X = hcat(values(ds(:train, :input, :_))...),
+    y = ds[(:train, :output, :prices)],
+    X̂ = hcat(values(ds(:predict, :input, :_))...),
+    ŷ = ds[(:predict, :output, :prices)],
+)
 ```
 
-Show the before or after?
+Questions:
+- Show the before or after?
+- Should we construct a new dataset at the end rather than a `NamedTuple`?
