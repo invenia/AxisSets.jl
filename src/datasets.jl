@@ -197,6 +197,7 @@ function mapset!(op::Function, f::Union{Function, Nothing}, ds::Dataset)
         end
     end
     validate(ds)
+    return ds
 end
 
 rekey!(f::Function, ds::Dataset, name::Symbol) = rekey!(f, ds, Pattern(:__, name))

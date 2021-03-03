@@ -13,6 +13,7 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Example" => "demo.md",
     ],
     strict=true,
     checkdocs=:exports,
