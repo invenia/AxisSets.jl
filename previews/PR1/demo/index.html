@@ -1382,11 +1382,204 @@ Dataset{Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var
        TimeZones.ZonedDateTime(2021, 1, 8, 20, tz&quot;UTC&quot;)    0.21805897261403762    0.5582533605742903     0.19373274059980083
        TimeZones.ZonedDateTime(2021, 1, 8, 21, tz&quot;UTC&quot;)    0.47944047366791187    0.1545249640518258     0.25298507719438224
        TimeZones.ZonedDateTime(2021, 1, 8, 22, tz&quot;UTC&quot;)    0.16055272833937817    0.972488300470923      0.5586357026400497
-       TimeZones.ZonedDateTime(2021, 1, 8, 23, tz&quot;UTC&quot;)    0.47881327911457827    0.1695641275744284     0.9298310292221936</code></pre><p>Optionally, we could also choose to flatten our inputs/ouputs into 2-d matrices which is what many ML algorithms expect.</p><pre><code class="language-julia-repl">julia&gt; # NIY
-       # flatten!(ds, (:id, :lag) =&gt; :id)</code></pre><p>Okay, so now that all of our data manipulation is complete we might want to collapse this back to a named tuple of X and y values to fit the usual ML notation.</p><pre><code class="language-julia-repl">julia&gt; # Also NIY
-       # (
-       #     X = hcat(values(ds[:train, :input]...),
-       #     y = ds[:train, :output, :price],
-       #     X̂ = hcat(values(ds[:predict, :input]...),
-       #     ŷ = ds[:predict, :output, :price],
-       # )</code></pre><p>Show the before or after?</p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 3 March 2021 00:26">Wednesday 3 March 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+       TimeZones.ZonedDateTime(2021, 1, 8, 23, tz&quot;UTC&quot;)    0.47881327911457827    0.1695641275744284     0.9298310292221936</code></pre><p>Optionally, we could also choose to flatten our inputs/ouputs into 2-d matrices which is what many ML algorithms expect.</p><pre><code class="language-julia-repl">julia&gt; AxisSets.flatten!(ds, (:id, :lag) =&gt; :id)
+Dataset{Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
+  AxisSets.Pattern((:train, :input, :_, :time))
+  AxisSets.Pattern((:train, :output, :_, :time))
+  AxisSets.Pattern((:predict, :input, :_, :time))
+  AxisSets.Pattern((:predict, :output, :_, :time))
+  AxisSets.Pattern((:__, :prices, :id))
+  AxisSets.Pattern((:__, :temp, :id))
+  AxisSets.Pattern((:__, :load, :id))
+  (:train, :input, :prices) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 78-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 12-element Vector{Symbol}
+    And data, 78×12 Array{Float64,2}
+                                                           Symbol(&quot;aᵡ-1 day&quot;)    Symbol(&quot;bᵡ-1 day&quot;)    Symbol(&quot;dᵡ-1 day&quot;)    Symbol(&quot;aᵡ-2 days&quot;)    Symbol(&quot;bᵡ-2 days&quot;)    Symbol(&quot;dᵡ-2 days&quot;)    Symbol(&quot;aᵡ-3 days&quot;)    Symbol(&quot;bᵡ-3 days&quot;)    Symbol(&quot;dᵡ-3 days&quot;)    Symbol(&quot;aᵡ-4 days&quot;)    Symbol(&quot;bᵡ-4 days&quot;)    Symbol(&quot;dᵡ-4 days&quot;)
+       TimeZones.ZonedDateTime(2021, 1, 1, 1, tz&quot;UTC&quot;)     0.4600853424625171    0.2843326256874683    0.8734274322605289    0.387213050001451      0.766438648990375      0.5327738585558968     0.1866372985616811     0.6065128828830786     0.7291281511255299     0.4975627556374047     0.19584838749242084    0.5149976075102771
+       TimeZones.ZonedDateTime(2021, 1, 1, 2, tz&quot;UTC&quot;)     0.8541465903790502    0.29086642208151625   0.05932033840648887   0.5975793639899674     0.22033093004951954    0.6347231143986116     0.03345998503567982    0.9078346904996732     0.03099918504053245    0.6302927444564894     0.184706385200625      0.020235903009607537
+       TimeZones.ZonedDateTime(2021, 1, 1, 6, tz&quot;UTC&quot;)     0.9567533636029237    0.7074410180856918    0.6612081223540658    0.23092702310257085    0.3068343448763966     0.21230739407692445    0.4528339881674397     0.9164691785827888     0.5302446780021342     0.4790006230652786     0.6279850835387073     0.09883324492089707
+       TimeZones.ZonedDateTime(2021, 1, 1, 7, tz&quot;UTC&quot;)     0.11248587118714015   0.23266995922548483   0.5400584519361125    0.35095971076015475    0.22272284427490785    0.4499068660140777     0.5462963357846118     0.8548290549418773     0.9493024758819262     0.27000712409504946    0.5063944631416499     0.5606558359230109
+       TimeZones.ZonedDateTime(2021, 1, 1, 8, tz&quot;UTC&quot;)     0.6516642063795697    0.6008190584805269    0.5805644030801609    0.2034044910786288     0.4943859515452853     0.843693504544256      0.45410674808600837    0.2964094010702316     0.34066252995751034    0.5479513063890276     0.09961820235223451    0.6790406380939518
+       TimeZones.ZonedDateTime(2021, 1, 1, 9, tz&quot;UTC&quot;)     0.8427136165865521    0.6531156275122973    0.7378705316519283    0.8804610492047296     0.8504908759075116     0.1897901283429657     0.9031341114850759     0.06200040763080561    0.538805899344861      0.20937707267276173    0.7211067908685658     0.6365195964453163
+       TimeZones.ZonedDateTime(2021, 1, 1, 10, tz&quot;UTC&quot;)    0.9646697763820897    0.040817896891157     0.8039465288383658    0.11965800173553998    0.1446436042173065     0.556190992764551      0.43776877528328173    0.16678659830491083    0.48518087313838576    0.6057961519008228     0.49463041412806863    0.661313933005603
+       TimeZones.ZonedDateTime(2021, 1, 1, 13, tz&quot;UTC&quot;)    0.31492622391998415   0.5487600812333377    0.39117359912557137   0.1556474952268594     0.41490780058896903    0.05356242708792425    0.16941353334534615    0.9245979101683954     0.665470741815299      0.1570854953580747     0.04930003735909971    0.16219088138159043
+       TimeZones.ZonedDateTime(2021, 1, 1, 14, tz&quot;UTC&quot;)    0.374186714831074     0.94087424551923      0.6041184457700806    0.7464368448520948     0.9117209704834612     0.9918108520893238     0.6691339372846117     0.37771190556376166    0.073403882173251      0.9590006840422738     0.23602831707622807    0.20436889843042993
+       TimeZones.ZonedDateTime(2021, 1, 6, 2, tz&quot;UTC&quot;)     0.06527734443118938   0.5716872529765835    0.68966958058771      0.1604026282165414     0.9070251985461071     0.6101272492257128     0.7293537268319952     0.33053801984698983    0.19016184775513234    0.6951682435680984     0.430674300082186      0.36146405603938936
+       TimeZones.ZonedDateTime(2021, 1, 6, 4, tz&quot;UTC&quot;)     0.13931815003129655   0.2751913064871354    0.7084333543873529    0.5367708480184743     0.9842177904541944     0.17940598906049554    0.007123548956803116   0.4737523145515794     0.8117487631017746     0.661629989438915      0.5109029327566816     0.7386119348704379
+       TimeZones.ZonedDateTime(2021, 1, 6, 5, tz&quot;UTC&quot;)     0.3085598801652909    0.7011326622593086    0.4690486611220568    0.3850841169107795     0.7997178399757892     0.5394807069971594     0.821107739209654      0.41941753153127803    0.44392541310018263    0.5437478289194619     0.6658461947371987     0.19669079671766898
+       TimeZones.ZonedDateTime(2021, 1, 6, 8, tz&quot;UTC&quot;)     0.5523356463291214    0.21397392987259845   0.13129901788278975   0.7808254657178599     0.6677909800408433     0.8693689482710354     0.17285002228870083    0.4336211722419405     0.17792134443617824    0.33612931288196357    0.26817066849555915    0.543059274688616
+       TimeZones.ZonedDateTime(2021, 1, 6, 9, tz&quot;UTC&quot;)     0.08806065034710131   0.07474769908944068   0.482343271045407     0.11619966959721406    0.6117015398903582     0.3499064301003494     0.44490121287814266    0.4392757703380017     0.8273344335477599     0.7570726323814432     0.15622296986932405    0.054877775513973104
+       TimeZones.ZonedDateTime(2021, 1, 6, 12, tz&quot;UTC&quot;)    0.7301962031915161    0.12807143915740493   0.6500231305007578    0.7739565216860254     0.6132606086947969     0.6624735163477233     0.28267742409147356    0.7855895821238059     0.8511753854808408     0.3042127647142492     0.6392571799211302     0.5402151322007898
+       TimeZones.ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)    0.7639582104274616    0.1030527221681492    0.6122763024103561    0.2967603751264354     0.5046187348649103     0.786097850158199      0.5322033683490315     0.6984696156430705     0.5586774380254051     0.709359156364646      0.7099441514794167     0.7175253762993721
+       TimeZones.ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)    0.5368589558301085    0.10373169429305817   0.8863944164482573    0.9022674552566048     0.0280079473193533     0.1684658648713091     0.10679843062575256    0.34057764384232403    0.6815066602927        0.16234529734230807    0.48681063907503974    0.868453461300366
+       TimeZones.ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)    0.39260565513842605   0.9016230623934989    0.46644929048291983   0.7902498091456165     0.23518168287341035    0.9700626701741955     0.35685721962899986    0.12533667497815193    0.729022888797036      0.9318563488798799     0.43346505379319744    0.2995750267205033
+       TimeZones.ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)    0.05862373370823204   0.23145131983670542   0.11221538267012066   0.2245377320464963     0.7486229456092182     0.8718694087647596     0.10427993190505469    0.3439402529674782     0.555703347222142      0.7827406968725137     0.8229253559421559     0.5246996952451972
+  (:train, :input, :load) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 78-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 2-element Vector{Symbol}
+    And data, 78×2 Array{Float64,2}
+                                                          (:p)                    (:q)
+       TimeZones.ZonedDateTime(2021, 1, 1, 1, tz&quot;UTC&quot;)     0.7676259926972284      0.08211344275040777
+       TimeZones.ZonedDateTime(2021, 1, 1, 2, tz&quot;UTC&quot;)     0.9201074049493432      0.543865598501426
+       TimeZones.ZonedDateTime(2021, 1, 1, 6, tz&quot;UTC&quot;)     0.9934710983118815      0.5404980960986105
+       TimeZones.ZonedDateTime(2021, 1, 1, 7, tz&quot;UTC&quot;)     0.2797905580804614      0.39416494406369584
+       TimeZones.ZonedDateTime(2021, 1, 1, 8, tz&quot;UTC&quot;)     0.5471117754617052      0.7120144327415345
+       TimeZones.ZonedDateTime(2021, 1, 1, 9, tz&quot;UTC&quot;)     0.214496788438443       0.20846051023906909
+       TimeZones.ZonedDateTime(2021, 1, 1, 10, tz&quot;UTC&quot;)    0.09684033784038037     0.17822318628305567
+       TimeZones.ZonedDateTime(2021, 1, 1, 13, tz&quot;UTC&quot;)    0.9759267537320884      0.6575079508708064
+       TimeZones.ZonedDateTime(2021, 1, 1, 14, tz&quot;UTC&quot;)    0.7969250789467033      0.5617489506728648
+       TimeZones.ZonedDateTime(2021, 1, 6, 2, tz&quot;UTC&quot;)     0.3171024377328129      0.4072129344995483
+       TimeZones.ZonedDateTime(2021, 1, 6, 4, tz&quot;UTC&quot;)     0.18721479906249705     0.08237554842320183
+       TimeZones.ZonedDateTime(2021, 1, 6, 5, tz&quot;UTC&quot;)     0.10704190158846028     0.8838422988852561
+       TimeZones.ZonedDateTime(2021, 1, 6, 8, tz&quot;UTC&quot;)     0.7951464056929294      0.6649720613136332
+       TimeZones.ZonedDateTime(2021, 1, 6, 9, tz&quot;UTC&quot;)     0.5922781911453381      0.11365765805172345
+       TimeZones.ZonedDateTime(2021, 1, 6, 12, tz&quot;UTC&quot;)    0.696242246115079       0.5609853924844199
+       TimeZones.ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)    0.0932627771583261      0.6207844247127214
+       TimeZones.ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)    0.0007018360040305094   0.9496015527283175
+       TimeZones.ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)    0.28099593459597405     0.3924685758039812
+       TimeZones.ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)    0.3977357837861646      0.3085570582531014
+  (:train, :input, :temp) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 78-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 3-element Vector{Symbol}
+    And data, 78×3 Array{Float64,2}
+                                                          (:x)                  (:y)                   (:z)
+       TimeZones.ZonedDateTime(2021, 1, 1, 1, tz&quot;UTC&quot;)     0.8630006784773296    0.774073430754949      0.6132915078914611
+       TimeZones.ZonedDateTime(2021, 1, 1, 2, tz&quot;UTC&quot;)     0.8427693354840005    0.8432491718325152     0.23177331845781768
+       TimeZones.ZonedDateTime(2021, 1, 1, 6, tz&quot;UTC&quot;)     0.32600950242416027   0.7608315647843875     0.870388848942403
+       TimeZones.ZonedDateTime(2021, 1, 1, 7, tz&quot;UTC&quot;)     0.7131251507340568    0.43759633052186686    0.88742980840615
+       TimeZones.ZonedDateTime(2021, 1, 1, 8, tz&quot;UTC&quot;)     0.7708509445184508    0.9951780881154442     0.6216703240677786
+       TimeZones.ZonedDateTime(2021, 1, 1, 9, tz&quot;UTC&quot;)     0.805948053354034     0.6465514691790204     0.8727536707114554
+       TimeZones.ZonedDateTime(2021, 1, 1, 10, tz&quot;UTC&quot;)    0.2617929886306214    0.3967714015395418     0.4181048627150188
+       TimeZones.ZonedDateTime(2021, 1, 1, 13, tz&quot;UTC&quot;)    0.8848752170715799    0.8738530953110808     0.8356474616448593
+       TimeZones.ZonedDateTime(2021, 1, 1, 14, tz&quot;UTC&quot;)    0.18265162341621455   0.030332833048106744   0.4386476691289227
+       TimeZones.ZonedDateTime(2021, 1, 6, 2, tz&quot;UTC&quot;)     0.01882585531209724   0.9570246113473404     0.5758589381399255
+       TimeZones.ZonedDateTime(2021, 1, 6, 4, tz&quot;UTC&quot;)     0.9430533075371268    0.5537235440130333     0.5301925543470185
+       TimeZones.ZonedDateTime(2021, 1, 6, 5, tz&quot;UTC&quot;)     0.7676124283237675    0.5052745990890635     0.32381520272315134
+       TimeZones.ZonedDateTime(2021, 1, 6, 8, tz&quot;UTC&quot;)     0.5452080739103382    0.015123973701245408   0.944366912318884
+       TimeZones.ZonedDateTime(2021, 1, 6, 9, tz&quot;UTC&quot;)     0.7756079106801204    0.8372436498749136     0.6110669890539138
+       TimeZones.ZonedDateTime(2021, 1, 6, 12, tz&quot;UTC&quot;)    0.6756041874704091    0.1769450399500041     0.790809115034742
+       TimeZones.ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)    0.40699236748665624   0.8601538841683287     0.7724069110311216
+       TimeZones.ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)    0.3856527539948038    0.8115751461269518     0.528692818884005
+       TimeZones.ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)    0.3666039443484872    0.3638313503242989     0.19442571193401892
+       TimeZones.ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)    0.3303946495282952    0.020931217076426423   0.46242621367298087
+  (:train, :output, :prices) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 123-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 3-element Vector{Symbol}
+    And data, 123×3 Array{Float64,2}
+                                                          (:a)                   (:b)                   (:d)
+       TimeZones.ZonedDateTime(2021, 1, 2, tz&quot;UTC&quot;)        0.30353247523391835    0.8957963047416011     0.8315624506628871
+       TimeZones.ZonedDateTime(2021, 1, 2, 1, tz&quot;UTC&quot;)     0.25274966416602007    0.3111763314717093     0.5576309209665022
+       TimeZones.ZonedDateTime(2021, 1, 2, 2, tz&quot;UTC&quot;)     0.7993661466626487     0.3343135257190273     0.9840340692061416
+       TimeZones.ZonedDateTime(2021, 1, 2, 3, tz&quot;UTC&quot;)     0.555203006206312      0.4810328033643263     0.3128234102976959
+       TimeZones.ZonedDateTime(2021, 1, 2, 4, tz&quot;UTC&quot;)     0.1890230833582769     0.9093916670650717     0.29527859784557253
+       TimeZones.ZonedDateTime(2021, 1, 2, 5, tz&quot;UTC&quot;)     0.07357511628029867    0.9407861441116854     0.15163815487829968
+       TimeZones.ZonedDateTime(2021, 1, 2, 7, tz&quot;UTC&quot;)     0.053897103354919595   0.04734296713336539    0.29301720327294967
+       TimeZones.ZonedDateTime(2021, 1, 2, 8, tz&quot;UTC&quot;)     0.2791409278293737     0.21947961045620756    0.8291460498532512
+       TimeZones.ZonedDateTime(2021, 1, 2, 9, tz&quot;UTC&quot;)     0.30654499340248376    0.644878252891949      0.5082151598040952
+       TimeZones.ZonedDateTime(2021, 1, 7, 13, tz&quot;UTC&quot;)    0.052337351737904214   0.2742982810100749     0.12832576465593948
+       TimeZones.ZonedDateTime(2021, 1, 7, 14, tz&quot;UTC&quot;)    0.4157953022810894     0.17823219413194602    0.7670734446112886
+       TimeZones.ZonedDateTime(2021, 1, 7, 15, tz&quot;UTC&quot;)    0.7222832867408115     0.6512106793106112     0.06812630870301017
+       TimeZones.ZonedDateTime(2021, 1, 7, 16, tz&quot;UTC&quot;)    0.6382942642868108     0.9483497351297838     0.8513341430976369
+       TimeZones.ZonedDateTime(2021, 1, 7, 17, tz&quot;UTC&quot;)    0.13264282746997247    0.6409569035344782     0.7404800868894781
+       TimeZones.ZonedDateTime(2021, 1, 7, 18, tz&quot;UTC&quot;)    0.18964115368745205    0.46060806563791323    0.5294454133673776
+       TimeZones.ZonedDateTime(2021, 1, 7, 19, tz&quot;UTC&quot;)    0.830910740841637      0.8272939632824208     0.8315294706225886
+       TimeZones.ZonedDateTime(2021, 1, 7, 20, tz&quot;UTC&quot;)    0.2841540288882227     0.008174538354256855   0.9594419582649065
+       TimeZones.ZonedDateTime(2021, 1, 7, 21, tz&quot;UTC&quot;)    0.6330698396756278     0.8572816362437623     0.6007821037213859
+       TimeZones.ZonedDateTime(2021, 1, 7, 22, tz&quot;UTC&quot;)    0.5912623024795514     0.12565925390597       0.2786893172077798
+  (:predict, :input, :prices) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 17-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 12-element Vector{Symbol}
+    And data, 17×12 Array{Float64,2}
+                                                           Symbol(&quot;aᵡ-1 day&quot;)    Symbol(&quot;bᵡ-1 day&quot;)     Symbol(&quot;dᵡ-1 day&quot;)     Symbol(&quot;aᵡ-2 days&quot;)    Symbol(&quot;bᵡ-2 days&quot;)    Symbol(&quot;dᵡ-2 days&quot;)    Symbol(&quot;aᵡ-3 days&quot;)    Symbol(&quot;bᵡ-3 days&quot;)    Symbol(&quot;dᵡ-3 days&quot;)    Symbol(&quot;aᵡ-4 days&quot;)    Symbol(&quot;bᵡ-4 days&quot;)    Symbol(&quot;dᵡ-4 days&quot;)
+       TimeZones.ZonedDateTime(2021, 1, 7, tz&quot;UTC&quot;)        0.8274251143605091    0.34374985075186104    0.855759736775636      0.847877669288734      0.595433194781916      0.8950779877465256     0.6338707043395522     0.43711298760477013    0.03163447886803139    0.06846805831289937    0.8412622086750299     0.22424423029646134
+       TimeZones.ZonedDateTime(2021, 1, 7, 1, tz&quot;UTC&quot;)     0.5094687764163952    0.314061124148554      0.7752978586126353     0.13466115651004418    0.4045411920059747     0.5871503666195834     0.7056076781232574     0.42717782056415543    0.040074143374024374   0.46886862309535493    0.26745013164924725    0.8027205290255293
+       TimeZones.ZonedDateTime(2021, 1, 7, 6, tz&quot;UTC&quot;)     0.887570415738753     0.004958101245232882   0.053488784125610866   0.4419713987538121     0.14221757844305238    0.8099257964871194     0.3633644220592138     0.1832366414141542     0.6329254374182536     0.9133832041410439     0.7999191859773012     0.7241534328902486
+       TimeZones.ZonedDateTime(2021, 1, 7, 7, tz&quot;UTC&quot;)     0.35648017907504337   0.5320920319401723     0.40013428470789036    0.4690151060528145     0.3958774623673784     0.5043287696626781     0.7639706667631221     0.25430390322581187    0.03398412793627448    0.5025369306883811     0.5488361203280749     0.016242454842540832
+       TimeZones.ZonedDateTime(2021, 1, 7, 8, tz&quot;UTC&quot;)     0.5581786521283336    0.05243840444089609    0.5155323197810457     0.6235556252637937     0.35029975578323436    0.09621737669686059    0.25189254811526296    0.1677904103433674     0.3810199053571517     0.3261105813741694     0.9792734674448427     0.8960491038485334
+       TimeZones.ZonedDateTime(2021, 1, 7, 9, tz&quot;UTC&quot;)     0.454479692802217     0.3862054891385087     0.45840299377943294    0.07306245901132447    0.35108202251969334    0.015387973541767241   0.20651657810874924    0.7732151912681586     0.3140295195897007     0.5564493552998275     0.27855813338422       0.48817018971024173
+       TimeZones.ZonedDateTime(2021, 1, 7, 10, tz&quot;UTC&quot;)    0.458581900408344     0.17618555914117873    0.09006188332208209    0.34751117485593586    0.9532983334894798     0.6882364781096459     0.5773344281624468     0.556837456022069      0.9819509442066681     0.9054794265714325     0.4170998849386389     0.913031192019462
+       TimeZones.ZonedDateTime(2021, 1, 7, 12, tz&quot;UTC&quot;)    0.22701756959939634   0.11705898767410505    0.5246500194157897     0.6298165633457418     0.24019547041362221    0.8865246840232079     0.007748791563923385   0.3218134135938986     0.9679217249530774     0.8313440987695848     0.08734498742033403    0.9789078661630486
+       TimeZones.ZonedDateTime(2021, 1, 7, 13, tz&quot;UTC&quot;)    0.9816393199302464    0.6737613633742363     0.5731781962404585     0.6981820259557334     0.41434331461915197    0.8503992479610025     0.48028086283328775    0.9994734751778658     0.4963352809824948     0.14610589677185803    0.17697294460144342    0.9181036753782525
+       TimeZones.ZonedDateTime(2021, 1, 7, 14, tz&quot;UTC&quot;)    0.7406374084619853    0.9031620611478022     0.07098028973315573    0.330859286610762      0.897777278421326      0.23028696719358233    0.8123228333299115     0.26067900902548913    0.2926946883804009     0.05182700548069796    0.07170323248277821    0.16508007862454277
+       TimeZones.ZonedDateTime(2021, 1, 7, 15, tz&quot;UTC&quot;)    0.10561214441295386   0.8748816906764567     0.6960002771117266     0.512421103701004      0.4155334177610548     0.3856733549296891     0.9100979502072362     0.6209971370236997     0.43438582986173846    0.6267630841399221     0.381587088365513      0.5260628649207797
+       TimeZones.ZonedDateTime(2021, 1, 7, 16, tz&quot;UTC&quot;)    0.12215361766411248   0.3444493924081289     0.5711842350025573     0.5655425084977919     0.39987206154141974    0.3167958592815121     0.888192584068126      0.6237775965208125     0.8354049018399903     0.9883939374149806     0.5508200368875817     0.7982354664375426
+       TimeZones.ZonedDateTime(2021, 1, 7, 17, tz&quot;UTC&quot;)    0.04454663689891247   0.3847367098290242     0.08331886140827138    0.1410177366521812     0.8330848384224594     0.10503703969847966    0.4559090228581901     0.4267074509221862     0.6108944547768196     0.058308353287304326   0.046851604022104976   0.22198689513796555
+       TimeZones.ZonedDateTime(2021, 1, 7, 18, tz&quot;UTC&quot;)    0.5898667495124483    0.9607628556077623     0.42451776333073243    0.1405078127936863     0.9230930772460282     0.6400274538904085     0.1801650496159699     0.2490856960894472     0.9901492335007345     0.43605435743887644    0.9767546135529679     0.14883517158520765
+       TimeZones.ZonedDateTime(2021, 1, 7, 19, tz&quot;UTC&quot;)    0.17293001372470784   0.18770751360213778    0.8020350823721061     0.37620245103050043    0.27390317378596474    0.16154510391353138    0.5159459604537666     0.011036489777172198   0.029240302054057254   0.1576305593222811     0.8000082900151844     0.17751552791901548
+       TimeZones.ZonedDateTime(2021, 1, 7, 20, tz&quot;UTC&quot;)    0.4010686268700481    0.5337476901850324     0.6169434681761077     0.4244861468423964     0.6578282267226307     0.38728492068806464    0.5034614442180023     0.39013415643766747    0.246195737358194      0.42874590664837675    0.544797499881994      0.9569168499908087
+       TimeZones.ZonedDateTime(2021, 1, 7, 23, tz&quot;UTC&quot;)    0.06430930930948131   0.02160652041234834    0.6844355781307587     0.750019791195347      0.09870126030009918    0.1817331526604562     0.7366472229313938     0.18946147264429936    0.009697641339300178   0.65498766930762       0.8405404286239975     0.5999394080486662
+  (:predict, :input, :load) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 17-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 2-element Vector{Symbol}
+    And data, 17×2 Array{Float64,2}
+                                                          (:p)                   (:q)
+       TimeZones.ZonedDateTime(2021, 1, 7, tz&quot;UTC&quot;)        0.2275830211144958     0.6225064488916758
+       TimeZones.ZonedDateTime(2021, 1, 7, 1, tz&quot;UTC&quot;)     0.554615138355596      0.028866885392075936
+       TimeZones.ZonedDateTime(2021, 1, 7, 6, tz&quot;UTC&quot;)     0.862697977159353      0.6761769278865812
+       TimeZones.ZonedDateTime(2021, 1, 7, 7, tz&quot;UTC&quot;)     0.48630876396822775    0.1391204554345662
+       TimeZones.ZonedDateTime(2021, 1, 7, 8, tz&quot;UTC&quot;)     0.05708885151257315    0.7916383599690062
+       TimeZones.ZonedDateTime(2021, 1, 7, 9, tz&quot;UTC&quot;)     0.9053241268899663     0.13340160225441045
+       TimeZones.ZonedDateTime(2021, 1, 7, 10, tz&quot;UTC&quot;)    0.28547680774070616    0.4625347898661136
+       TimeZones.ZonedDateTime(2021, 1, 7, 12, tz&quot;UTC&quot;)    0.2666587268261058     0.4904604549939
+       TimeZones.ZonedDateTime(2021, 1, 7, 13, tz&quot;UTC&quot;)    0.6085193275972329     0.5494379957137021
+       TimeZones.ZonedDateTime(2021, 1, 7, 14, tz&quot;UTC&quot;)    0.6689592400669733     0.993208914135193
+       TimeZones.ZonedDateTime(2021, 1, 7, 15, tz&quot;UTC&quot;)    0.4494329621874218     0.4249486796871249
+       TimeZones.ZonedDateTime(2021, 1, 7, 16, tz&quot;UTC&quot;)    0.17324718719169674    0.25245416607122295
+       TimeZones.ZonedDateTime(2021, 1, 7, 17, tz&quot;UTC&quot;)    0.8055197929991946     0.2589398885820553
+       TimeZones.ZonedDateTime(2021, 1, 7, 18, tz&quot;UTC&quot;)    0.043623014013633554   0.9752429200655643
+       TimeZones.ZonedDateTime(2021, 1, 7, 19, tz&quot;UTC&quot;)    0.5462704188071301     0.3065911528465337
+       TimeZones.ZonedDateTime(2021, 1, 7, 20, tz&quot;UTC&quot;)    0.17655731653106033    0.3277158265229656
+       TimeZones.ZonedDateTime(2021, 1, 7, 23, tz&quot;UTC&quot;)    0.14602410973912305    0.31559953633457893
+  (:predict, :input, :temp) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 17-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 3-element Vector{Symbol}
+    And data, 17×3 Array{Float64,2}
+                                                          (:x)                  (:y)                  (:z)
+       TimeZones.ZonedDateTime(2021, 1, 7, tz&quot;UTC&quot;)        0.42515735444561265   0.7429665678558428    0.32799719666166793
+       TimeZones.ZonedDateTime(2021, 1, 7, 1, tz&quot;UTC&quot;)     0.9308165940377227    0.4699403836637668    0.8106738825203796
+       TimeZones.ZonedDateTime(2021, 1, 7, 6, tz&quot;UTC&quot;)     0.9250857723700099    0.4203273642385488    0.9180239256600908
+       TimeZones.ZonedDateTime(2021, 1, 7, 7, tz&quot;UTC&quot;)     0.5323316813663976    0.2524382274914536    0.043255143101238014
+       TimeZones.ZonedDateTime(2021, 1, 7, 8, tz&quot;UTC&quot;)     0.15695923766832753   0.3469049542243563    0.6726527293179163
+       TimeZones.ZonedDateTime(2021, 1, 7, 9, tz&quot;UTC&quot;)     0.8711345542734357    0.1975493730461424    0.8703417235109365
+       TimeZones.ZonedDateTime(2021, 1, 7, 10, tz&quot;UTC&quot;)    0.8359105021897408    0.4972860892286546    0.9504463690964506
+       TimeZones.ZonedDateTime(2021, 1, 7, 12, tz&quot;UTC&quot;)    0.6034285711482259    0.4922099475390589    0.4080536057594908
+       TimeZones.ZonedDateTime(2021, 1, 7, 13, tz&quot;UTC&quot;)    0.765875230696359     0.5711309711750068    0.7583557570319337
+       TimeZones.ZonedDateTime(2021, 1, 7, 14, tz&quot;UTC&quot;)    0.23353061992482527   0.6164287396101074    0.24076258221543378
+       TimeZones.ZonedDateTime(2021, 1, 7, 15, tz&quot;UTC&quot;)    0.543313669617481     0.5156045272136283    0.7913897453732388
+       TimeZones.ZonedDateTime(2021, 1, 7, 16, tz&quot;UTC&quot;)    0.09433520743792001   0.8926206778423165    0.48478622719958664
+       TimeZones.ZonedDateTime(2021, 1, 7, 17, tz&quot;UTC&quot;)    0.6547184108426214    0.7053841010081625    0.8699082377605949
+       TimeZones.ZonedDateTime(2021, 1, 7, 18, tz&quot;UTC&quot;)    0.1838863123619543    0.13449803529279714   0.6694968139242989
+       TimeZones.ZonedDateTime(2021, 1, 7, 19, tz&quot;UTC&quot;)    0.4716723384463486    0.7187166108968663    0.17607215123757136
+       TimeZones.ZonedDateTime(2021, 1, 7, 20, tz&quot;UTC&quot;)    0.5811300629520699    0.3309395221788931    0.7047474280632953
+       TimeZones.ZonedDateTime(2021, 1, 7, 23, tz&quot;UTC&quot;)    0.04030855330903926   0.9469722085479793    0.9925070659446054
+  (:predict, :output, :prices) =&gt; 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+    ↓   time ∈ 24-element Vector{TimeZones.ZonedDateTime}
+    →   id ∈ 3-element Vector{Symbol}
+    And data, 24×3 Array{Float64,2}
+                                                          (:a)                   (:b)                   (:d)
+       TimeZones.ZonedDateTime(2021, 1, 8, tz&quot;UTC&quot;)        0.000600888104545616   0.9928774975565282     0.2790895201317716
+       TimeZones.ZonedDateTime(2021, 1, 8, 1, tz&quot;UTC&quot;)     0.23293140259872347    0.5120338913324758     0.39121754106407525
+       TimeZones.ZonedDateTime(2021, 1, 8, 2, tz&quot;UTC&quot;)     0.30746984901667584    0.8494920527362906     0.8061575063192785
+       TimeZones.ZonedDateTime(2021, 1, 8, 3, tz&quot;UTC&quot;)     0.5070466942978527     0.5329750070419839     0.03281153616113519
+       TimeZones.ZonedDateTime(2021, 1, 8, 4, tz&quot;UTC&quot;)     0.5734786753444674     0.9566330544728356     0.9693312815584216
+       TimeZones.ZonedDateTime(2021, 1, 8, 5, tz&quot;UTC&quot;)     0.8232297421721779     0.8107814658691952     0.8050574795006227
+       TimeZones.ZonedDateTime(2021, 1, 8, 6, tz&quot;UTC&quot;)     0.5538641646684295     0.288351194796413      0.5253400893604951
+       TimeZones.ZonedDateTime(2021, 1, 8, 7, tz&quot;UTC&quot;)     0.2640234352261728     0.5803869137940578     0.7380076207641559
+       TimeZones.ZonedDateTime(2021, 1, 8, 8, tz&quot;UTC&quot;)     0.7733962400649148     0.8267008797641233     0.3769302528148051
+       TimeZones.ZonedDateTime(2021, 1, 8, 14, tz&quot;UTC&quot;)    0.3166119000859524     0.027439969981966517   0.4974674037365223
+       TimeZones.ZonedDateTime(2021, 1, 8, 15, tz&quot;UTC&quot;)    0.6983479864169886     0.5143386057077488     0.7711672257593196
+       TimeZones.ZonedDateTime(2021, 1, 8, 16, tz&quot;UTC&quot;)    0.28271002878665374    0.11679199270344531    0.06415169481601968
+       TimeZones.ZonedDateTime(2021, 1, 8, 17, tz&quot;UTC&quot;)    0.6805013245057927     0.0624122914054146     0.4724040881497735
+       TimeZones.ZonedDateTime(2021, 1, 8, 18, tz&quot;UTC&quot;)    0.7397291652166345     0.8877268390849173     0.33525021128666577
+       TimeZones.ZonedDateTime(2021, 1, 8, 19, tz&quot;UTC&quot;)    0.3149574233259873     0.6281266959913363     0.939386781436824
+       TimeZones.ZonedDateTime(2021, 1, 8, 20, tz&quot;UTC&quot;)    0.21805897261403762    0.5582533605742903     0.19373274059980083
+       TimeZones.ZonedDateTime(2021, 1, 8, 21, tz&quot;UTC&quot;)    0.47944047366791187    0.1545249640518258     0.25298507719438224
+       TimeZones.ZonedDateTime(2021, 1, 8, 22, tz&quot;UTC&quot;)    0.16055272833937817    0.972488300470923      0.5586357026400497
+       TimeZones.ZonedDateTime(2021, 1, 8, 23, tz&quot;UTC&quot;)    0.47881327911457827    0.1695641275744284     0.9298310292221936</code></pre><p>Okay, so now that all of our data manipulation is complete we might want to collapse this back to a named tuple of X and y values to fit the usual ML notation.</p><pre><code class="language-julia-repl">julia&gt; results = (
+           X = hcat(values(ds(:train, :input, :_))...),
+           y = ds[(:train, :output, :prices)],
+           X̂ = hcat(values(ds(:predict, :input, :_))...),
+           ŷ = ds[(:predict, :output, :prices)],
+       )
+(X = [0.4600853424625171 0.2843326256874683 … 0.774073430754949 0.6132915078914611; 0.8541465903790502 0.29086642208151625 … 0.8432491718325152 0.23177331845781768; … ; 0.39260565513842605 0.9016230623934989 … 0.3638313503242989 0.19442571193401892; 0.05862373370823204 0.23145131983670542 … 0.020931217076426423 0.46242621367298087], y = [0.30353247523391835 0.8957963047416011 0.8315624506628871; 0.25274966416602007 0.3111763314717093 0.5576309209665022; … ; 0.6330698396756278 0.8572816362437623 0.6007821037213859; 0.5912623024795514 0.12565925390597 0.2786893172077798], X̂ = [0.8274251143605091 0.34374985075186104 … 0.7429665678558428 0.32799719666166793; 0.5094687764163952 0.314061124148554 … 0.4699403836637668 0.8106738825203796; … ; 0.4010686268700481 0.5337476901850324 … 0.3309395221788931 0.7047474280632953; 0.06430930930948131 0.02160652041234834 … 0.9469722085479793 0.9925070659446054], ŷ = [0.000600888104545616 0.9928774975565282 0.2790895201317716; 0.23293140259872347 0.5120338913324758 0.39121754106407525; … ; 0.16055272833937817 0.972488300470923 0.5586357026400497; 0.47881327911457827 0.1695641275744284 0.9298310292221936])</code></pre><p>Questions:</p><ul><li>Show the before or after?</li><li>Should we construct a new dataset at the end rather than a <code>NamedTuple</code>?</li></ul></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 3 March 2021 02:39">Wednesday 3 March 2021</span>. Using Julia version 1.5.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
