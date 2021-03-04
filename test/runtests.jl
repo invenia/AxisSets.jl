@@ -1,6 +1,8 @@
 using AxisSets
 using Test
 
+using AxisSets: Pattern
+
 @testset "AxisSets.jl" begin
-    # Write your tests here.
+    include("patterns.jl")
 end
