@@ -45,7 +45,7 @@ using AxisSets: flatten
                 val3 = [111, 222],
                 val4 = 4.3,
             )
-            # Expected names for NamedTuple must be symbols. Default delimiter is `:_`
+            # Expected names for NamedTuple must be symbols. Default delimiter is `:⁻`
             expected = (
                 val1⁻a1 = 1,
                 val1⁻a2 = 2,
