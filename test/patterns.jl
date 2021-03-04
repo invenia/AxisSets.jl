@@ -63,8 +63,13 @@
     end
 
     @testset "Pattern(:__, :_, :time)" begin
-        pattern = Pattern(:__, :_, :time)
-        @test_throws ArgumentError filter(in(pattern), items)
+        # Check that our Pattern is reduced in cases where we have extra wildcards.
+        @test Pattern(:__, :_, :time) == Pattern(:__, :time)
+    end
+
+    @testset "Pattern(:_, :__, :time)" begin
+        # Check that our Pattern is reduced in cases where we have extra wildcards.
+        @test Pattern(:_, :__, :time) == Pattern(:__, :time)
     end
 
     @testset "Pattern(:train, :input, :__)" begin
