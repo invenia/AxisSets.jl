@@ -44,15 +44,20 @@ struct Pattern
         n = length(segments)
         mask = trues(n)
 
-        prev = nothing
+        # Prev index used for lookup up segment and mask values as we iterate through
+        j = 1
 
         # Iterating forwards and backwards seemed like the easiest way to
         # remove extra wildcards on either side of a `:__`
-        for i in Iterators.flatten([1:n, n:-1:1])
-            if segments[i] === :_ && prev === :__
+        for i in Iterators.flatten([2:n, n-1:-1:1])
+            val = segments[i]
+            prev = segments[j]
+            prev_mask = mask[j]
+
+            if val in (:_, :__) && prev === :__ && prev_mask
                 mask[i] = false
             else
-                prev = segments[i]
+                j = i
             end
         end
 

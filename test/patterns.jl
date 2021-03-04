@@ -72,6 +72,11 @@
         @test Pattern(:_, :__, :time) == Pattern(:__, :time)
     end
 
+    @testset "Pattern(:__, :__, :time)" begin
+        # Check that our Pattern is reduced in cases where we have extra wildcards.
+        @test Pattern(:__, :__, :time) == Pattern(:__, :time)
+    end
+
     @testset "Pattern(:train, :input, :__)" begin
         pattern = Pattern(:train, :input, :__)
         @test filter(in(pattern), items) == [
