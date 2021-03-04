@@ -1,0 +1,3 @@
+var documenterSearchIndex = {"docs":
+[{"location":"","page":"Home","title":"Home","text":"CurrentModule = AxisSets","category":"page"},{"location":"#AxisSets","page":"Home","title":"AxisSets","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"","category":"page"},{"location":"","page":"Home","title":"Home","text":"Modules = [AxisSets]","category":"page"},{"location":"#AxisSets.Pattern","page":"Home","title":"AxisSets.Pattern","text":"Pattern\n\nA pattern is just a wrapper around a Tuple{Vararg{Symbol}} which enables searching for matching components and dimension paths in a Dataset. Special symbols :_ and :__ are used as wildcards, similar to * and ** in glob pattern matching.\n\n\n\n\n\n","category":"type"}]
+}
