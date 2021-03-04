@@ -5,7 +5,7 @@ isassociative(x::Iterators.Pairs) = true
 isassociative(x::Vector{<:Pair}) = true
 isassociative(x) = false
 
-# NOTE: NamedTuples only support symbol names, so we use a simple :_ delimiter
+# NOTE: NamedTuples only support symbol names, so we use a simple :⁻ delimiter
 function flatten(x::NamedTuple; delim=DEFAULT_FLATTEN_DELIM)::NamedTuple
     kwargs = map(flatten(pairs(x))) do (k, v)
         _k = isa(k, Tuple) ? join(k, delim) : k
@@ -57,15 +57,35 @@ function flatten(A::XArray, dims::Tuple, delim=DEFAULT_PROD_DELIM)
 end
 
 function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
+    # Lookup our unnamed dimensions to flatten
+    # We sort the result to ensure that the dimensions to flatten are consecutive
     fd = sort!(collect(NamedDims.dim(A, first(dims))))
+
+    # The max difference between the dimensions to flatten should be 1, otherwise we have
+    # non-consecutive dimensions and should throw an error
     maximum(diff(fd)) == 1 || throw(ArgumentError("Flatten dimensions must be consecutive"))
 
+    # The offset is equal to the number of dimensions that are being dropped
+    # (ie: ndims(origin) - ndims(flattened))
     offset = length(first(dims)) - 1
+
+    # Our desired number of dimensions after flattening
     n = ndims(A) - offset
+
+    # Extract the original dimension sizes, names and keys for easy reference
     _size = collect(size(A))
     _names = collect(NamedDims.dimnames(A))
     _keys = collect(axiskeys(A))
 
+    # Generate our new sizes, names and keys
+    # In all of these ntuple constructors we're constructing new tuples of length `n`.
+    # As we iterate from 1 to n we check the relative index dimension `d` relative to our dimensions to flatten.
+    # - d < first(fd): Just return the original size, name or key because nothing has changed yet
+    # - d == first(d): Perform our flatten operations. For example:
+    #    - size = flatten dimensions size multiplied together
+    #    - name = our desired new dimension name value symbol from the function input pair.
+    #    - keys = product of the flatten dimension keys, as either a symbol if a `delim` is specified or tuples.
+    # - d > first(d): Just return the original size, name or key using our offset to index
     sz = ntuple(n) do d
         if d < first(fd)
             _size[d]
@@ -97,5 +117,7 @@ function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
         end
     end
 
+    # Finally construct our new `KeyedArray` by reshaping the parent array and providing our new axis names/keys.
+    # We call parent twice to avoid calling `reshape` on the `NamedDimsArray`)
     return KeyedArray(reshape(parent(parent(A)), sz); NamedTuple{nm}(keys)...)
 end
