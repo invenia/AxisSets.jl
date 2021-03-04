@@ -6,6 +6,33 @@ A pattern is just a wrapper around a `Tuple{Vararg{Symbol}}` which enables searc
 filtering for matching components and dimension paths in a [`Dataset`](@ref).
 Special symbols `:_` and `:__` are used as wildcards, similar to `*` and `**` in glob
 pattern matching.
+
+# Example
+```jldoctest
+julia> using AxisSets: Pattern;
+
+julia> items = [
+           (:train, :input, :load, :time),
+           (:train, :input, :load, :id),
+           (:train, :input, :temperature, :time),
+           (:train, :input, :temperature, :id),
+           (:train, :output, :load, :time),
+           (:train, :output, :load, :id),
+       ];
+
+julia> filter(in(Pattern(:__, :time)), items)
+3-element Array{NTuple{4,Symbol},1}:
+ (:train, :input, :load, :time)
+ (:train, :input, :temperature, :time)
+ (:train, :output, :load, :time)
+
+julia> filter(in(Pattern(:__, :load, :_)), items)
+4-element Array{NTuple{4,Symbol},1}:
+ (:train, :input, :load, :time)
+ (:train, :input, :load, :id)
+ (:train, :output, :load, :time)
+ (:train, :output, :load, :id)
+```
 """
 struct Pattern
     segments::Tuple{Vararg{Symbol}}
