@@ -2,8 +2,8 @@
 """
     Pattern
 
-A pattern is just a wrapper around a `Tuple{Vararg{Symbol}}` which enables searching for
-matching components and dimension paths in a Dataset.
+A pattern is just a wrapper around a `Tuple{Vararg{Symbol}}` which enables searching and
+filtering for matching components and dimension paths in a [`Dataset`](@ref).
 Special symbols `:_` and `:__` are used as wildcards, similar to `*` and `**` in glob
 pattern matching.
 """
