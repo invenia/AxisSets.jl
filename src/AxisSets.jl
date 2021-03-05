@@ -1,5 +1,5 @@
 module AxisSets
 
-# Write your package code here.
+include("patterns.jl")
 
 end

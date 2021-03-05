@@ -1,6 +1,10 @@
 using AxisSets
+using Documenter
 using Test
 
+using AxisSets: Pattern
+
 @testset "AxisSets.jl" begin
-    # Write your tests here.
+    include("patterns.jl")
+    doctest(AxisSets)
 end
