@@ -5,6 +5,15 @@ isassociative(x::Iterators.Pairs) = true
 isassociative(x::Vector{<:Pair}) = true
 isassociative(x) = false
 
+"""
+    flatten(collection; delim)
+
+Flatten a collection of nested associative types into a flat collection of pairs.
+If the input keys are symbols (ie: `NamedTuple`) then the $DEFAULT_FLATTEN_DELIM  will be
+used, otherwise `Tuple` keys will be returned.
+"""
+function flatten end
+
 # NOTE: NamedTuples only support symbol names, so we use a simple :⁻ delimiter
 function flatten(x::NamedTuple; delim=DEFAULT_FLATTEN_DELIM)::NamedTuple
     kwargs = map(flatten(pairs(x))) do (k, v)
