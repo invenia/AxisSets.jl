@@ -37,25 +37,17 @@ will be used to generate the new dimension name.
 
 # Example
 ```jldoctest
-julia> using AxisKeys, Dates; using AxisSets: flatten
+julia> using AxisKeys, Dates, NamedDims; using AxisSets: flatten
 
 julia> A = KeyedArray(
            reshape(1:24, (4, 3, 2));
            time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-           loc=1:3,
-           obj=[:a, :b],
+           obj=[:a, :b, :c],
+           loc=[1, 2],
        );
 
-julia> flatten(A, (:loc, :obj))
-2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
-↓   time ∈ 4-element StepRange{Dates.DateTime,...}
-→   locᵡobj ∈ 6-element Vector{Symbol}
-And data, 4×6 reshape(::UnitRange{Int64}, 4, 6) with eltype Int64:
-                                     …   Symbol("2ᵡb")    Symbol("3ᵡb")
-   DateTime("2021-01-01T11:00:00")      17               21
-   DateTime("2021-01-01T12:00:00")      18               22
-   DateTime("2021-01-01T13:00:00")      19               23
-   DateTime("2021-01-01T14:00:00")      20               24
+julia> dimnames(flatten(A, (:obj, :loc)))
+(:time, :objᵡloc)
 ```
 """
 function flatten end
