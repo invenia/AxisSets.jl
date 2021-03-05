@@ -37,7 +37,7 @@ struct Pattern
     segments::Tuple{Vararg{Symbol}}
 
     # We reduce the segments on construction to remove extra wildcards
-    # (e.g., `(:_, :__, ...)`, `(:__, :_, ...`)
+    # e.g., `(:_, :__, ...)` reduces to`(:__, ...`)
     # NOTE: Since these patterns shouldn't be very long it seemed alright to do in an
     # inner constructor
     function Pattern(segments::Tuple{Vararg{Symbol}})
