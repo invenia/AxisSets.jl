@@ -50,14 +50,17 @@ struct Pattern
         # Iterating forwards and backwards seemed like the easiest way to
         # remove extra wildcards on either side of a `:__`
         for i in Iterators.flatten([2:n, n-1:-1:1])
-            val = segments[i]
+            curr = segments[i]
+            curr_mask = mask[i]
             prev = segments[j]
             prev_mask = mask[j]
 
-            if val in (:_, :__) && prev === :__ && prev_mask
-                mask[i] = false
-            else
-                j = i
+            if curr_mask
+                if curr === :__ && prev in (:_, :__) && prev_mask
+                    mask[j] = false
+                else
+                    j = i
+                end
             end
         end
 
