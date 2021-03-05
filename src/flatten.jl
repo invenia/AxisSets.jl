@@ -11,6 +11,52 @@ isassociative(x) = false
 Flatten a collection of nested associative types into a flat collection of pairs.
 If the input keys are symbols (ie: `NamedTuple`) then the $DEFAULT_FLATTEN_DELIM  will be
 used, otherwise `Tuple` keys will be returned.
+
+# Example
+```jldoctest
+julia> using AxisSets: flatten
+
+julia> data = (
+           val1 = (a1 = 1, a2 = 2),
+           val2 = (b1 = 11, b2 = 22),
+           val3 = [111, 222],
+           val4 = 4.3,
+       );
+
+julia> flatten(data)
+(val1⁻a1 = 1, val1⁻a2 = 2, val2⁻b1 = 11, val2⁻b2 = 22, val3 = [111, 222], val4 = 4.3)
+```
+
+    flatten(A, dims; delim)
+
+Flatten a `KeyedArray` along the specified consecutive dimensions.
+The `dims` argument can either be a `Tuple` of symbols or a `Pair{Tuple, Symbol}` if
+you'd like to specify the desired flattened dimension name.
+If the `dims` is just a `Tuple` with no output dimension specified then $DEFAULT_PROD_DELIM
+will be used to generate the new dimension name.
+
+# Example
+```jldoctest
+julia> using AxisKeys, Dates; using AxisSets: flatten
+
+julia> A = KeyedArray(
+           reshape(1:24, (4, 3, 2));
+           time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+           loc=1:3,
+           obj=[:a, :b],
+       );
+
+julia> flatten(A, (:loc, :obj))
+2-dimensional KeyedArray(NamedDimsArray(...)) with keys:
+↓   time ∈ 4-element StepRange{Dates.DateTime,...}
+→   locᵡobj ∈ 6-element Vector{Symbol}
+And data, 4×6 reshape(::UnitRange{Int64}, 4, 6) with eltype Int64:
+                                     …   Symbol("2ᵡb")    Symbol("3ᵡb")
+   DateTime("2021-01-01T11:00:00")      17               21
+   DateTime("2021-01-01T12:00:00")      18               22
+   DateTime("2021-01-01T13:00:00")      19               23
+   DateTime("2021-01-01T14:00:00")      20               24
+```
 """
 function flatten end
 
@@ -60,12 +106,12 @@ end
 # Fallback if delim is nothing is just the single argument form
 flatten(x::Vector{<:Pair}, delim::Nothing) = flatten(x)
 
-function flatten(A::XArray, dims::Tuple, delim=DEFAULT_PROD_DELIM)
+function flatten(A::XArray, dims::Tuple; delim=DEFAULT_PROD_DELIM)
     new_name = Symbol(join(dims, delim))
-    flatten(A, dims => new_name, delim)
+    flatten(A, dims => new_name; delim=delim)
 end
 
-function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
+function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}; delim=nothing)
     # Lookup our unnamed dimensions to flatten
     # We sort the result to ensure that the dimensions to flatten are consecutive
     fd = sort!(collect(NamedDims.dim(A, first(dims))))
@@ -86,47 +132,40 @@ function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
     _names = collect(NamedDims.dimnames(A))
     _keys = collect(axiskeys(A))
 
-    # Generate our new sizes, names and keys
-    # In all of these ntuple constructors we're constructing new tuples of length `n`.
-    # As we iterate from 1 to n we check the relative index dimension `d` relative to our dimensions to flatten.
-    # - d < first(fd): Just return the original size, name or key because nothing has changed yet
-    # - d == first(d): Perform our flatten operations. For example:
-    #    - size = flatten dimensions size multiplied together
-    #    - name = our desired new dimension name value symbol from the function input pair.
-    #    - keys = product of the flatten dimension keys, as either a symbol if a `delim` is specified or tuples.
-    # - d > first(d): Just return the original size, name or key using our offset to index
-    sz = ntuple(n) do d
-        if d < first(fd)
-            _size[d]
-        elseif d == first(fd)
-            *(_size[fd]...)
-        else
-            _size[d + offset]
+    # Generic function for constructing new dimension sizes, names and keys, since the
+    # pattern is the largely the same. As we iterate from 1 to n we check the relative
+    # index dimension `d` relative to our dimensions to flatten.
+    #
+    # - d < first(fd): Return original values since nothing has changed
+    # - d == first(d): Apply our flatten values
+    # - d > first(d): Return original values using an index offset
+    function newdims(src::Vector, val)
+        return ntuple(n) do d
+            if d < first(fd)
+                src[d]
+            elseif d == first(fd)
+                val
+            else
+                src[d + offset]
+            end
         end
     end
 
-    nm = ntuple(n) do d
-        if d < first(fd)
-            _names[d]
-        elseif d == first(fd)
-            last(dims)
-        else
-            _names[d + offset]
-        end
-    end
+    # Flattened size values is just the flattened dimension sizes multiplied together
+    sz = newdims(_size, *(_size[fd]...))
+    # Flattened name is just the second value of the input dims pair.
+    nm = newdims(_names, last(dims))
+    # Flattened key is the product of the keys to be flattened, either as a tuple or symbol.
+    keys = newdims(
+        _keys,
+        [
+            delim === nothing ? t : Symbol(join(t, delim))
+            for t in Iterators.product(_keys[fd]...)
+        ][:]
+    )
 
-    keys = ntuple(n) do d
-        if d < first(fd)
-            _keys[d]
-        elseif d == first(fd)
-            tuples = Iterators.product(_keys[fd]...)
-            [delim === nothing ? t : Symbol(join(t, delim)) for t in tuples][:]
-        else
-            _keys[d + offset]
-        end
-    end
-
-    # Finally construct our new `KeyedArray` by reshaping the parent array and providing our new axis names/keys.
-    # We call parent twice to avoid calling `reshape` on the `NamedDimsArray`)
+    # Finally construct our new `KeyedArray` by reshaping the parent array and providing
+    # our new axis names/keys. We call parent twice to avoid calling `reshape` on the
+    # `NamedDimsArray`
     return KeyedArray(reshape(parent(parent(A)), sz); NamedTuple{nm}(keys)...)
 end
