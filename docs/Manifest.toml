@@ -25,7 +25,7 @@ uuid = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
 version = "0.1.13"
 
 [[AxisSets]]
-deps = ["AxisKeys", "NamedDims"]
+deps = ["AxisKeys", "NamedDims", "OrderedCollections"]
 path = ".."
 uuid = "a1a1544e-ba16-4f6d-8861-e833517b754e"
 version = "0.1.0"

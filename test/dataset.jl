@@ -146,18 +146,165 @@
                 @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
 
                 # Test that we successfully extracted the flattened pairs as tuples.
-                @show keys(ds)
                 @test issetequal(
                     [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds)
                 )
 
                 # We can still choose to flatten to a single symbol if we want.
                 ds = Dataset(flatten(data, :_)...)
-                @show keys(ds)
                 @test issetequal(
                     [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
                 )
             end
         end
+    end
+    @testset "show" begin
+        ds = Dataset(
+            :val1 => KeyedArray(
+                rand(4, 3, 2);
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+            :val2 => KeyedArray(
+                rand(4, 3, 2) .+ 1.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+        )
+
+        # This is likely to change in the future, so we keep this test simple
+        @test startswith(sprint(show, ds), "$(typeof(ds)) with 2 entries:")
+    end
+
+    @testset "Associative" begin
+        ds = Dataset(
+            :val1 => KeyedArray(
+                rand(4, 3, 2);
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+            :val2 => KeyedArray(
+                rand(4, 3, 2) .+ 1.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+        )
+        @test keys(ds) == keys(ds.data)
+        @test values(ds) == values(ds.data)
+        @test pairs(ds) == pairs(ds.data)
+    end
+
+    @testset "dimpaths" begin
+        ds = Dataset(
+            :val1 => KeyedArray(
+                rand(4, 3, 2);
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+            :val2 => KeyedArray(
+                rand(4, 3, 2) .+ 1.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+        )
+
+        @test issetequal(
+            dimpaths(ds),
+            [
+                (:val1, :time),
+                (:val1, :loc),
+                (:val1, :obj),
+                (:val2, :time),
+                (:val2, :loc),
+                (:val2, :obj),
+            ],
+        )
+
+        @test issetequal(dimpaths(ds, Pattern(:__, :time)), [(:val1, :time), (:val2, :time)])
+    end
+
+    @testset "dimnames" begin
+        ds = Dataset(
+            :val1 => KeyedArray(
+                rand(4, 3, 2);
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+            :val2 => KeyedArray(
+                rand(4, 3, 2) .+ 1.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                id=1:3,
+                obj=[:a, :b],
+            ),
+        )
+        @test issetequal(dimnames(ds), [:time, :loc, :obj, :id])
+    end
+
+    @testset "axiskeys" begin
+        ds = Dataset(
+            :val1 => KeyedArray(
+                rand(4, 3, 2);
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+            :val2 => KeyedArray(
+                rand(4, 3, 2) .+ 1.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                id=1:3,
+                obj=[:a, :b],
+            ),
+        )
+
+        @test issetequal(
+            axiskeys(ds),
+            [
+                DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                1:3,
+                [:a, :b],
+            ],
+        )
+
+        @test axiskeys(ds, (:val1, :time)) == DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14)
+        @test unique(axiskeys(ds, :time)) == [DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14)]
+    end
+
+    @testset "validate" begin
+        ds = Dataset(
+            :val1 => KeyedArray(
+                rand(4, 3, 2);
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            ),
+            :val2 => KeyedArray(
+                rand(4, 3, 2) .+ 1.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                id=1:3,
+                obj=[:a, :b],
+            ),
+        )
+
+        @test validate(ds)
+        @test validate(ds, Pattern(:__, :time))
+
+        # Intentionally break the internal keys
+        ds.data[(:val1,)] = KeyedArray(
+            rand(4, 3, 2);
+            time=DateTime(2021, 1, 2, 11):Hour(1):DateTime(2021, 1, 2, 14),
+            loc=1:3,
+            obj=[:a, :b],
+        )
+
+        @test_throws ArgumentError validate(ds)
+        @test_throws ArgumentError validate(ds, Pattern(:__, :time))
+        @test validate(ds, Pattern(:__, :obj))
     end
 end

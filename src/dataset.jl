@@ -5,7 +5,7 @@ A `Dataset` describes an associative collection of component `KeyedArray`s with 
 on their shared dimensions.
 
 # Fields
-- `constraints::OrderedSet{Pattern}` - Constraint [`Pattern`s](@ref) on shared dimensions.
+- `constraints::OrderedSet{Pattern}` - Constraint [`Pattern`](@ref)s on shared dimensions.
 - `data::LittleDict{Tuple{Vararg{Symbol}}, T}` - Flattened key paths as tuples of symbols
   to each component array of type `T`.
 """
@@ -68,18 +68,26 @@ Base.keys(ds::Dataset) = keys(ds.data)
 Base.values(ds::Dataset) = values(ds.data)
 Base.pairs(ds::Dataset) = pairs(ds.data)
 
-#####################################
-# Dimension paths, names and keys
-# - dimpaths
-# - dimnames
-# - axiskeys
-#####################################
+
+"""
+    dimpaths(ds, [pattern]) -> Vector{<:Tuple{Vararg{Symbol}}}
+
+Return a list of all dimension paths in the [`Dataset`](@ref).
+Optionally, you can filter the results using a [`Pattern`](@ref).
+"""
 dimpaths(ds::Dataset, pattern::Pattern) = filter(in(pattern), dimpaths(ds))
 function dimpaths(ds::Dataset)
     paths = Iterators.flatten(((k..., d) for d in dimnames(v)) for (k, v) in ds.data)
     return collect(paths)
 end
 
+"""
+    constrainmap(ds)
+
+Returns a mapping of constraint patterns to specific dimension paths.
+The returned dictionary has keys of type [`Pattern`](@ref) and the values are sets of
+`Tuple{Vararg{Symbol}}`.
+"""
 function constraintmap(ds::Dataset)
     items = dimpaths(ds)
     return LittleDict{Pattern, Set{Tuple{Vararg{Symbol}}}}(
@@ -87,12 +95,24 @@ function constraintmap(ds::Dataset)
     )
 end
 
-# dimnames on a dataset returns the unique dimnames
+"""
+    dimnames(ds)
+
+Returns a list of the unique dimension names within the [`Dataset`](@ref).
+"""
 function NamedDims.dimnames(ds::Dataset)
     return unique(Iterators.flatten(dimnames(a) for a in values(ds)))
 end
 
-# axiskeys on a dataset returns the unique key values
+"""
+    axiskeys(ds)
+    axiskeys(ds, dimname)
+    axiskeys(ds, pattern)
+    axiskeys(ds, dimpath)
+
+Returns a list of unique axis keys within the [`Dataset`](@ref).
+A `Tuple` will always be returned unless you explicitly specify the `dimpath` you want.
+"""
 function AxisKeys.axiskeys(ds::Dataset)
     return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds))))
 end
@@ -104,30 +124,42 @@ function AxisKeys.axiskeys(ds::Dataset, dimpath::Tuple{Vararg{Symbol}})
 end
 
 function AxisKeys.axiskeys(ds::Dataset, pattern::Pattern)
-    return Tuple(axiskeys(ds, p) for p in dimpaths(ds, pattern))
+    return Tuple(unique(axiskeys(ds, p) for p in dimpaths(ds, pattern)))
 end
 
 AxisKeys.axiskeys(ds::Dataset, dim::Symbol) = axiskeys(ds, Pattern(:__, dim))
 
-#############
-# Validation
-#############
+"""
+    validate(ds, [constraint])
+
+Validate that all constrained dimension paths within a [`Dataset`](@ref) have matching key values.
+Optionally, you can test an explicit constraint [`Pattern`](@ref).
+
+# Returns
+- `true` if an error isn't thrown
+
+# Throws
+- `ArgumentError`: If the constraints are not respected
+"""
 function validate(ds::Dataset)
     for (k, v) in constraintmap(ds::Dataset)
         validate(ds, k, v)
     end
+    return true
 end
 
 function validate(ds::Dataset, constraint::Pattern)
     paths = filter(in(constraint), dimpaths(ds))
     validate(ds, constraint, paths)
+    return true
 end
 
-function validate(ds::Dataset, constraint::Pattern, paths::Set{Tuple{Vararg{Symbol}}})
+function validate(ds::Dataset, constraint::Pattern, paths)
     if isempty(paths)
         @debug("No dimensions match the constraint $constraint")
     else
         f, r = Iterators.peel(axiskeys(ds, p) for p in paths)
         all(==(f), r) || throw(ArgumentError("Shared dimensions don't have matching keys"))
     end
+    return true
 end
