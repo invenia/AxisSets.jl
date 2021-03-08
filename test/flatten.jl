@@ -74,6 +74,35 @@ using AxisSets: flatten
                 (:val4,) => 4.3,
             )
             @test flatten(data) == expected
+
+            # Test that we can operate on keys that aren't symbols or strings
+            data = Dict(
+                DateTime(2021, 1, 1, 11) => Dict(1 => "a", 2 => "b"),
+                DateTime(2021, 1, 1, 12) => Dict(1 => "x", 2 => "y"),
+                DateTime(2021, 1, 1, 13) => [111, 222],
+                DateTime(2021, 1, 1, 14) => 4.3,
+            )
+
+            expected = Dict(
+                (DateTime(2021, 1, 1, 11), 1) => "a",
+                (DateTime(2021, 1, 1, 11), 2) => "b",
+                (DateTime(2021, 1, 1, 12), 1) => "x",
+                (DateTime(2021, 1, 1, 12), 2) => "y",
+                (DateTime(2021, 1, 1, 13),) => [111, 222],
+                (DateTime(2021, 1, 1, 14),) => 4.3,
+            )
+            @test flatten(data) == expected
+
+            expected = Dict(
+                "2021-01-01T11:00:00_1" => "a",
+                "2021-01-01T11:00:00_2" => "b",
+                "2021-01-01T12:00:00_1" => "x",
+                "2021-01-01T12:00:00_2" => "y",
+                "2021-01-01T13:00:00" => [111, 222],
+                "2021-01-01T14:00:00" => 4.3,
+            )
+            # Test that we can flatten that to a string
+            @test flatten(data, "_") == expected
         end
 
         @testset "NamedTuple" begin

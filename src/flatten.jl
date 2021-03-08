@@ -90,11 +90,11 @@ end
 flatten(x::AbstractDict, delim) = Dict(flatten(collect(x), delim)...)
 
 # Utility flatten to handle joining tuples of symbols or strings into a single string/symbol
-function flatten(x::Vector{<:Pair{T}}, delim::T) where T<:AbstractString
+function flatten(x::Vector{<:Pair}, delim::AbstractString)
     return [join(k, delim) => v for (k, v) in flatten(x)]
 end
 
-function flatten(x::Vector{<:Pair{Symbol}}, delim::Symbol)
+function flatten(x::Vector{<:Pair}, delim::Symbol)
     return [Symbol(join(k, delim)) => v for (k, v) in flatten(x)]
 end
 
