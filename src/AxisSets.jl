@@ -2,6 +2,7 @@ module AxisSets
 
 using AxisKeys
 using NamedDims
+using OrderedCollections
 
 """
     DEFAULT_FLATTEN_DELIM
@@ -64,5 +65,6 @@ const XArray{L, T, N} = Union{NamedDimsArray{L,T,N,<:KeyedArray}, KeyedArray{T,N
 
 include("flatten.jl")
 include("patterns.jl")
+include("dataset.jl")
 
 end
