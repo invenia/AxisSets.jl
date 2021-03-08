@@ -3,12 +3,19 @@ uuid = "a1a1544e-ba16-4f6d-8861-e833517b754e"
 authors = ["Invenia Technical Computing Corporation"]
 version = "0.1.0"
 
+[deps]
+AxisKeys = "94b1ba4f-4ee9-5380-92f1-94cde586c3c5"
+NamedDims = "356022a1-0364-5f58-8944-0da4b18d706f"
+
 [compat]
-julia = "1"
+AxisKeys = "0.1"
+NamedDims = "0.2"
+julia = "1.3"
 
 [extras]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Documenter", "Test"]
+test = ["Dates", "Documenter", "Test"]
