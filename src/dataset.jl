@@ -82,7 +82,7 @@ function dimpaths(ds::Dataset)
 end
 
 """
-    constrainmap(ds)
+    constraintmap(ds)
 
 Returns a mapping of constraint patterns to specific dimension paths.
 The returned dictionary has keys of type [`Pattern`](@ref) and the values are sets of
