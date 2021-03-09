@@ -5,7 +5,7 @@ using Documenter
 using OrderedCollections
 using Test
 
-using AxisSets: Dataset, Pattern, constraintmap, dimpaths, flatten, validate
+using AxisSets: Pattern, constraintmap, dimpaths, flatten, validate
 
 @testset "AxisSets.jl" begin
     include("flatten.jl")

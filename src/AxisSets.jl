@@ -4,6 +4,8 @@ using AxisKeys
 using NamedDims
 using OrderedCollections
 
+export KeyedDataset
+
 """
     DEFAULT_FLATTEN_DELIM
 

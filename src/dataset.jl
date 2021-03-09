@@ -1,7 +1,7 @@
 """
-    Dataset{T}
+    KeyedDataset{T}
 
-A `Dataset` describes an associative collection of component `KeyedArray`s with constraints
+A `KeyedDataset` describes an associative collection of component `KeyedArray`s with constraints
 on their shared dimensions.
 
 # Fields
@@ -9,7 +9,7 @@ on their shared dimensions.
 - `data::LittleDict{Tuple{Vararg{Symbol}}, T}` - Flattened key paths as tuples of symbols
   to each component array of type `T`.
 """
-struct Dataset{T<:XArray}
+struct KeyedDataset{T<:XArray}
     # Our constraints are a collection of pseudo path tuples typically with 1 or
     # more `:_` wildcard components
     constraints::OrderedSet{Pattern}
@@ -17,7 +17,7 @@ struct Dataset{T<:XArray}
     data::LittleDict{Tuple{Vararg{Symbol}}, T}
 end
 
-function Dataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
+function KeyedDataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
     data = LittleDict{Tuple{Vararg{Symbol}}, XArray}(pairs...)
 
     # If no constraints have been specified then we default to (:__, dimname)
@@ -29,28 +29,28 @@ function Dataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
         OrderedSet{Pattern}(constraints)
     end
 
-    result = Dataset(constraint_set, data)
+    result = KeyedDataset(constraint_set, data)
     validate(result)
     return result
 end
 
 # Taking pairs is the most general constructor as it doesn't make assumptions about the
 # data key type.
-function Dataset(pairs::Pair{Symbol}...; constraints=Pattern[])
+function KeyedDataset(pairs::Pair{Symbol}...; constraints=Pattern[])
     data = (
         Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
         for (k, v) in pairs
     )
 
-    return Dataset(data...; constraints=constraints)
+    return KeyedDataset(data...; constraints=constraints)
 end
 
 # Utility kwargs constructor.
-Dataset(; constraints=Pattern[], kwargs...) = Dataset(kwargs...; constraints=constraints)
+KeyedDataset(; constraints=Pattern[], kwargs...) = KeyedDataset(kwargs...; constraints=constraints)
 
-function Base.show(io::IO, ds::Dataset{T}) where T
+function Base.show(io::IO, ds::KeyedDataset{T}) where T
     n = length(ds.data)
-    print(io, "Dataset{$T} with $n entries:")
+    print(io, "KeyedDataset{$T} with $n entries:")
     for c in ds.constraints
         print(io, "\n  ", c)
     end
@@ -64,22 +64,22 @@ end
 #################
 # Dict iterators
 #################
-Base.keys(ds::Dataset) = keys(ds.data)
-Base.values(ds::Dataset) = values(ds.data)
-Base.pairs(ds::Dataset) = pairs(ds.data)
+Base.keys(ds::KeyedDataset) = keys(ds.data)
+Base.values(ds::KeyedDataset) = values(ds.data)
+Base.pairs(ds::KeyedDataset) = pairs(ds.data)
 
 
 """
     dimpaths(ds, [pattern]) -> Vector{<:Tuple{Vararg{Symbol}}}
 
-Return a list of all dimension paths in the [`Dataset`](@ref).
+Return a list of all dimension paths in the [`KeyedDataset`](@ref).
 Optionally, you can filter the results using a [`Pattern`](@ref).
 
 # Example
 ```jldoctest
-julia> using AxisKeys; using AxisSets: Dataset, dimpaths;
+julia> using AxisKeys; using AxisSets: KeyedDataset, dimpaths;
 
-julia> ds = Dataset(
+julia> ds = KeyedDataset(
            :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
            :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
        );
@@ -94,8 +94,8 @@ julia> dimpaths(ds)
  (:val2, :obj)
 ```
 """
-dimpaths(ds::Dataset, pattern::Pattern) = filter(in(pattern), dimpaths(ds))
-function dimpaths(ds::Dataset)
+dimpaths(ds::KeyedDataset, pattern::Pattern) = filter(in(pattern), dimpaths(ds))
+function dimpaths(ds::KeyedDataset)
     paths = Iterators.flatten(((k..., d) for d in dimnames(v)) for (k, v) in ds.data)
     return collect(paths)
 end
@@ -109,9 +109,9 @@ The returned dictionary has keys of type [`Pattern`](@ref) and the values are se
 
 # Example
 ```jldoctest
-julia> using AxisKeys; using AxisSets: Dataset, constraintmap;
+julia> using AxisKeys; using AxisSets: KeyedDataset, constraintmap;
 
-julia> ds = Dataset(
+julia> ds = KeyedDataset(
            :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
            :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
        );
@@ -131,7 +131,7 @@ Base.ValueIterator for a OrderedCollections.LittleDict{AxisSets.Pattern,Set{Tupl
   Set(Tuple{Vararg{Symbol,N} where N}[(:val2, :obj), (:val1, :obj)])
 ```
 """
-function constraintmap(ds::Dataset)
+function constraintmap(ds::KeyedDataset)
     items = dimpaths(ds)
     return LittleDict{Pattern, Set{Tuple{Vararg{Symbol}}}}(
         c => Set(filter(in(c), items)) for c in ds.constraints
@@ -141,13 +141,13 @@ end
 """
     dimnames(ds)
 
-Returns a list of the unique dimension names within the [`Dataset`](@ref).
+Returns a list of the unique dimension names within the [`KeyedDataset`](@ref).
 
 # Example
 ```jldoctest
-julia> using AxisKeys; using NamedDims; using AxisSets: Dataset;
+julia> using AxisKeys; using NamedDims; using AxisSets: KeyedDataset;
 
-julia> ds = Dataset(
+julia> ds = KeyedDataset(
            :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
            :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
        );
@@ -159,7 +159,7 @@ julia> dimnames(ds)
  :obj
 ```
 """
-function NamedDims.dimnames(ds::Dataset)
+function NamedDims.dimnames(ds::KeyedDataset)
     return unique(Iterators.flatten(dimnames(a) for a in values(ds)))
 end
 
@@ -169,14 +169,14 @@ end
     axiskeys(ds, pattern)
     axiskeys(ds, dimpath)
 
-Returns a list of unique axis keys within the [`Dataset`](@ref).
+Returns a list of unique axis keys within the [`KeyedDataset`](@ref).
 A `Tuple` will always be returned unless you explicitly specify the `dimpath` you want.
 
 # Example
 ```jldoctest
-julia> using AxisKeys; using AxisSets: Dataset;
+julia> using AxisKeys; using AxisSets: KeyedDataset;
 
-julia> ds = Dataset(
+julia> ds = KeyedDataset(
            :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
            :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
        );
@@ -191,26 +191,26 @@ julia> axiskeys(ds, (:val1, :time))
 1:4
 ```
 """
-function AxisKeys.axiskeys(ds::Dataset)
+function AxisKeys.axiskeys(ds::KeyedDataset)
     return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds))))
 end
 
-function AxisKeys.axiskeys(ds::Dataset, dimpath::Tuple{Vararg{Symbol}})
+function AxisKeys.axiskeys(ds::KeyedDataset, dimpath::Tuple{Vararg{Symbol}})
     key, dim = dimpath[1:end-1], dimpath[end]
     component = ds.data[key]
     return axiskeys(component, dim)
 end
 
-function AxisKeys.axiskeys(ds::Dataset, pattern::Pattern)
+function AxisKeys.axiskeys(ds::KeyedDataset, pattern::Pattern)
     return Tuple(unique(axiskeys(ds, p) for p in dimpaths(ds, pattern)))
 end
 
-AxisKeys.axiskeys(ds::Dataset, dim::Symbol) = axiskeys(ds, Pattern(:__, dim))
+AxisKeys.axiskeys(ds::KeyedDataset, dim::Symbol) = axiskeys(ds, Pattern(:__, dim))
 
 """
     validate(ds, [constraint])
 
-Validate that all constrained dimension paths within a [`Dataset`](@ref) have matching key values.
+Validate that all constrained dimension paths within a [`KeyedDataset`](@ref) have matching key values.
 Optionally, you can test an explicit constraint [`Pattern`](@ref).
 
 # Returns
@@ -219,20 +219,20 @@ Optionally, you can test an explicit constraint [`Pattern`](@ref).
 # Throws
 - `ArgumentError`: If the constraints are not respected
 """
-function validate(ds::Dataset)
-    for (k, v) in constraintmap(ds::Dataset)
+function validate(ds::KeyedDataset)
+    for (k, v) in constraintmap(ds::KeyedDataset)
         validate(ds, k, v)
     end
     return true
 end
 
-function validate(ds::Dataset, constraint::Pattern)
+function validate(ds::KeyedDataset, constraint::Pattern)
     paths = filter(in(constraint), dimpaths(ds))
     validate(ds, constraint, paths)
     return true
 end
 
-function validate(ds::Dataset, constraint::Pattern, paths)
+function validate(ds::KeyedDataset, constraint::Pattern, paths)
     if isempty(paths)
         @debug("No dimensions match the constraint $constraint")
     else

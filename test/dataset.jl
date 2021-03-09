@@ -1,7 +1,7 @@
-@testset "Dataset" begin
+@testset "KeyedDataset" begin
     @testset "Construction" begin
         @testset "KeyedArrays" begin
-            ds = Dataset(
+            ds = KeyedDataset(
                 :val1 => KeyedArray(
                     rand(4, 3, 2);
                     time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
@@ -32,7 +32,7 @@
 
         @testset "Flatten" begin
             # Technically this test is just showing how you can use the `flatten` function
-            # to construct a Datasets from an existing nested structure of KeyedArrays.
+            # to construct a KeyedDatasets from an existing nested structure of KeyedArrays.
             @testset "NamedTuples" begin
                 # In this case, the resulting keys from flatten need to be symbols with
                 # an `:ᵡ` delimiter
@@ -64,7 +64,7 @@
                         )
                     )
                 )
-                ds = Dataset(; flatten(data)...)
+                ds = KeyedDataset(; flatten(data)...)
 
                 # Test that we successfully extracted the dims
                 @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
@@ -91,7 +91,7 @@
                 )
 
                 # Test an example where we don't use the default delimiter
-                ds = Dataset(; flatten(data, :_)...)
+                ds = KeyedDataset(; flatten(data, :_)...)
 
                 @test constraintmap(ds) == LittleDict(
                     Pattern((:__, :time)) => Set([
@@ -140,7 +140,7 @@
                         )
                     ]
                 ]
-                ds = Dataset(flatten(data)...)
+                ds = KeyedDataset(flatten(data)...)
 
                 # Test that we successfully extracted the dims
                 @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
@@ -151,7 +151,7 @@
                 )
 
                 # We can still choose to flatten to a single symbol if we want.
-                ds = Dataset(flatten(data, :_)...)
+                ds = KeyedDataset(flatten(data, :_)...)
 
                 @test issetequal(
                     [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
@@ -172,7 +172,7 @@
         end
     end
     @testset "show" begin
-        ds = Dataset(
+        ds = KeyedDataset(
             :val1 => KeyedArray(
                 rand(4, 3, 2);
                 time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
@@ -192,7 +192,7 @@
     end
 
     @testset "Associative" begin
-        ds = Dataset(
+        ds = KeyedDataset(
             :val1 => KeyedArray(
                 rand(4, 3, 2);
                 time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
@@ -212,7 +212,7 @@
     end
 
     @testset "dimpaths" begin
-        ds = Dataset(
+        ds = KeyedDataset(
             :val1 => KeyedArray(
                 rand(4, 3, 2);
                 time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
@@ -243,7 +243,7 @@
     end
 
     @testset "dimnames" begin
-        ds = Dataset(
+        ds = KeyedDataset(
             :val1 => KeyedArray(
                 rand(4, 3, 2);
                 time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
@@ -261,7 +261,7 @@
     end
 
     @testset "axiskeys" begin
-        ds = Dataset(
+        ds = KeyedDataset(
             :val1 => KeyedArray(
                 rand(4, 3, 2);
                 time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
@@ -290,7 +290,7 @@
     end
 
     @testset "validate" begin
-        ds = Dataset(
+        ds = KeyedDataset(
             :val1 => KeyedArray(
                 rand(4, 3, 2);
                 time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
