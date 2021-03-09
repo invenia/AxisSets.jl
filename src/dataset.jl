@@ -74,6 +74,25 @@ Base.pairs(ds::Dataset) = pairs(ds.data)
 
 Return a list of all dimension paths in the [`Dataset`](@ref).
 Optionally, you can filter the results using a [`Pattern`](@ref).
+
+# Example
+```jldoctest
+julia> using AxisKeys; using AxisSets: Dataset, dimpaths;
+
+julia> ds = Dataset(
+           :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia> dimpaths(ds)
+6-element Array{Tuple{Symbol,Symbol},1}:
+ (:val1, :time)
+ (:val1, :loc)
+ (:val1, :obj)
+ (:val2, :time)
+ (:val2, :loc)
+ (:val2, :obj)
+```
 """
 dimpaths(ds::Dataset, pattern::Pattern) = filter(in(pattern), dimpaths(ds))
 function dimpaths(ds::Dataset)
@@ -87,6 +106,30 @@ end
 Returns a mapping of constraint patterns to specific dimension paths.
 The returned dictionary has keys of type [`Pattern`](@ref) and the values are sets of
 `Tuple{Vararg{Symbol}}`.
+
+# Example
+```jldoctest
+julia> using AxisKeys; using AxisSets: Dataset, constraintmap;
+
+julia> ds = Dataset(
+           :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia> cmap = constraintmap(ds);
+
+julia> keys(cmap)
+Base.KeySet for a OrderedCollections.LittleDict{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}},Array{AxisSets.Pattern,1},Array{Set{Tuple{Vararg{Symbol,N} where N}},1}} with 3 entries. Keys:
+  AxisSets.Pattern((:__, :time))
+  AxisSets.Pattern((:__, :loc))
+  AxisSets.Pattern((:__, :obj))
+
+julia> values(cmap)
+Base.ValueIterator for a OrderedCollections.LittleDict{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}},Array{AxisSets.Pattern,1},Array{Set{Tuple{Vararg{Symbol,N} where N}},1}} with 3 entries. Values:
+  Set(Tuple{Vararg{Symbol,N} where N}[(:val2, :time), (:val1, :time)])
+  Set(Tuple{Vararg{Symbol,N} where N}[(:val1, :loc), (:val2, :loc)])
+  Set(Tuple{Vararg{Symbol,N} where N}[(:val2, :obj), (:val1, :obj)])
+```
 """
 function constraintmap(ds::Dataset)
     items = dimpaths(ds)
@@ -99,6 +142,22 @@ end
     dimnames(ds)
 
 Returns a list of the unique dimension names within the [`Dataset`](@ref).
+
+# Example
+```jldoctest
+julia> using AxisKeys; using NamedDims; using AxisSets: Dataset;
+
+julia> ds = Dataset(
+           :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia> dimnames(ds)
+3-element Array{Symbol,1}:
+ :time
+ :loc
+ :obj
+```
 """
 function NamedDims.dimnames(ds::Dataset)
     return unique(Iterators.flatten(dimnames(a) for a in values(ds)))
@@ -112,6 +171,25 @@ end
 
 Returns a list of unique axis keys within the [`Dataset`](@ref).
 A `Tuple` will always be returned unless you explicitly specify the `dimpath` you want.
+
+# Example
+```jldoctest
+julia> using AxisKeys; using AxisSets: Dataset;
+
+julia> ds = Dataset(
+           :val1 => KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia> axiskeys(ds)
+(1:4, -1:-1:-3, [:a, :b])
+
+julia> axiskeys(ds, :time)
+(1:4,)
+
+julia> axiskeys(ds, (:val1, :time))
+1:4
+```
 """
 function AxisKeys.axiskeys(ds::Dataset)
     return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds))))

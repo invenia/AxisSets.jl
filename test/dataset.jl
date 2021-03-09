@@ -152,8 +152,21 @@
 
                 # We can still choose to flatten to a single symbol if we want.
                 ds = Dataset(flatten(data, :_)...)
+
                 @test issetequal(
                     [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
+                )
+
+                @test constraintmap(ds) == LittleDict(
+                    Pattern((:__, :time)) => Set([
+                        (:group1_a, :time),
+                        (:group1_b, :time),
+                        (:group2_a, :time),
+                        (:group2_b, :time),
+                    ]),
+                    Pattern((:__, :loc)) => Set([(:group1_a, :loc), (:group2_a, :loc)]),
+                    Pattern((:__, :obj)) => Set([(:group1_a, :obj), (:group2_a, :obj)]),
+                    Pattern((:__, :label)) => Set([(:group1_b, :label), (:group2_b, :label)]),
                 )
             end
         end
