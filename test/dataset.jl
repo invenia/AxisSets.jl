@@ -87,7 +87,7 @@
 
                 # Test that we successfully extracted the flattened kwargs.
                 @test issetequal(
-                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds)
+                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds.data)
                 )
 
                 # Test an example where we don't use the default delimiter
@@ -106,7 +106,7 @@
                 )
 
                 @test issetequal(
-                    [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
+                    [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds.data)
                 )
             end
             @testset "Pairs" begin
@@ -147,14 +147,14 @@
 
                 # Test that we successfully extracted the flattened pairs as tuples.
                 @test issetequal(
-                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds)
+                    [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds.data)
                 )
 
                 # We can still choose to flatten to a single symbol if we want.
                 ds = KeyedDataset(flatten(data, :_)...)
 
                 @test issetequal(
-                    [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds)
+                    [(:group1_a,), (:group1_b,), (:group2_a,), (:group2_b,)], keys(ds.data)
                 )
 
                 @test constraintmap(ds) == LittleDict(
@@ -189,26 +189,6 @@
 
         # This is likely to change in the future, so we keep this test simple
         @test startswith(sprint(show, ds), "$(typeof(ds)) with 2 entries:")
-    end
-
-    @testset "Associative" begin
-        ds = KeyedDataset(
-            :val1 => KeyedArray(
-                rand(4, 3, 2);
-                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-                loc=1:3,
-                obj=[:a, :b],
-            ),
-            :val2 => KeyedArray(
-                rand(4, 3, 2) .+ 1.0;
-                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
-                loc=1:3,
-                obj=[:a, :b],
-            ),
-        )
-        @test keys(ds) == keys(ds.data)
-        @test values(ds) == values(ds.data)
-        @test pairs(ds) == pairs(ds.data)
     end
 
     @testset "dimpaths" begin

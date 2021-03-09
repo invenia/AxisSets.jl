@@ -61,14 +61,6 @@ function Base.show(io::IO, ds::KeyedDataset{T}) where T
     end
 end
 
-#################
-# Dict iterators
-#################
-Base.keys(ds::KeyedDataset) = keys(ds.data)
-Base.values(ds::KeyedDataset) = values(ds.data)
-Base.pairs(ds::KeyedDataset) = pairs(ds.data)
-
-
 """
     dimpaths(ds, [pattern]) -> Vector{<:Tuple{Vararg{Symbol}}}
 
@@ -160,7 +152,7 @@ julia> dimnames(ds)
 ```
 """
 function NamedDims.dimnames(ds::KeyedDataset)
-    return unique(Iterators.flatten(dimnames(a) for a in values(ds)))
+    return unique(Iterators.flatten(dimnames(a) for a in values(ds.data)))
 end
 
 """
@@ -192,7 +184,7 @@ julia> axiskeys(ds, (:val1, :time))
 ```
 """
 function AxisKeys.axiskeys(ds::KeyedDataset)
-    return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds))))
+    return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds.data))))
 end
 
 function AxisKeys.axiskeys(ds::KeyedDataset, dimpath::Tuple{Vararg{Symbol}})
