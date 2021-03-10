@@ -32,18 +32,21 @@ julia> dimnames(ds.val1)
 function Base.getproperty(ds::KeyedDataset, sym::Symbol)
     symkey = (sym,)
     if sym in fieldnames(KeyedDataset)
-        # Fields take priority
-        getfield(ds, sym)
+        return getfield(ds, sym)
     elseif sym in dimnames(ds)
-        # If we're looking up key then return a ReadOnlyArray of it.
-        # If folks want to mutate it then they're going to need to access it through
-        # the nested interface.
-        ReadOnlyArray(first(axiskeys(ds, sym)))
+        _keys = axiskeys(ds, sym)
+        if length(_keys) == 1
+            return ReadOnlyArray(first(_keys))
+        else
+            throw(ArgumentError(
+                "$sym is an ambiguous dimension in the dataset. " *
+                "More than one set of values exist for this dimension: $_keys"
+            ))
+        end
     elseif haskey(ds.data, symkey)
-        # If the symkey is in the data dict then return that
-        ds[symkey]
+        return ds[symkey]
     else
-        throw(ErrorException("type KeyedDataset has no field $sym"))
+        throw(ArgumentError("type KeyedDataset has no field $sym"))
     end
 end
 

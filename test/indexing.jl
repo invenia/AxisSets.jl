@@ -10,7 +10,7 @@
             rand(4, 3, 2) .+ 1.0;
             time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
             loc=1:3,
-            obj=[:a, :b],
+            obj=[:x, :y],
         );
         constraints=Pattern[(:__, :time), (:__, :loc)],
     )
@@ -19,7 +19,8 @@
     @test getproperty(ds, :data) == getfield(ds, :data)
     @test ds.val1 == ds.data[(:val1,)]
     @test ds.time == ds.data[(:val1,)].time
-    @test_throws ErrorException ds.foobar
+    @test_throws ArgumentError ds.obj
+    @test_throws ArgumentError ds.foobar
 
     @testset "ReadOnly" begin
         # Test that mutating data properties directly errors
