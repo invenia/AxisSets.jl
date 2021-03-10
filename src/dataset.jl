@@ -108,19 +108,11 @@ julia> ds = KeyedDataset(
            :val2 => KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
        );
 
-julia> cmap = constraintmap(ds);
-
-julia> keys(cmap)
-Base.KeySet for a OrderedCollections.LittleDict{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}},Array{AxisSets.Pattern,1},Array{Set{Tuple{Vararg{Symbol,N} where N}},1}} with 3 entries. Keys:
-  AxisSets.Pattern((:__, :time))
-  AxisSets.Pattern((:__, :loc))
-  AxisSets.Pattern((:__, :obj))
-
-julia> values(cmap)
-Base.ValueIterator for a OrderedCollections.LittleDict{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}},Array{AxisSets.Pattern,1},Array{Set{Tuple{Vararg{Symbol,N} where N}},1}} with 3 entries. Values:
-  Set(Tuple{Vararg{Symbol,N} where N}[(:val2, :time), (:val1, :time)])
-  Set(Tuple{Vararg{Symbol,N} where N}[(:val1, :loc), (:val2, :loc)])
-  Set(Tuple{Vararg{Symbol,N} where N}[(:val2, :obj), (:val1, :obj)])
+julia> collect(constraintmap(ds))
+3-element Array{Pair{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}}},1}:
+ AxisSets.Pattern((:__, :time)) => Set([(:val2, :time), (:val1, :time)])
+  AxisSets.Pattern((:__, :loc)) => Set([(:val1, :loc), (:val2, :loc)])
+  AxisSets.Pattern((:__, :obj)) => Set([(:val2, :obj), (:val1, :obj)])
 ```
 """
 function constraintmap(ds::KeyedDataset)
