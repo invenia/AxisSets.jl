@@ -3,6 +3,7 @@ module AxisSets
 using AxisKeys
 using NamedDims
 using OrderedCollections
+using ReadOnlyArrays
 
 export KeyedDataset
 
@@ -68,5 +69,6 @@ const XArray{L, T, N} = Union{NamedDimsArray{L,T,N,<:KeyedArray}, KeyedArray{T,N
 include("flatten.jl")
 include("patterns.jl")
 include("dataset.jl")
+include("indexing.jl")
 
 end
