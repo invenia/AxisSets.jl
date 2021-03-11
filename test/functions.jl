@@ -47,14 +47,46 @@ end
 
 @testset "mapslices" begin
     ds = KeyedDataset(
-        :val1 => KeyedArray(zeros(3, 2); time=1:3, obj=[:a, :b]),
-        :val2 => KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
-    );
+        flatten([
+            :g1 => [
+                :a => KeyedArray(zeros(3); time=1:3),
+                :b => KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+            ],
+            :g2 => [
+                :a => KeyedArray(ones(3); time=1:3),
+                :b => KeyedArray(zeros(3, 2); time=1:3, loc=[:x, :y]),
+            ]
+        ])...
+    )
 
-    r = mapslices(sum, ds; dims=:time);
 
-    @test mean(r.val1) == 0.0
-    @test mean(r.val2) == 3.0
+    r = mapslices(sum, ds; dims=:time)
+    expected = [
+        (:g1, :a) => [0.0],
+        (:g1, :b) => [3.0 3.0],
+        (:g2, :a) => [3.0],
+        (:g2, :b) => [0.0 0.0],
+    ]
+    for (k, v) in expected
+        @test v == r[k]
+    end
+
+    r = mapslices(sum, ds, (:__, :b, :_); dims=:loc)
+    @test r.data == mapslices(sum, ds; dims=:loc).data
+    expected = [
+        (:g1, :a) => zeros(3),
+        (:g1, :b) => fill(2.0, (3, 1)),
+        (:g2, :a) => ones(3),
+        (:g2, :b) => zeros((3, 1)),
+    ]
+    for (k, v) in expected
+        @test v == r[k]
+    end
+
+    # Reducing over time will violate our :time dimension constraint
+    @test_throws ArgumentError mapslices(sum, ds, (:__, :b, :_); dims=:time)
+    # Dimension doesn't exist in the selection
+    @test_throws ArgumentError mapslices(sum, ds, (:__, :b, :_); dims=:foo)
 end
 
 @testset "merge" begin
