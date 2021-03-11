@@ -132,7 +132,7 @@ end
     rekey(f, ds, dim)
 
 Apply function `f` to key values of each matching `dim` in the [`KeyedDataset`](@ref).
-`dim` can either by a `Symbol` or a [`Pattern`](@ref) for the dimension paths.
+`dim` can either be a `Symbol` or a [`Pattern`](@ref) for the dimension paths.
 
 # Example
 ```jldoctest
