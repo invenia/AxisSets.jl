@@ -1,9 +1,9 @@
 """
-    map(f, ds, [key]; dims) -> KeyedDataset
+    map(f, ds, [key]) -> KeyedDataset
 
 Apply function `f` to each component of the [`KeyedDataset`](@ref).
 Returns a new dataset with the same constraints, but new components.
-The function can be applied to a subselection of components via a [`Pattern`](@ref) `key` and/or `dims`.
+The function can be applied to a subselection of components via a [`Pattern`](@ref) `key`.
 
 # Example
 ```jldoctest
@@ -22,9 +22,9 @@ julia> ds = KeyedDataset(
             ])...
        );
 
-julia> r = map(a -> a .+ 100, ds, (:__, :a));  # KeyedArray printing isn't consistent in jldoctests
+julia> r = map(a -> a .+ 100, ds, (:__, :a, :_));  # The extra `:_` is to clarify that we don't care about the dimnames.
 
-julia> [k => mean(v) for (k, v) in r.data]
+julia> [k => mean(v) for (k, v) in r.data]  # KeyedArray printing isn't consistent in jldoctests
 4-element Array{Pair{Tuple{Symbol,Symbol},Float64},1}:
  (:g1, :a) => 100.0
  (:g1, :b) => 1.0
@@ -32,23 +32,12 @@ julia> [k => mean(v) for (k, v) in r.data]
  (:g2, :b) => 0.0
 ```
 """
-function Base.map(f::Function, ds::KeyedDataset, key::Tuple; kwargs...)
-    return map(f, ds, Pattern(key); kwargs...)
-end
+function Base.map(f::Function, ds::KeyedDataset, keys...)
+    # Ensure that our keys are patterns or converted to patterns
+    patterns = isempty(keys) ? Pattern[(:__,)] : Pattern[keys...]
 
-function Base.map(f::Function, ds::KeyedDataset, key::Pattern=Pattern(:__); dims=:)
-    # Select any components where the key and dims match
-    # NOTE: If this is a common operation maybe we should working into the lookup syntax?
-    selected = filter(collect(keys(ds.data))) do k
-        names = dimnames(ds.data[k])
-        dimsmatch = (
-            dims === Colon() ||
-            (isa(dims, Symbol) && dims in names) ||
-            (!isa(dims, Symbol) && dims ⊆ names)
-        )
-        return dimsmatch && k in key
-    end
-
+    # Select any components our keys match
+    selected = unique(x[1:end-1] for x in dimpaths(ds) if any(p -> x in p, patterns))
     return map!(f, deepcopy(ds), ds(k -> k in selected))
 end
 
@@ -68,7 +57,7 @@ end
     mapslices(f, ds, [key]; dims) -> KeyedDataset
 
 Apply the `mapslices` call to each of the desired components and returns a new [`KeyedDataset`](@ref).
-The desired components can be selected via a [`Pattern`](@ref) `key` and/or `dims`.
+Selection [`Pattern`](@ref)s may be provided via `key`, but components are selected by the desired `dims` by default.
 
 # Example
 ```jldoctest
@@ -87,8 +76,13 @@ julia> [k => parent(parent(v)) for (k, v) in r.data]
  (:val2,) => [3.0 3.0]
 ```
 """
-function Base.mapslices(f::Function, ds::KeyedDataset, args...; dims)
-    return map(a -> mapslices(f, a; dims=dims), ds, args...; dims=dims)
+function Base.mapslices(f::Function, ds::KeyedDataset, keys...; dims)
+    patterns = if isempty(keys)
+        dims isa Symbol ? Pattern[(:__, dims)] : Pattern[(:__, d) for d in dims]
+    else
+        Pattern[keys...]
+    end
+    return map(a -> mapslices(f, a; dims=dims), ds, patterns...)
 end
 
 """
@@ -154,7 +148,7 @@ julia> r.time
 """
 rekey(f::Function, ds::KeyedDataset, args...) = rekey!(f, deepcopy(ds), args...)
 rekey!(f::Function, ds::KeyedDataset, dim::Symbol) = rekey!(f, ds, Pattern(:__, dim))
-rekey!(f::Function, ds::KeyedDataset, dimpath::Tuple) = rekey!(f, ds, Pattern(dim))
+rekey!(f::Function, ds::KeyedDataset, dimpath::Tuple) = rekey!(f, ds, Pattern(dimpath))
 function rekey!(f::Function, ds::KeyedDataset, pattern::Pattern)
     for p in filter(in(pattern), dimpaths(ds))
         k, d = p[1:end-1], p[end]

@@ -20,25 +20,26 @@
     @test mean(r[(:g1, :a)]) == mean(r[(:g2, :b)]) == 1.0
     @test mean(r[(:g1, :b)]) == mean(r[(:g2, :a)]) == 2.0
 
-    # Test mapping over pattern
+    # Test mapping over components
     r = map(a -> a .+ 1.0, ds, (:g1, :__))
     @test mean(r[(:g2, :b)]) == 0.0
     @test mean(r[(:g1, :a)]) == mean(r[(:g2, :a)]) == 1.0
     @test mean(r[(:g1, :b)]) == 2.0
 
-    r = map(a -> a .+ 1.0, ds, (:__, :a))
+    # Test mapping over more complex patterns
+    r = map(a -> a .+ 1.0, ds, (:__, :a, :_))
     @test mean(r[(:g2, :b)]) == 0.0
     @test mean(r[(:g1, :a)]) == mean(r[(:g1, :b)]) == 1.0
     @test mean(r[(:g2, :a)]) == 2.0
 
-    # Test mapping by dims
-    r = map(a -> a .+ 1.0, ds; dims=:loc)
+    # Test mapping just dims
+    r = map(a -> a .+ 1.0, ds, (:__, :loc))
     @test mean(r[(:g1, :a)]) == 0.0
     @test mean(r[(:g2, :b)]) == mean(r[(:g2, :a)]) == 1.0
     @test mean(r[(:g1, :b)]) == 2.0
 
-    # Test mapping by both
-    r = map(a -> a .+ 1.0, ds, (:g1, :__); dims=:loc)
+    # Test mapping over component and dim pattern
+    r = map(a -> a .+ 1.0, ds, (:g1, :__, :loc))
     @test mean(r[(:g1, :a)]) == mean(r[(:g2, :b)]) == 0.0
     @test mean(r[(:g2, :a)]) == 1.0
     @test mean(r[(:g1, :b)]) == 2.0
@@ -144,7 +145,7 @@ end
     @test eltype(r.val1.time) <: ZonedDateTime
     @test eltype(r.val2.time) <: ZonedDateTime
 
-    r = AxisSets.rekey(k -> k .+ 1, ds, :loc)
+    r = AxisSets.rekey(k -> k .+ 1, ds, (:__, :loc))
     @test r.loc == 2:4
     @test r.loc == 2:4
     @test r.loc == 2:4
