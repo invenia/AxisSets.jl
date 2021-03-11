@@ -7,20 +7,29 @@ The function can be applied to a subselection of components via a [`Pattern`](@r
 
 # Example
 ```jldoctest
-julia> using AxisKeys, Statistics; using AxisSets: KeyedDataset;
+julia> using AxisKeys, Statistics; using AxisSets: KeyedDataset, flatten;
 
 julia> ds = KeyedDataset(
-           :val1 => KeyedArray(zeros(3, 2); time=1:3, obj=[:a, :b]),
-           :val2 => KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+           flatten([
+               :g1 => [
+                   :a => KeyedArray(zeros(3); time=1:3),
+                   :b => KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+                ],
+                :g2 => [
+                    :a => KeyedArray(ones(3); time=1:3),
+                    :b => KeyedArray(zeros(3, 2); time=1:3, loc=[:x, :y]),
+                ]
+            ])...
        );
 
-julia> mean.((ds.val1, ds.val2))
-(0.0, 1.0)
+julia> r = map(a -> a .+ 100, ds, (:__, :a));  # KeyedArray printing isn't consistent in jldoctests
 
-julia> r = map(a -> a .+ 1.0, ds; dims=:loc);
-
-julia> mean.((r.val1, r.val2))
-(0.0, 2.0)
+julia> [k => mean(v) for (k, v) in r.data]
+4-element Array{Pair{Tuple{Symbol,Symbol},Float64},1}:
+ (:g1, :a) => 100.0
+ (:g1, :b) => 1.0
+ (:g2, :a) => 101.0
+ (:g2, :b) => 0.0
 ```
 """
 function Base.map(f::Function, ds::KeyedDataset, key::Tuple; kwargs...)
@@ -70,10 +79,12 @@ julia> ds = KeyedDataset(
            :val2 => KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
        );
 
-julia> r = mapslices(sum, ds; dims=:time);
+julia> r = mapslices(sum, ds; dims=:time);  # KeyedArray printing isn't consistent in jldoctests
 
-julia> mean.((r.val1, r.val2))
-(0.0, 3.0)
+julia> [k => parent(parent(v)) for (k, v) in r.data]
+2-element Array{Pair{Tuple{Symbol},Array{Float64,2}},1}:
+ (:val1,) => [0.0 0.0]
+ (:val2,) => [3.0 3.0]
 ```
 """
 function Base.mapslices(f::Function, ds::KeyedDataset, args...; dims)
