@@ -70,5 +70,6 @@ include("flatten.jl")
 include("patterns.jl")
 include("dataset.jl")
 include("indexing.jl")
+include("functions.jl")
 
 end
