@@ -163,12 +163,12 @@ julia> collect(keys(ds(:g1, :__).data))
  (:g1, :b)
 ```
 """
-(ds::KeyedDataset)(args...) = filterset(ds, args...)
-filterset(ds::KeyedDataset, key...) = filterset(ds, key)
-filterset(ds::KeyedDataset, key::Symbol) = ds[key]
-filterset(ds::KeyedDataset, key::Tuple) = filterset(ds, Pattern(key))
-filterset(ds::KeyedDataset, key::Pattern) = filterset(ds, in(key))
-function filterset(ds::KeyedDataset, f::Function)
+(ds::KeyedDataset)(args...) = _filterset(ds, args...)
+_filterset(ds::KeyedDataset, key...) = _filterset(ds, key)
+_filterset(ds::KeyedDataset, key::Symbol) = ds[key]
+_filterset(ds::KeyedDataset, key::Tuple) = _filterset(ds, Pattern(key))
+_filterset(ds::KeyedDataset, key::Pattern) = _filterset(ds, in(key))
+function _filterset(ds::KeyedDataset, f::Function)
     data = filter(p -> f(first(p)), pairs(ds.data))
     paths = collect(Iterators.flatten(((k..., d) for d in dimnames(v)) for (k, v) in data))
     constraints = filter(c -> any(in(c), paths), ds.constraints)
