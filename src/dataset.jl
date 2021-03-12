@@ -15,6 +15,16 @@ struct KeyedDataset{T<:XArray}
     constraints::OrderedSet{Pattern}
     # Data lookup can be by any type, but typically it'll either be symbol or tuple.
     data::LittleDict{Tuple{Vararg{Symbol}}, T}
+
+    function KeyedDataset(
+        constraints::OrderedSet{Pattern},
+        data::LittleDict{<:Tuple{Vararg{Symbol}}, T},
+        check=true,
+    ) where T
+        ds = new{T}(constraints, data)
+        check && validate(ds)
+        return ds
+    end
 end
 
 function KeyedDataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
@@ -30,19 +40,19 @@ function KeyedDataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
     end
 
     result = KeyedDataset(constraint_set, data)
-    validate(result)
     return result
 end
 
 # Taking pairs is the most general constructor as it doesn't make assumptions about the
 # data key type.
 function KeyedDataset(pairs::Pair{Symbol}...; constraints=Pattern[])
-    data = (
-        Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
-        for (k, v) in pairs
+    return KeyedDataset(
+        (
+            Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
+            for (k, v) in pairs
+        )...;
+        constraints=constraints,
     )
-
-    return KeyedDataset(data...; constraints=constraints)
 end
 
 # Utility kwargs constructor.

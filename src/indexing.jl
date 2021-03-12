@@ -172,7 +172,5 @@ function _filterset(ds::KeyedDataset, f::Function)
     data = filter(p -> f(first(p)), pairs(ds.data))
     paths = collect(Iterators.flatten(((k..., d) for d in dimnames(v)) for (k, v) in data))
     constraints = filter(c -> any(in(c), paths), ds.constraints)
-    result = KeyedDataset(constraints, data)
-    validate(result)
-    return result
+    return KeyedDataset(constraints, data)
 end

@@ -1,5 +1,26 @@
 @testset "KeyedDataset" begin
     @testset "Construction" begin
+        @testset "Invalid" begin
+            # Test that you can construct an invalid dataset if you really want to
+            @test_throws ArgumentError KeyedDataset(
+                OrderedSet(Pattern[(:__, :time)]),
+                LittleDict(
+                    (:val1,) => KeyedArray(rand(4); time=1:4),
+                    (:val2,) => KeyedArray(rand(4); time=2:5),
+                ),
+            )
+
+            ds = KeyedDataset(
+                OrderedSet(Pattern[(:__, :time)]),
+                LittleDict(
+                    (:val1,) => KeyedArray(rand(4); time=1:4),
+                    (:val2,) => KeyedArray(rand(4); time=2:5),
+                ),
+                false
+            )
+            @test_throws ArgumentError validate(ds)
+        end
+
         @testset "KeyedArrays" begin
             ds = KeyedDataset(
                 :val1 => KeyedArray(
