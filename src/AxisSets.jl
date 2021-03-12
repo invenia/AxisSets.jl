@@ -1,9 +1,12 @@
 module AxisSets
 
 using AxisKeys
+using Impute
 using NamedDims
 using OrderedCollections
 using ReadOnlyArrays
+
+using Impute: DeclareMissings, Filter, Imputor, Validator
 
 export KeyedDataset
 
@@ -71,5 +74,6 @@ include("patterns.jl")
 include("dataset.jl")
 include("indexing.jl")
 include("functions.jl")
+include("impute.jl")
 
 end
