@@ -16,10 +16,7 @@
     @testset "validate" begin
         @test_throws ThresholdError Impute.threshold(ds; limit=0.1)
         r = Impute.threshold(ds; limit=1.0)
-
-        for (k, v) in pairs(ds.data)
-            @test isequal(r[k], v)
-        end
+        @test isequal(r, ds)
     end
 
     @testset "declaremissings" begin
@@ -37,9 +34,7 @@
         );
 
         r = Impute.declaremissings(nonmissing; values=(NaN, -9999.0))
-        for (k, v) in ds.data
-            @test isequal(r[k], v)
-        end
+        @test isequal(r, ds)
     end
 
     @testset "impute" begin
@@ -57,9 +52,7 @@
         );
 
         r = Impute.substitute(ds; dims=:time)
-        for (k, v) in expected.data
-            @test isequal(r[k], v)
-        end
+        @test isequal(r, expected)
 
         expected = KeyedDataset(
             flatten([
@@ -75,9 +68,7 @@
         );
 
         r = Impute.substitute(ds; dims=:loc)
-        for (k, v) in expected.data
-            @test isequal(r[k], v)
-        end
+        @test isequal(r, expected)
     end
 
     @testset "filter" begin
@@ -97,9 +88,7 @@
         );
 
         r = Impute.filter(ds; dims=:time)
-        for (k, v) in expected.data
-            @test isequal(r[k], v)
-        end
+        @test isequal(r, expected)
 
         # Only :load has a shared :loc axis, so we see that that :y location is dropped from
         # both train and predict.
@@ -117,8 +106,6 @@
         );
 
         r = Impute.filter(ds; dims=:loc)
-        for (k, v) in expected.data
-            @test isequal(r[k], v)
-        end
+        @test isequal(r, expected)
     end
 end

@@ -168,5 +168,5 @@ end
 
     # Test custom filter
     custom = ds(k -> any(startswith("gr"), string.(k)))
-    @test custom.data == ds.data
+    @test custom == ds
 end

@@ -9,7 +9,7 @@ on their shared dimensions.
 - `data::LittleDict{Tuple{Vararg{Symbol}}, T}` - Flattened key paths as tuples of symbols
   to each component array of type `T`.
 """
-struct KeyedDataset{T<:XArray}
+@auto_hash_equals struct KeyedDataset{T<:XArray}
     # Our constraints are a collection of pseudo path tuples typically with 1 or
     # more `:_` wildcard components
     constraints::OrderedSet{Pattern}

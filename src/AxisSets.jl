@@ -1,5 +1,6 @@
 module AxisSets
 
+using AutoHashEquals
 using AxisKeys
 using Impute
 using NamedDims

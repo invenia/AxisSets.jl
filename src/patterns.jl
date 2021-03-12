@@ -33,7 +33,7 @@ julia> filter(in(Pattern(:__, :load, :_)), items)
  (:train, :output, :load, :id)
 ```
 """
-struct Pattern
+@auto_hash_equals struct Pattern
     segments::Tuple{Vararg{Symbol}}
 
     # We reduce the segments on construction to remove extra wildcards
