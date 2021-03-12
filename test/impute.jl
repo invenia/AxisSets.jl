@@ -107,11 +107,11 @@
             flatten([
                 :train => [
                     :temp => KeyedArray([1.0 1.1; missing 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
-                    :load => KeyedArray([7.0 8.0 9.0]'; time=1:3, loc=[:x]),
+                    :load => KeyedArray([7.0, 8.0, 9.0][:, :]; time=1:3, loc=[:x]),
                 ],
                 :predict => [
                     :temp => KeyedArray([1.0 missing; 2.0 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
-                    :load => KeyedArray([7.0 8.1 9.0]'; time=1:3, loc=[:x]),
+                    :load => KeyedArray([7.0, 8.1, 9.0][:, :]; time=1:3, loc=[:x]),
                 ]
             ])...
         );

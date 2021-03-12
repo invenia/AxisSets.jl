@@ -128,8 +128,6 @@ function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
     end
 
     # Apply our shared filter mask for each set of constrained paths
-    # NOTE: We're assuming that the constrained paths are mutually exclusive, but in theory
-    # the same component could be processed twice
     for (constraint, paths) in cmap
         @debug "$constraint => $paths"
         # We're assuming this dataset has already been validated so all dimpaths are
