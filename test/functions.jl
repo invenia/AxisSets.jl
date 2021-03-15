@@ -72,7 +72,7 @@ end
     end
 
     r = mapslices(sum, ds, (:__, :b, :_); dims=:loc)
-    @test r.data == mapslices(sum, ds; dims=:loc).data
+    @test r == mapslices(sum, ds; dims=:loc)
     expected = [
         (:g1, :a) => zeros(3),
         (:g1, :b) => fill(2.0, (3, 1)),
