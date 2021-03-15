@@ -113,13 +113,10 @@ julia> collect(keys(merge(ds1, ds2).data))
 ```
 """
 function Base.merge(ds::KeyedDataset, others::KeyedDataset...)
-    result = KeyedDataset(
+    return KeyedDataset(
         union(ds.constraints, getfield.(others, :constraints)...),
         merge(ds.data, getfield.(others, :data)...),
     )
-
-    validate(result)
-    return result
 end
 
 """
