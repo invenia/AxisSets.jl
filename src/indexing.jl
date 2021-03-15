@@ -111,6 +111,7 @@ julia> collect(constraintmap(ds))
 
 julia> ds[:c] = KeyedArray(ones(3, 2); time=2:4, lag=[-1, -2])
 ERROR: ArgumentError: Shared dimensions don't have matching keys
+
 ```
 """
 Base.setindex!(ds::KeyedDataset, val, key::Symbol) = setindex!(ds, val, (key,))
