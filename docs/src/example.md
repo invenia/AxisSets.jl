@@ -5,7 +5,7 @@ In this example, we're going to step through a set of common operations we typic
 Lets start by loading some packages we'll need.
 
 ```@example full
-using AxisKeys, AxisSets, DataFrames, Dates, Impute, Random, TimeZones
+using AxisKeys, AxisSets, DataFrames, Dates, Impute, Random, Statistics, TimeZones
 using AxisSets: Pattern, flatten, rekey
 ```
 
@@ -21,7 +21,7 @@ predict_input_times = DateTime(2021, 1, 7):Hour(1):DateTime(2021, 1, 8)
 predict_output_times = predict_input_times .+ Day(1)
 
 # We're gonna say that price, load and temp nodes are different non-overlapping ids
-node_ids = [:a, :b, :c, :d]
+price_ids = [:a, :b, :c, :d]
 load_ids = [:p, :q]
 temp_ids = [:x, :y, :z]
 
@@ -60,44 +60,44 @@ data = (
     train = (
         input = (
             prices = DataFrame(
-                NamedTuple{(:time, :id, :lag, :price)}((t..., misrand(train_factor, t[2])))
-                for t in Iterators.product(train_input_times, node_ids, feature_lags)
+                (time=t[1], id=t[2], lag=t[3], price=misrand(train_factor, t[2]))
+                for t in Iterators.product(train_input_times, price_ids, feature_lags)
             ),
             load = DataFrame(
-                NamedTuple{(:time, :id, :load)}((t..., misrand(train_factor, t[2])))
+                (time=t[1], id=t[2], load=misrand(train_factor, t[2]))
                 for t in Iterators.product(train_input_times, load_ids)
             ),
             temp = DataFrame(
-                NamedTuple{(:time, :id, :temperature)}((t..., misrand(train_factor, t[2])))
+                (time=t[1], id=t[2], temp=misrand(train_factor, t[2]))
                 for t in Iterators.product(train_input_times, temp_ids)
             ),
         ),
         output = (
             prices = DataFrame(
-                NamedTuple{(:time, :id, :price)}((t..., misrand(train_factor, t[2])))
-                for t in Iterators.product(train_output_times, node_ids)
+                (time=t[1], id=t[2], price=misrand(train_factor, t[2]))
+                for t in Iterators.product(train_output_times, price_ids)
             ),
         ),
     ),
     predict = (
         input = (
             prices = DataFrame(
-                NamedTuple{(:time, :id, :lag, :price)}((t..., misrand(predict_factor, t[2])))
-                for t in Iterators.product(predict_input_times, node_ids, feature_lags)
+                (time=t[1], id=t[2], lag=t[3], price=misrand(predict_factor, t[2]))
+                for t in Iterators.product(predict_input_times, price_ids, feature_lags)
             ),
             load = DataFrame(
-                NamedTuple{(:time, :id, :load)}((t..., misrand(predict_factor, t[2])))
+                (time=t[1], id=t[2], load=misrand(predict_factor, t[2]))
                 for t in Iterators.product(predict_input_times, load_ids)
             ),
             temp = DataFrame(
-                NamedTuple{(:time, :id, :temperature)}((t..., misrand(predict_factor, t[2])))
+                (time=t[1], id=t[2], temp=misrand(predict_factor, t[2]))
                 for t in Iterators.product(predict_input_times, temp_ids)
             ),
         ),
         output = (
             prices = DataFrame(
-                NamedTuple{(:time, :id, :price)}((t..., misrand(predict_factor, t[2])))
-                for t in Iterators.product(predict_output_times, node_ids)
+                (time=t[1], id=t[2], price=misrand(predict_factor, t[2]))
+                for t in Iterators.product(predict_output_times, price_ids)
             ),
         ),
     ),
@@ -196,27 +196,20 @@ The objective of this type is to address two primary issues:
 Let's perform some common operations:
 
 We often want to filter out `id`s being consider if they have too many missing values.
-Let's define a rule for when we want to filter out an `id`.
+Lets try just applying this filtering rule to each component of our dataset
 
 ```@example full
-threshold = 0.1
-function filter_rule(x)
-    r = count(ismissing, x) / length(x)
-    r < threshold
-end
-```
-
-Okay, so lets try just applying this filtering rule to each component of our dataset
-
-```@example full
-unique(axiskeys(Impute.filter(filter_rule, v; dims=:id), :id) for (k, v) in ds.data)
+unique(
+    axiskeys(Impute.filter(x -> mean(ismissing, x) < 0.1, v; dims=:id), :id)
+    for (k, v) in ds.data
+)
 ```
 
 We can see that doing this results in inconsistent `:id` keys across our components.
 Now lets try applying a batched version of that filtering rule across the entire dataset.
 
 ```@example full
-ds = Impute.filter(filter_rule, ds; dims=:id)
+ds = Impute.filter(x -> mean(ismissing, x) < 0.1, ds; dims=:id)
 unique(axiskeys(ds, :id))
 ```
 
