@@ -1,6 +1,6 @@
 # Example
 
-In this example, we're going to step through a set of common operations we typically perform when converting a collection of individually fetched features into a simple set of training fetures (X, y) and predict/testing features (X̂, ŷ).
+In this example, we're going to step through a set of common operations we typically perform when converting a collection of individually fetched features into a simple set of training features (X, y) and predict/testing features (X̂, ŷ).
 
 Lets start by loading some packages we'll need.
 
@@ -126,7 +126,7 @@ components = (
 
 This representation avoids storing duplicate `:time` and `:id` column values and allows us to perform normal n-dimensional array operation over the dataset more efficiently.
 
-If we look al little closer we'll also find that several of these "key" columns align across the dataframes, while others do not.
+If we look a little closer we'll also find that several of these "key" columns align across the dataframes, while others do not.
 
 For example, the `:time` columns across `train⁻input` tables align.
 Similarly the `:id` columns match for both `train⁻input⁻prices` and `train⁻output⁻prices`.
