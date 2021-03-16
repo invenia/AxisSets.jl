@@ -9,10 +9,12 @@ makedocs(;
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://invenia.github.io/AxisSets.jl",
-        assets=String[],
+        assets=String["assets/invenia.css"],
     ),
     pages=[
         "Home" => "index.md",
+        "Example" => "example.md",
+        "API" => "api.md",
     ],
     strict=true,
     checkdocs=:exports,
