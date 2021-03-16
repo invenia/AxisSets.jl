@@ -105,7 +105,7 @@ data = (
 ```
 
 To see how we can use AxisSets.jl to aid with data wrangling problems, we're going to assume our dataset is a nested `NamedTuple` of `DataFrame`s.
-We're using DataFrames for simplicity, but we could also construct our `Dataset` from a `LibPQ.Result` via the Tables interface.
+We're using DataFrames for simplicity, but we could also construct our `Dataset` from a `LibPQ.Result` or anything else that follows the Tables interface.
 Let's start by taking a look at what our data looks like.
 To make things easier we're gonna flatten our nested structure and display the column names for each dataframe.
 
@@ -181,7 +181,7 @@ id_constraints = Pattern[
 
 ## KeyedDataset
 
-Okay, so how can we make the constraint `Pattern`s and component `KeyedArray`s more useful to us?
+How can we make the constraint `Pattern`s and component `KeyedArray`s more useful to us?
 Well, we can now combine our constraints and component `KeyedArray`s into a `KeyedDataset`.
 
 ```@example full
