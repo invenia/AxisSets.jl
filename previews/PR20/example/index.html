@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Example · AxisSets.jl</title><link rel="canonical" href="https://invenia.github.io/AxisSets.jl/example/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/invenia.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img class="docs-light-only" src="../assets/logo.png" alt="AxisSets.jl logo"/><img class="docs-dark-only" src="../assets/logo-dark.png" alt="AxisSets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">AxisSets.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Example</a><ul class="internal"><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#KeyedDataset"><span>KeyedDataset</span></a></li></ul></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Example</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Example</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/invenia/AxisSets.jl/blob/master/docs/src/example.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h1><p>In this example, we&#39;re going to step through a set of common operations we typically perform when converting a collection of individually fetched features into a simple set of training fetures (X, y) and predict/testing features (X̂, ŷ).</p><p>Lets start by loading some packages we&#39;ll need.</p><pre><code class="language-julia">using AxisKeys, AxisSets, DataFrames, Dates, Impute, Random, TimeZones
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Example · AxisSets.jl</title><link rel="canonical" href="https://invenia.github.io/AxisSets.jl/example/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/invenia.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img class="docs-light-only" src="../assets/logo.png" alt="AxisSets.jl logo"/><img class="docs-dark-only" src="../assets/logo-dark.png" alt="AxisSets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">AxisSets.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Example</a><ul class="internal"><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#KeyedDataset"><span>KeyedDataset</span></a></li></ul></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Example</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Example</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/invenia/AxisSets.jl/blob/master/docs/src/example.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h1><p>In this example, we&#39;re going to step through a set of common operations we typically perform when converting a collection of individually fetched features into a simple set of training fetures (X, y) and predict/testing features (X̂, ŷ).</p><p>Lets start by loading some packages we&#39;ll need.</p><pre><code class="language-julia">using AxisKeys, AxisSets, DataFrames, Dates, Impute, Random, Statistics, TimeZones
 using AxisSets: Pattern, flatten, rekey</code></pre><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><p>To see how we can use AxisSets.jl to aid with data wrangling problems, we&#39;re going to assume our dataset is a nested <code>NamedTuple</code> of <code>DataFrame</code>s. We&#39;re using DataFrames for simplicity, but we could also construct our <code>Dataset</code> from a <code>LibPQ.Result</code> via the Tables interface. Let&#39;s start by taking a look at what our data looks like. To make things easier we&#39;re gonna flatten our nested structure and display the column names for each dataframe.</p><pre><code class="language-julia">flattened = AxisSets.flatten(data)
 Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="documenter-example-output">Dict{Symbol,Array{String,1}} with 8 entries:
   :train⁻output⁻prices   =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;price&quot;]
-  :train⁻input⁻temp      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temperature&quot;]
+  :train⁻input⁻temp      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temp&quot;]
   :predict⁻output⁻prices =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;price&quot;]
-  :predict⁻input⁻temp    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temperature&quot;]
+  :predict⁻input⁻temp    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temp&quot;]
   :train⁻input⁻load      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;load&quot;]
   :predict⁻input⁻prices  =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;lag&quot;, &quot;price&quot;]
   :train⁻input⁻prices    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;lag&quot;, &quot;price&quot;]
@@ -53,7 +53,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
  289 │ 2021-01-06T23:00:00  q       0.908562
  290 │ 2021-01-07T00:00:00  q       0.0673735
                               275 rows omitted,:train⁻input⁻temp =&gt; 435×3 DataFrame
- Row │ time                 id      temperature
+ Row │ time                 id      temp
      │ DateTime…            Symbol  Float64?
 ─────┼──────────────────────────────────────────────
    1 │ 2021-01-01T00:00:00  x             0.0852417
@@ -133,26 +133,26 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
   49 │ 2021-01-07T23:00:00  q       0.3156
   50 │ 2021-01-08T00:00:00  q       0.929448
                                35 rows omitted,:predict⁻input⁻temp =&gt; 75×3 DataFrame
- Row │ time                 id      temperature
+ Row │ time                 id      temp
      │ DateTime…            Symbol  Float64?
-─────┼──────────────────────────────────────────
-   1 │ 2021-01-07T00:00:00  x          0.425157
-   2 │ 2021-01-07T01:00:00  x          0.930817
-   3 │ 2021-01-07T02:00:00  x          0.803252
-   4 │ 2021-01-07T03:00:00  x          0.316607
-   5 │ 2021-01-07T04:00:00  x          0.853816
-   6 │ 2021-01-07T05:00:00  x          0.389236
-   7 │ 2021-01-07T06:00:00  x          0.925086
-   8 │ 2021-01-07T07:00:00  x          0.532332
-  ⋮  │          ⋮             ⋮          ⋮
-  69 │ 2021-01-07T18:00:00  z          0.669497
-  70 │ 2021-01-07T19:00:00  z          0.176072
-  71 │ 2021-01-07T20:00:00  z          0.704747
-  72 │ 2021-01-07T21:00:00  z          0.356378
-  73 │ 2021-01-07T22:00:00  z          0.208576
-  74 │ 2021-01-07T23:00:00  z          0.992507
-  75 │ 2021-01-08T00:00:00  z          0.235793
-                                 60 rows omitted,:predict⁻output⁻prices =&gt; 100×3 DataFrame
+─────┼───────────────────────────────────────
+   1 │ 2021-01-07T00:00:00  x       0.425157
+   2 │ 2021-01-07T01:00:00  x       0.930817
+   3 │ 2021-01-07T02:00:00  x       0.803252
+   4 │ 2021-01-07T03:00:00  x       0.316607
+   5 │ 2021-01-07T04:00:00  x       0.853816
+   6 │ 2021-01-07T05:00:00  x       0.389236
+   7 │ 2021-01-07T06:00:00  x       0.925086
+   8 │ 2021-01-07T07:00:00  x       0.532332
+  ⋮  │          ⋮             ⋮        ⋮
+  69 │ 2021-01-07T18:00:00  z       0.669497
+  70 │ 2021-01-07T19:00:00  z       0.176072
+  71 │ 2021-01-07T20:00:00  z       0.704747
+  72 │ 2021-01-07T21:00:00  z       0.356378
+  73 │ 2021-01-07T22:00:00  z       0.208576
+  74 │ 2021-01-07T23:00:00  z       0.992507
+  75 │ 2021-01-08T00:00:00  z       0.235793
+                              60 rows omitted,:predict⁻output⁻prices =&gt; 100×3 DataFrame
  Row │ time                 id      price
      │ DateTime…            Symbol  Float64?
 ─────┼────────────────────────────────────────────────
@@ -581,15 +581,14 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
        Dates.DateTime(&quot;2021-01-08T21:00:00&quot;)    0.47944047366791187    0.1545249640518258    0.47723391993999287   0.25298507719438224
        Dates.DateTime(&quot;2021-01-08T22:00:00&quot;)    0.16055272833937817    0.972488300470923     0.5285530840237271    0.5586357026400497
        Dates.DateTime(&quot;2021-01-08T23:00:00&quot;)    0.47881327911457827    0.1695641275744284    0.04854303058783582   0.9298310292221936
-       Dates.DateTime(&quot;2021-01-09T00:00:00&quot;)    0.11836938522268481    0.05315412601009051    missing               missing</pre><p>The objective of this type is to address two primary issues:</p><ol><li>Ensure that our data wrangling operations won&#39;t violate our constraints outlined above.</li><li>Provide batched operations to minimize verbose data wrangling operations.</li></ol><p>Let&#39;s perform some common operations:</p><p>We often want to filter out <code>id</code>s being consider if they have too many missing values. Let&#39;s define a rule for when we want to filter out an <code>id</code>.</p><pre><code class="language-julia">threshold = 0.1
-function filter_rule(x)
-    r = count(ismissing, x) / length(x)
-    r &lt; threshold
-end</code></pre><pre class="documenter-example-output">filter_rule (generic function with 1 method)</pre><p>Okay, so lets try just applying this filtering rule to each component of our dataset</p><pre><code class="language-julia">unique(axiskeys(Impute.filter(filter_rule, v; dims=:id), :id) for (k, v) in ds.data)</code></pre><pre class="documenter-example-output">4-element Array{Array{Symbol,1},1}:
+       Dates.DateTime(&quot;2021-01-09T00:00:00&quot;)    0.11836938522268481    0.05315412601009051    missing               missing</pre><p>The objective of this type is to address two primary issues:</p><ol><li>Ensure that our data wrangling operations won&#39;t violate our constraints outlined above.</li><li>Provide batched operations to minimize verbose data wrangling operations.</li></ol><p>Let&#39;s perform some common operations:</p><p>We often want to filter out <code>id</code>s being consider if they have too many missing values. Lets try just applying this filtering rule to each component of our dataset</p><pre><code class="language-julia">unique(
+    axiskeys(Impute.filter(x -&gt; mean(ismissing, x) &lt; 0.1, v; dims=:id), :id)
+    for (k, v) in ds.data
+)</code></pre><pre class="documenter-example-output">4-element Array{Array{Symbol,1},1}:
  [:a, :b, :c, :d]
  [:p, :q]
  [:x, :y, :z]
- [:a, :b, :d]</pre><p>We can see that doing this results in inconsistent <code>:id</code> keys across our components. Now lets try applying a batched version of that filtering rule across the entire dataset.</p><pre><code class="language-julia">ds = Impute.filter(filter_rule, ds; dims=:id)
+ [:a, :b, :d]</pre><p>We can see that doing this results in inconsistent <code>:id</code> keys across our components. Now lets try applying a batched version of that filtering rule across the entire dataset.</p><pre><code class="language-julia">ds = Impute.filter(x -&gt; mean(ismissing, x) &lt; 0.1, ds; dims=:id)
 unique(axiskeys(ds, :id))</code></pre><pre class="documenter-example-output">3-element Array{Array{Symbol,1},1}:
  [:a, :b, :d]
  [:p, :q]
@@ -1324,4 +1323,4 @@ And data, 78×17 Array{Float64,2}:
    ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)       0.772407   0.0932628     0.620784
    ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)       0.528693   0.000701836   0.949602
    ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)       0.194426   0.280996      0.392469
-   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Monday 15 March 2021 22:53">Monday 15 March 2021</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 16 March 2021 05:06">Tuesday 16 March 2021</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
