@@ -209,7 +209,9 @@
         )
 
         # This is likely to change in the future, so we keep this test simple
-        @test startswith(sprint(show, ds), "$(typeof(ds)) with 2 entries:")
+        s = sprint(show, ds)
+        @test startswith(s, "KeyedDataset{Tuple{Symbol},")
+        @test occursin("with 2 entries", s)
     end
 
     @testset "dimpaths" begin

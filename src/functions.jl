@@ -105,7 +105,7 @@ julia> ds2 = KeyedDataset(
        );
 
 julia> collect(keys(merge(ds1, ds2).data))
-4-element Array{Tuple{Vararg{Symbol,N} where N},1}:
+4-element Array{Tuple{Symbol},1}:
  (:a,)
  (:b,)
  (:c,)

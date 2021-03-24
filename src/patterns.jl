@@ -1,7 +1,7 @@
 """
     Pattern
 
-A pattern is just a wrapper around a `Tuple{Vararg{Symbol}}` which enables searching and
+A pattern is just a wrapper around a `Tuple` which enables searching and
 filtering for matching components and dimension paths in a [`KeyedDataset`](@ref).
 Special symbols `:_` and `:__` are used as wildcards, similar to `*` and `**` in glob
 pattern matching.
@@ -33,14 +33,14 @@ julia> filter(in(Pattern(:__, :load, :_)), items)
  (:train, :output, :load, :id)
 ```
 """
-@auto_hash_equals struct Pattern
-    segments::Tuple{Vararg{Symbol}}
+@auto_hash_equals struct Pattern{T<:Tuple}
+    segments::T
 
     # We reduce the segments on construction to remove extra wildcards
     # e.g., `(:_, :__, ...)` reduces to`(:__, ...`)
     # NOTE: Since these patterns shouldn't be very long it seemed alright to do in an
     # inner constructor
-    function Pattern(segments::Tuple{Vararg{Symbol}})
+    function Pattern(segments::Tuple)
         n = length(segments)
         mask = trues(n)
 
@@ -64,14 +64,17 @@ julia> filter(in(Pattern(:__, :load, :_)), items)
             end
         end
 
-        return new(segments[mask])
+        vals = segments[mask]
+        return new{typeof(vals)}(vals)
     end
 end
 
-Pattern(segments::Symbol...) = Pattern(segments)
-Base.convert(::Type{Pattern}, x::Tuple{Vararg{Symbol}}) = Pattern(x)
+Pattern(segments...) = Pattern(segments)
+Base.convert(::Type{Pattern}, x::Tuple) = Pattern(x)
 
-function Base.in(item::Tuple{Vararg{Symbol}}, pattern::Pattern)
+Base.show(io::IO, pattern::Pattern) = print(io, "Pattern($(pattern.segments))")
+
+function Base.in(item::Tuple, pattern::Pattern)
     # If our pattern has more segments than the item then it isn't going to match
     length(pattern.segments) <= length(item) || return false
 
@@ -86,7 +89,7 @@ function Base.in(item::Tuple{Vararg{Symbol}}, pattern::Pattern)
         pat_val, pat_st = pat_iter
 
         # Iterate as normal if the pattern value matches or it's :_
-        if item_val === pat_val || pat_val === :_
+        if item_val == pat_val || pat_val === :_
             pat_iter = iterate(pattern.segments, pat_st)
             item_iter = iterate(item, item_st)
         # Look ahead when we see a multi-value wildcard to see if the next value matches

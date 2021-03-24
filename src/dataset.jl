@@ -1,34 +1,33 @@
 """
-    KeyedDataset{T}
+    KeyedDataset{K, T}
 
 A `KeyedDataset` describes an associative collection of component `KeyedArray`s with constraints
 on their shared dimensions.
 
 # Fields
 - `constraints::OrderedSet{Pattern}` - Constraint [`Pattern`](@ref)s on shared dimensions.
-- `data::LittleDict{Tuple{Vararg{Symbol}}, T}` - Flattened key paths as tuples of symbols
-  to each component array of type `T`.
+- `data::LittleDict{K, T}` - Flattened key paths as type `K <: Tuple` to each component array of type `T`.
 """
-@auto_hash_equals struct KeyedDataset{T<:XArray}
+@auto_hash_equals struct KeyedDataset{K<:Tuple, T<:XArray}
     # Our constraints are a collection of pseudo path tuples typically with 1 or
     # more `:_` wildcard components
     constraints::OrderedSet{Pattern}
     # Data lookup can be by any type, but typically it'll either be symbol or tuple.
-    data::LittleDict{Tuple{Vararg{Symbol}}, T}
+    data::LittleDict{K, T}
 
     function KeyedDataset(
         constraints::OrderedSet{Pattern},
-        data::LittleDict{<:Tuple{Vararg{Symbol}}, T},
+        data::LittleDict{K, T},
         check=true,
-    ) where T
-        ds = new{T}(constraints, data)
+    ) where {K<:Tuple, T}
+        ds = new{K, T}(constraints, data)
         check && validate(ds)
         return ds
     end
 end
 
-function KeyedDataset(pairs::Pair{<:Tuple}...; constraints=Pattern[])
-    data = LittleDict{Tuple{Vararg{Symbol}}, XArray}(pairs...)
+function KeyedDataset(pairs::Pair{T}...; constraints=Pattern[]) where T<:Tuple
+    data = LittleDict{T, XArray}(pairs...)
 
     # If no constraints have been specified then we default to (:__, dimname)
     constraint_set = if isempty(constraints)
@@ -58,9 +57,9 @@ end
 # Utility kwargs constructor.
 KeyedDataset(; constraints=Pattern[], kwargs...) = KeyedDataset(kwargs...; constraints=constraints)
 
-function Base.show(io::IO, ds::KeyedDataset{T}) where T
+function Base.show(io::IO, ds::KeyedDataset{K, T}) where {K, T}
     n = length(ds.data)
-    print(io, "KeyedDataset{$T} with $n entries:")
+    print(io, "KeyedDataset{$K, $T} with $n entries:")
     for c in ds.constraints
         print(io, "\n  ", c)
     end
@@ -72,7 +71,7 @@ function Base.show(io::IO, ds::KeyedDataset{T}) where T
 end
 
 """
-    dimpaths(ds, [pattern]) -> Vector{<:Tuple{Vararg{Symbol}}}
+    dimpaths(ds, [pattern]) -> Vector{<:Tuple}
 
 Return a list of all dimension paths in the [`KeyedDataset`](@ref).
 Optionally, you can filter the results using a [`Pattern`](@ref).
@@ -107,7 +106,7 @@ end
 
 Returns a mapping of constraint patterns to specific dimension paths.
 The returned dictionary has keys of type [`Pattern`](@ref) and the values are sets of
-`Tuple{Vararg{Symbol}}`.
+`Tuple`.
 
 # Example
 ```jldoctest
@@ -119,15 +118,15 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(constraintmap(ds))
-3-element Array{Pair{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}}},1}:
- AxisSets.Pattern((:__, :time)) => Set([(:val2, :time), (:val1, :time)])
-  AxisSets.Pattern((:__, :loc)) => Set([(:val1, :loc), (:val2, :loc)])
-  AxisSets.Pattern((:__, :obj)) => Set([(:val2, :obj), (:val1, :obj)])
+3-element Array{Pair{AxisSets.Pattern,Set{Tuple}},1}:
+ Pattern((:__, :time)) => Set([(:val2, :time), (:val1, :time)])
+  Pattern((:__, :loc)) => Set([(:val1, :loc), (:val2, :loc)])
+  Pattern((:__, :obj)) => Set([(:val2, :obj), (:val1, :obj)])
 ```
 """
 function constraintmap(ds::KeyedDataset)
     items = dimpaths(ds)
-    return LittleDict{Pattern, Set{Tuple{Vararg{Symbol}}}}(
+    return LittleDict{Pattern, Set{Tuple}}(
         c => Set(filter(in(c), items)) for c in ds.constraints
     )
 end
@@ -189,7 +188,7 @@ function AxisKeys.axiskeys(ds::KeyedDataset)
     return Tuple(unique(Iterators.flatten(axiskeys(a) for a in values(ds.data))))
 end
 
-function AxisKeys.axiskeys(ds::KeyedDataset, dimpath::Tuple{Vararg{Symbol}})
+function AxisKeys.axiskeys(ds::KeyedDataset, dimpath::Tuple)
     key, dim = dimpath[1:end-1], dimpath[end]
     component = ds.data[key]
     return axiskeys(component, dim)
