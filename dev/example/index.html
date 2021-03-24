@@ -187,25 +187,25 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
     # All predict output time keys should match
     (:predict, :output, :_, :time),
 ]</code></pre><pre class="documenter-example-output">4-element Array{AxisSets.Pattern,1}:
- AxisSets.Pattern((:train, :input, :_, :time))
- AxisSets.Pattern((:train, :output, :_, :time))
- AxisSets.Pattern((:predict, :input, :_, :time))
- AxisSets.Pattern((:predict, :output, :_, :time))</pre><p>Constraint patterns on <code>:id</code></p><pre><code class="language-julia">id_constraints = Pattern[
+ Pattern((:train, :input, :_, :time))
+ Pattern((:train, :output, :_, :time))
+ Pattern((:predict, :input, :_, :time))
+ Pattern((:predict, :output, :_, :time))</pre><p>Constraint patterns on <code>:id</code></p><pre><code class="language-julia">id_constraints = Pattern[
     # All ids for each data type should align across
     (:__, :prices, :id),
     (:__, :temp, :id),
     (:__, :load, :id),
 ]</code></pre><pre class="documenter-example-output">3-element Array{AxisSets.Pattern,1}:
- AxisSets.Pattern((:__, :prices, :id))
- AxisSets.Pattern((:__, :temp, :id))
- AxisSets.Pattern((:__, :load, :id))</pre><h2 id="KeyedDataset"><a class="docs-heading-anchor" href="#KeyedDataset">KeyedDataset</a><a id="KeyedDataset-1"></a><a class="docs-heading-anchor-permalink" href="#KeyedDataset" title="Permalink"></a></h2><p>How can we make the constraint <code>Pattern</code>s and component <code>KeyedArray</code>s more useful to us? Well, we can now combine our constraints and component <code>KeyedArray</code>s into a <code>KeyedDataset</code>.</p><pre><code class="language-julia">ds = KeyedDataset(components...; constraints=vcat(time_constraints, id_constraints))</code></pre><pre class="documenter-example-output">KeyedDataset{Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
-  AxisSets.Pattern((:train, :input, :_, :time))
-  AxisSets.Pattern((:train, :output, :_, :time))
-  AxisSets.Pattern((:predict, :input, :_, :time))
-  AxisSets.Pattern((:predict, :output, :_, :time))
-  AxisSets.Pattern((:__, :prices, :id))
-  AxisSets.Pattern((:__, :temp, :id))
-  AxisSets.Pattern((:__, :load, :id))
+ Pattern((:__, :prices, :id))
+ Pattern((:__, :temp, :id))
+ Pattern((:__, :load, :id))</pre><h2 id="KeyedDataset"><a class="docs-heading-anchor" href="#KeyedDataset">KeyedDataset</a><a id="KeyedDataset-1"></a><a class="docs-heading-anchor-permalink" href="#KeyedDataset" title="Permalink"></a></h2><p>How can we make the constraint <code>Pattern</code>s and component <code>KeyedArray</code>s more useful to us? Well, we can now combine our constraints and component <code>KeyedArray</code>s into a <code>KeyedDataset</code>.</p><pre><code class="language-julia">ds = KeyedDataset(components...; constraints=vcat(time_constraints, id_constraints))</code></pre><pre class="documenter-example-output">KeyedDataset{Tuple{Symbol,Symbol,Symbol}, Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
+  Pattern((:train, :input, :_, :time))
+  Pattern((:train, :output, :_, :time))
+  Pattern((:predict, :input, :_, :time))
+  Pattern((:predict, :output, :_, :time))
+  Pattern((:__, :prices, :id))
+  Pattern((:__, :temp, :id))
+  Pattern((:__, :load, :id))
   (:train, :input, :prices) =&gt; 3-dimensional KeyedArray(NamedDimsArray(...)) with keys:
     ↓   time ∈ 145-element Vector{Dates.DateTime}
     →   id ∈ 4-element Vector{Symbol}
@@ -597,14 +597,14 @@ unique(axiskeys(ds, :time))</code></pre><pre class="documenter-example-output">4
  [Dates.DateTime(&quot;2021-01-01T01:00:00&quot;), Dates.DateTime(&quot;2021-01-01T02:00:00&quot;), Dates.DateTime(&quot;2021-01-01T06:00:00&quot;), Dates.DateTime(&quot;2021-01-01T07:00:00&quot;), Dates.DateTime(&quot;2021-01-01T08:00:00&quot;), Dates.DateTime(&quot;2021-01-01T09:00:00&quot;), Dates.DateTime(&quot;2021-01-01T10:00:00&quot;), Dates.DateTime(&quot;2021-01-01T13:00:00&quot;), Dates.DateTime(&quot;2021-01-01T14:00:00&quot;), Dates.DateTime(&quot;2021-01-01T15:00:00&quot;)  …  Dates.DateTime(&quot;2021-01-06T02:00:00&quot;), Dates.DateTime(&quot;2021-01-06T04:00:00&quot;), Dates.DateTime(&quot;2021-01-06T05:00:00&quot;), Dates.DateTime(&quot;2021-01-06T08:00:00&quot;), Dates.DateTime(&quot;2021-01-06T09:00:00&quot;), Dates.DateTime(&quot;2021-01-06T12:00:00&quot;), Dates.DateTime(&quot;2021-01-06T13:00:00&quot;), Dates.DateTime(&quot;2021-01-06T15:00:00&quot;), Dates.DateTime(&quot;2021-01-06T19:00:00&quot;), Dates.DateTime(&quot;2021-01-06T21:00:00&quot;)]
  [Dates.DateTime(&quot;2021-01-02T00:00:00&quot;), Dates.DateTime(&quot;2021-01-02T01:00:00&quot;), Dates.DateTime(&quot;2021-01-02T02:00:00&quot;), Dates.DateTime(&quot;2021-01-02T03:00:00&quot;), Dates.DateTime(&quot;2021-01-02T04:00:00&quot;), Dates.DateTime(&quot;2021-01-02T05:00:00&quot;), Dates.DateTime(&quot;2021-01-02T07:00:00&quot;), Dates.DateTime(&quot;2021-01-02T08:00:00&quot;), Dates.DateTime(&quot;2021-01-02T09:00:00&quot;), Dates.DateTime(&quot;2021-01-02T10:00:00&quot;)  …  Dates.DateTime(&quot;2021-01-07T13:00:00&quot;), Dates.DateTime(&quot;2021-01-07T14:00:00&quot;), Dates.DateTime(&quot;2021-01-07T15:00:00&quot;), Dates.DateTime(&quot;2021-01-07T16:00:00&quot;), Dates.DateTime(&quot;2021-01-07T17:00:00&quot;), Dates.DateTime(&quot;2021-01-07T18:00:00&quot;), Dates.DateTime(&quot;2021-01-07T19:00:00&quot;), Dates.DateTime(&quot;2021-01-07T20:00:00&quot;), Dates.DateTime(&quot;2021-01-07T21:00:00&quot;), Dates.DateTime(&quot;2021-01-07T22:00:00&quot;)]
  [Dates.DateTime(&quot;2021-01-07T00:00:00&quot;), Dates.DateTime(&quot;2021-01-07T01:00:00&quot;), Dates.DateTime(&quot;2021-01-07T06:00:00&quot;), Dates.DateTime(&quot;2021-01-07T07:00:00&quot;), Dates.DateTime(&quot;2021-01-07T08:00:00&quot;), Dates.DateTime(&quot;2021-01-07T09:00:00&quot;), Dates.DateTime(&quot;2021-01-07T10:00:00&quot;), Dates.DateTime(&quot;2021-01-07T12:00:00&quot;), Dates.DateTime(&quot;2021-01-07T13:00:00&quot;), Dates.DateTime(&quot;2021-01-07T14:00:00&quot;), Dates.DateTime(&quot;2021-01-07T15:00:00&quot;), Dates.DateTime(&quot;2021-01-07T16:00:00&quot;), Dates.DateTime(&quot;2021-01-07T17:00:00&quot;), Dates.DateTime(&quot;2021-01-07T18:00:00&quot;), Dates.DateTime(&quot;2021-01-07T19:00:00&quot;), Dates.DateTime(&quot;2021-01-07T20:00:00&quot;), Dates.DateTime(&quot;2021-01-07T23:00:00&quot;)]
- [Dates.DateTime(&quot;2021-01-08T00:00:00&quot;), Dates.DateTime(&quot;2021-01-08T01:00:00&quot;), Dates.DateTime(&quot;2021-01-08T02:00:00&quot;), Dates.DateTime(&quot;2021-01-08T03:00:00&quot;), Dates.DateTime(&quot;2021-01-08T04:00:00&quot;), Dates.DateTime(&quot;2021-01-08T05:00:00&quot;), Dates.DateTime(&quot;2021-01-08T06:00:00&quot;), Dates.DateTime(&quot;2021-01-08T07:00:00&quot;), Dates.DateTime(&quot;2021-01-08T08:00:00&quot;), Dates.DateTime(&quot;2021-01-08T09:00:00&quot;)  …  Dates.DateTime(&quot;2021-01-08T14:00:00&quot;), Dates.DateTime(&quot;2021-01-08T15:00:00&quot;), Dates.DateTime(&quot;2021-01-08T16:00:00&quot;), Dates.DateTime(&quot;2021-01-08T17:00:00&quot;), Dates.DateTime(&quot;2021-01-08T18:00:00&quot;), Dates.DateTime(&quot;2021-01-08T19:00:00&quot;), Dates.DateTime(&quot;2021-01-08T20:00:00&quot;), Dates.DateTime(&quot;2021-01-08T21:00:00&quot;), Dates.DateTime(&quot;2021-01-08T22:00:00&quot;), Dates.DateTime(&quot;2021-01-08T23:00:00&quot;)]</pre><p>You&#39;ll notice that we may have up-to 4 unique <code>:time</code> keys among our 8 components. This is because we only expect keys to align across each <code>:train</code>/<code>predict</code> and <code>input</code>/<code>output</code> combinations as described above.</p><p>Finally, we should be able to restrict the component <code>KeyedArrays</code> to <code>disallowmissing</code>.</p><pre><code class="language-julia">ds = map(disallowmissing, ds)</code></pre><pre class="documenter-example-output">KeyedDataset{Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
-  AxisSets.Pattern((:train, :input, :_, :time))
-  AxisSets.Pattern((:train, :output, :_, :time))
-  AxisSets.Pattern((:predict, :input, :_, :time))
-  AxisSets.Pattern((:predict, :output, :_, :time))
-  AxisSets.Pattern((:__, :prices, :id))
-  AxisSets.Pattern((:__, :temp, :id))
-  AxisSets.Pattern((:__, :load, :id))
+ [Dates.DateTime(&quot;2021-01-08T00:00:00&quot;), Dates.DateTime(&quot;2021-01-08T01:00:00&quot;), Dates.DateTime(&quot;2021-01-08T02:00:00&quot;), Dates.DateTime(&quot;2021-01-08T03:00:00&quot;), Dates.DateTime(&quot;2021-01-08T04:00:00&quot;), Dates.DateTime(&quot;2021-01-08T05:00:00&quot;), Dates.DateTime(&quot;2021-01-08T06:00:00&quot;), Dates.DateTime(&quot;2021-01-08T07:00:00&quot;), Dates.DateTime(&quot;2021-01-08T08:00:00&quot;), Dates.DateTime(&quot;2021-01-08T09:00:00&quot;)  …  Dates.DateTime(&quot;2021-01-08T14:00:00&quot;), Dates.DateTime(&quot;2021-01-08T15:00:00&quot;), Dates.DateTime(&quot;2021-01-08T16:00:00&quot;), Dates.DateTime(&quot;2021-01-08T17:00:00&quot;), Dates.DateTime(&quot;2021-01-08T18:00:00&quot;), Dates.DateTime(&quot;2021-01-08T19:00:00&quot;), Dates.DateTime(&quot;2021-01-08T20:00:00&quot;), Dates.DateTime(&quot;2021-01-08T21:00:00&quot;), Dates.DateTime(&quot;2021-01-08T22:00:00&quot;), Dates.DateTime(&quot;2021-01-08T23:00:00&quot;)]</pre><p>You&#39;ll notice that we may have up-to 4 unique <code>:time</code> keys among our 8 components. This is because we only expect keys to align across each <code>:train</code>/<code>predict</code> and <code>input</code>/<code>output</code> combinations as described above.</p><p>Finally, we should be able to restrict the component <code>KeyedArrays</code> to <code>disallowmissing</code>.</p><pre><code class="language-julia">ds = map(disallowmissing, ds)</code></pre><pre class="documenter-example-output">KeyedDataset{Tuple{Symbol,Symbol,Symbol}, Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
+  Pattern((:train, :input, :_, :time))
+  Pattern((:train, :output, :_, :time))
+  Pattern((:predict, :input, :_, :time))
+  Pattern((:predict, :output, :_, :time))
+  Pattern((:__, :prices, :id))
+  Pattern((:__, :temp, :id))
+  Pattern((:__, :load, :id))
   (:train, :input, :prices) =&gt; 3-dimensional KeyedArray(NamedDimsArray(...)) with keys:
     ↓   time ∈ 78-element Vector{Dates.DateTime}
     →   id ∈ 3-element Vector{Symbol}
@@ -944,14 +944,14 @@ unique(axiskeys(ds, :time))</code></pre><pre class="documenter-example-output">4
        Dates.DateTime(&quot;2021-01-08T20:00:00&quot;)    0.21805897261403762    0.5582533605742903     0.19373274059980083
        Dates.DateTime(&quot;2021-01-08T21:00:00&quot;)    0.47944047366791187    0.1545249640518258     0.25298507719438224
        Dates.DateTime(&quot;2021-01-08T22:00:00&quot;)    0.16055272833937817    0.972488300470923      0.5586357026400497
-       Dates.DateTime(&quot;2021-01-08T23:00:00&quot;)    0.47881327911457827    0.1695641275744284     0.9298310292221936</pre><p>Another common operation is to mutate the key values in batches. In this case, we&#39;ll say that we need to convert the <code>:time</code> keys to <code>ZonedDateTime</code>s.</p><pre><code class="language-julia">ds = rekey(k -&gt; ZonedDateTime.(k, tz&quot;UTC&quot;), ds, :time)</code></pre><pre class="documenter-example-output">KeyedDataset{Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
-  AxisSets.Pattern((:train, :input, :_, :time))
-  AxisSets.Pattern((:train, :output, :_, :time))
-  AxisSets.Pattern((:predict, :input, :_, :time))
-  AxisSets.Pattern((:predict, :output, :_, :time))
-  AxisSets.Pattern((:__, :prices, :id))
-  AxisSets.Pattern((:__, :temp, :id))
-  AxisSets.Pattern((:__, :load, :id))
+       Dates.DateTime(&quot;2021-01-08T23:00:00&quot;)    0.47881327911457827    0.1695641275744284     0.9298310292221936</pre><p>Another common operation is to mutate the key values in batches. In this case, we&#39;ll say that we need to convert the <code>:time</code> keys to <code>ZonedDateTime</code>s.</p><pre><code class="language-julia">ds = rekey(k -&gt; ZonedDateTime.(k, tz&quot;UTC&quot;), ds, :time)</code></pre><pre class="documenter-example-output">KeyedDataset{Tuple{Symbol,Symbol,Symbol}, Union{AxisKeys.KeyedArray{T,N,var&quot;#s13&quot;,KT} where KT where var&quot;#s13&quot;&lt;:NamedDims.NamedDimsArray, NamedDims.NamedDimsArray{L,T,N,var&quot;#s12&quot;} where var&quot;#s12&quot;&lt;:AxisKeys.KeyedArray} where N where T where L} with 8 entries:
+  Pattern((:train, :input, :_, :time))
+  Pattern((:train, :output, :_, :time))
+  Pattern((:predict, :input, :_, :time))
+  Pattern((:predict, :output, :_, :time))
+  Pattern((:__, :prices, :id))
+  Pattern((:__, :temp, :id))
+  Pattern((:__, :load, :id))
   (:train, :input, :prices) =&gt; 3-dimensional KeyedArray(NamedDimsArray(...)) with keys:
     ↓   time ∈ 78-element Vector{TimeZones.ZonedDateTime}
     →   id ∈ 3-element Vector{Symbol}
@@ -1323,4 +1323,4 @@ And data, 78×17 Array{Float64,2}:
    ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)       0.772407   0.0932628     0.620784
    ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)       0.528693   0.000701836   0.949602
    ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)       0.194426   0.280996      0.392469
-   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 16 March 2021 16:36">Tuesday 16 March 2021</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 24 March 2021 17:53">Wednesday 24 March 2021</span>. Using Julia version 1.5.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
