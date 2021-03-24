@@ -59,16 +59,39 @@ KeyedDataset(; constraints=Pattern[], kwargs...) = KeyedDataset(kwargs...; const
 
 function Base.show(io::IO, ds::KeyedDataset{K, T}) where {K, T}
     n = length(ds.data)
-    print(io, "KeyedDataset{$K, $T} with $n entries:")
-    for c in ds.constraints
-        print(io, "\n  ", c)
-    end
+    m = length(ds.constraints)
+
+    # Extract the constraints as a vector for indexing
+    constraints = collect(ds.constraints)
+
+    lines = String["KeyedDataset with:", "  $n components"]
     for (k, v) in ds.data
-        printstyled(io, "\n  ", k, " => "; color=:cyan)
-        printstyled(io, replace(sprint(Base.summary, v), "\n" => "\n    "); color=:cyan)
-        print(io, "\n    ", replace(sprint(Base.print_array, v), "\n" => "\n    "))
+        # Identify shared dimensions where appropriate
+        dimensions = map(dimnames(v)) do dimname
+            cidx = findall(c -> (k..., dimname) in c, constraints)
+            isempty(cidx) ? string(dimname) : string(dimname, "[", _only(cidx), "]")
+        end
+
+        s = string(
+            "    $k => ",
+            join(size(v), "x"),
+            " $(nameof(typeof(v))){$(eltype(v))}",
+            " with dimension ",
+            join(dimensions, ", ")
+        )
+
+        push!(lines, s)
     end
+
+    push!(lines, "  $m constraints")
+
+    for (i, c) in enumerate(constraints)
+        push!(lines, "    [$i] $(c.segments) ∈ $(sprint(summary, _only(axiskeys(ds, c))))")
+    end
+
+    print(io, join(lines, "\n"))
 end
+
 
 """
     dimpaths(ds, [pattern]) -> Vector{<:Tuple}

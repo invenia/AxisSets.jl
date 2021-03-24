@@ -252,8 +252,9 @@
 
         # This is likely to change in the future, so we keep this test simple
         s = sprint(show, ds)
-        @test startswith(s, "KeyedDataset{Tuple{Symbol},")
-        @test occursin("with 2 entries", s)
+        @test startswith(s, "KeyedDataset")
+        @test occursin("2 components", s)
+        @test occursin("3 constraints", s)
     end
 
     @testset "dimpaths" begin
