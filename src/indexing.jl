@@ -15,7 +15,7 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(keys(ds.data))
-2-element Array{Tuple{Vararg{Symbol,N} where N},1}:
+2-element Array{Tuple{Symbol},1}:
  (:val1,)
  (:val2,)
 
@@ -105,9 +105,9 @@ julia> ds = KeyedDataset(:a => KeyedArray(zeros(3); time=1:3));
 julia> ds[:b] = KeyedArray(ones(3, 2); time=1:3, lag=[-1, -2]);
 
 julia> collect(constraintmap(ds))
-2-element Array{Pair{AxisSets.Pattern,Set{Tuple{Vararg{Symbol,N} where N}}},1}:
- AxisSets.Pattern((:__, :time)) => Set([(:b, :time), (:a, :time)])
-  AxisSets.Pattern((:__, :lag)) => Set([(:b, :lag)])
+2-element Array{Pair{AxisSets.Pattern,Set{Tuple}},1}:
+ Pattern((:__, :time)) => Set([(:b, :time), (:a, :time)])
+  Pattern((:__, :lag)) => Set([(:b, :lag)])
 
 julia> ds[:c] = KeyedArray(ones(3, 2); time=2:4, lag=[-1, -2])
 ERROR: ArgumentError: Shared dimensions don't have matching keys
@@ -154,12 +154,12 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(keys(ds(:__, :a).data))
-2-element Array{Tuple{Vararg{Symbol,N} where N},1}:
+2-element Array{Tuple{Symbol,Symbol},1}:
  (:g1, :a)
  (:g2, :a)
 
 julia> collect(keys(ds(:g1, :__).data))
-2-element Array{Tuple{Vararg{Symbol,N} where N},1}:
+2-element Array{Tuple{Symbol,Symbol},1}:
  (:g1, :a)
  (:g1, :b)
 ```

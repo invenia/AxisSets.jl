@@ -170,3 +170,50 @@ end
     custom = ds(k -> any(startswith("gr"), string.(k)))
     @test custom == ds
 end
+
+@testset "mixed key types" begin
+    ds = KeyedDataset(
+        flatten([
+            :group1 => [
+                "a" => KeyedArray(
+                    allowmissing(rand(4, 3, 2));
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                ),
+                "b" => KeyedArray(
+                    rand(4, 2);
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    label=["x", "y"],
+                )
+            ],
+            :group2 => [
+                "a" => KeyedArray(
+                    rand(4, 3, 2) .+ 1.0;
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    loc=1:3,
+                    obj=[:a, :b],
+                ),
+                "b" => KeyedArray(
+                    rand(4, 2) .+ 1.0;
+                    time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                    label=["x", "y"],
+                )
+            ]
+        ])...
+    )
+
+    grp1a = ds[(:group1, "a")]
+    @test isa(grp1a, KeyedArray)
+
+    grp2b = ds[(:group2, "b")]
+    @test isa(grp2b, KeyedArray)
+
+    a = ds(:_, "a")
+    @test isa(a, KeyedDataset)
+    @test issetequal([(:group1, "a"), (:group2, "a")], keys(a.data))
+
+    grp1 = ds(:group1, :__)
+    @test isa(grp1, KeyedDataset)
+    @test issetequal([(:group1, "a"), (:group1, "b")], keys(grp1.data))
+end
