@@ -69,11 +69,7 @@ function Base.show(io::IO, ds::KeyedDataset{K, T}) where {K, T}
         # Identify shared dimensions where appropriate
         dimensions = map(dimnames(v)) do dimname
             cidx = findall(c -> (k..., dimname) in c, constraints)
-            if isempty(cidx)
-                return dimname
-            else
-                return string(dimname, "[", only(cidx), "]")
-            end
+            isempty(cidx) ? string(dimname) : string(dimname, "[", _only(cidx), "]")
         end
 
         s = string(
@@ -90,11 +86,12 @@ function Base.show(io::IO, ds::KeyedDataset{K, T}) where {K, T}
     push!(lines, "  $m constraints")
 
     for (i, c) in enumerate(constraints)
-        push!(lines, "    [$i] $(c.segments) ∈ $(sprint(summary, only(axiskeys(ds, c))))")
+        push!(lines, "    [$i] $(c.segments) ∈ $(sprint(summary, _only(axiskeys(ds, c))))")
     end
 
     print(io, join(lines, "\n"))
 end
+
 
 """
     dimpaths(ds, [pattern]) -> Vector{<:Tuple}

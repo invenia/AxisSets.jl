@@ -70,6 +70,21 @@ const DEFAULT_PROD_DELIM = :ᵡ
 # Short hand type for complicated union of nested Keyed or NamedDims arrays
 const XArray{L, T, N} = Union{NamedDimsArray{L,T,N,<:KeyedArray}, KeyedArray{T,N,<:NamedDimsArray}}
 
+# There's a few places calling `only` is convenient, even for older Julia releases
+if VERSION < v"1.4"
+    function _only(x)
+        if isempty(x)
+            throw(ArgumentError("Collection is empty, must contain exactly 1 element"))
+        elseif length(x) > 1
+            throw(ArgumentError("Collection has multiple elements, must contain exactly 1 element"))
+        else
+            first(x)
+        end
+    end
+else
+    _only(x) = only(x)
+end
+
 include("flatten.jl")
 include("patterns.jl")
 include("dataset.jl")
