@@ -190,6 +190,48 @@
                     Pattern((:__, :label)) => Set([(:group1_b, :label), (:group2_b, :label)]),
                 )
             end
+
+            @testset "Mixed key types" begin
+                # In this case, we have the option to having tuple keys which allows for
+                # multi-dimensional style indexing.
+                data = [
+                    :group1 => [
+                        "a" => KeyedArray(
+                            rand(4, 3, 2);
+                            time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                            loc=1:3,
+                            obj=[:a, :b],
+                        ),
+                        "b" => KeyedArray(
+                            rand(4, 2);
+                            time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                            label=["x", "y"],
+                        )
+                    ],
+                    :group2 => [
+                        "a" => KeyedArray(
+                            rand(4, 3, 2) .+ 1.0;
+                            time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                            loc=1:3,
+                            obj=[:a, :b],
+                        ),
+                        "b" => KeyedArray(
+                            rand(4, 2) .+ 1.0;
+                            time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                            label=["x", "y"],
+                        )
+                    ]
+                ]
+                ds = KeyedDataset(flatten(data)...)
+
+                # Test that we successfully extracted the dims
+                @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
+
+                # Test that we successfully extracted the flattened pairs as tuples.
+                @test issetequal(
+                    [(:group1, "a"), (:group1, "b"), (:group2, "a"), (:group2, "b")], keys(ds.data)
+                )
+            end
         end
     end
     @testset "show" begin

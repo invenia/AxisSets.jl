@@ -119,4 +119,40 @@
             @test Pattern(:_, :__, :input, :__) != reduced
         end
     end
+
+    @testset "Mixed types" begin
+        t1 = today()
+        t2 = t1 + Day(1)
+        items = [
+            (t1, 1, "prices", :time),
+            (t1, 1, "prices", :id),
+            (t1, 1, "prices", :lag),
+            (t1, 1, "load", :time),
+            (t1, 1, "load", :id),
+            (t1, 1, "temperature", :time),
+            (t1, 1, "temperature", :id),
+            (t1, 2, "prices", :time),
+            (t1, 2, "prices", :id),
+            (t2, 1, "prices", :time),
+            (t2, 1, "prices", :id),
+            (t2, 1, "prices", :lag),
+            (t2, 1, "load", :time),
+            (t2, 1, "load", :id),
+            (t2, 1, "temperature", :time),
+            (t2, 1, "temperature", :id),
+            (t2, 2, "prices", :time),
+            (t2, 2, "prices", :id),
+        ]
+
+        pattern = Pattern(t1, 1, :__)
+        @test filter(in(pattern), items) == [
+            (t1, 1, "prices", :time),
+            (t1, 1, "prices", :id),
+            (t1, 1, "prices", :lag),
+            (t1, 1, "load", :time),
+            (t1, 1, "load", :id),
+            (t1, 1, "temperature", :time),
+            (t1, 1, "temperature", :id),
+        ]
+    end
 end
