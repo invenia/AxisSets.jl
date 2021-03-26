@@ -47,14 +47,14 @@ julia> ds = KeyedDataset(
        );
 
 julia> [k => parent(parent(v)) for (k, v) in Impute.substitute(ds; dims=:time).data]  # KeyedArray printing isn't consistent in jldoctests
-4-element Array{Pair{Tuple{Symbol,Symbol},Array{Union{Missing, Float64},2}},1}:
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; 2.2 2.2; 3.0 3.3]
    (:train, :load) => [7.0 7.7; 8.0 8.0; 9.0 9.9]
  (:predict, :temp) => [1.0 1.0; 2.0 2.2; 3.0 3.3]
  (:predict, :load) => [7.0 7.7; 8.1 8.1; 9.0 9.9]
 
 julia> [k => parent(parent(v)) for (k, v) in Impute.substitute(ds; dims=:loc).data]
-4-element Array{Pair{Tuple{Symbol,Symbol},Array{Union{Missing, Float64},2}},1}:
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; missing 2.2; 3.0 3.3]
    (:train, :load) => [7.0 7.7; 8.0 8.8; 9.0 9.9]
  (:predict, :temp) => [1.0 missing; 2.0 2.2; 3.0 3.3]
@@ -103,14 +103,14 @@ julia> ds = KeyedDataset(
        );
 
 julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time).data]  # KeyedArray printing isn't consistent in jldoctests
-4-element Array{Pair{Tuple{Symbol,Symbol},Array{Union{Missing, Float64},2}},1}:
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [3.0 3.3]
    (:train, :load) => [9.0 9.9]
  (:predict, :temp) => [3.0 3.3]
  (:predict, :load) => [9.0 9.9]
 
 julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
-4-element Array{Pair{Tuple{Symbol,Symbol},Array{Union{Missing, Float64},2}},1}:
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; missing 2.2; 3.0 3.3]
    (:train, :load) => [7.0; 8.0; 9.0]
  (:predict, :temp) => [1.0 missing; 2.0 2.2; 3.0 3.3]

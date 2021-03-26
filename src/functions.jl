@@ -25,7 +25,7 @@ julia> ds = KeyedDataset(
 julia> r = map(a -> a .+ 100, ds, (:__, :a, :_));  # The extra `:_` is to clarify that we don't care about the dimnames.
 
 julia> [k => mean(v) for (k, v) in r.data]  # KeyedArray printing isn't consistent in jldoctests
-4-element Array{Pair{Tuple{Symbol,Symbol},Float64},1}:
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Float64}}:
  (:g1, :a) => 100.0
  (:g1, :b) => 1.0
  (:g2, :a) => 101.0
@@ -71,7 +71,7 @@ julia> ds = KeyedDataset(
 julia> r = mapslices(sum, ds; dims=:time);  # KeyedArray printing isn't consistent in jldoctests
 
 julia> [k => parent(parent(v)) for (k, v) in r.data]
-2-element Array{Pair{Tuple{Symbol},Array{Float64,2}},1}:
+2-element Vector{Pair{Tuple{Symbol}, Matrix{Float64}}}:
  (:val1,) => [0.0 0.0]
  (:val2,) => [3.0 3.0]
 ```
@@ -105,7 +105,7 @@ julia> ds2 = KeyedDataset(
        );
 
 julia> collect(keys(merge(ds1, ds2).data))
-4-element Array{Tuple{Symbol},1}:
+4-element Vector{Tuple{Symbol}}:
  (:a,)
  (:b,)
  (:c,)
@@ -137,7 +137,7 @@ julia> ds = KeyedDataset(
 julia> r = rekey(k -> k .+ 1, ds, :time);
 
 julia> r.time
-3-element ReadOnlyArrays.ReadOnlyArray{Int64,1,UnitRange{Int64}}:
+3-element ReadOnlyArrays.ReadOnlyArray{Int64, 1, UnitRange{Int64}}:
  2
  3
  4

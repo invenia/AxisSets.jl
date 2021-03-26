@@ -20,13 +20,13 @@ julia> items = [
        ];
 
 julia> filter(in(Pattern(:__, :time)), items)
-3-element Array{NTuple{4,Symbol},1}:
+3-element Vector{NTuple{4, Symbol}}:
  (:train, :input, :load, :time)
  (:train, :input, :temperature, :time)
  (:train, :output, :load, :time)
 
 julia> filter(in(Pattern(:__, :load, :_)), items)
-4-element Array{NTuple{4,Symbol},1}:
+4-element Vector{NTuple{4, Symbol}}:
  (:train, :input, :load, :time)
  (:train, :input, :load, :id)
  (:train, :output, :load, :time)

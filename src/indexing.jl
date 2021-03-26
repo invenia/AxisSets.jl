@@ -15,12 +15,12 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(keys(ds.data))
-2-element Array{Tuple{Symbol},1}:
+2-element Vector{Tuple{Symbol}}:
  (:val1,)
  (:val2,)
 
 julia> ds.time
-3-element ReadOnlyArrays.ReadOnlyArray{Int64,1,UnitRange{Int64}}:
+3-element ReadOnlyArrays.ReadOnlyArray{Int64, 1, UnitRange{Int64}}:
  1
  2
  3
@@ -105,7 +105,7 @@ julia> ds = KeyedDataset(:a => KeyedArray(zeros(3); time=1:3));
 julia> ds[:b] = KeyedArray(ones(3, 2); time=1:3, lag=[-1, -2]);
 
 julia> collect(constraintmap(ds))
-2-element Array{Pair{AxisSets.Pattern,Set{Tuple}},1}:
+2-element Vector{Pair{AxisSets.Pattern, Set{Tuple}}}:
  Pattern((:__, :time)) => Set([(:b, :time), (:a, :time)])
   Pattern((:__, :lag)) => Set([(:b, :lag)])
 
@@ -154,12 +154,12 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(keys(ds(:__, :a).data))
-2-element Array{Tuple{Symbol,Symbol},1}:
+2-element Vector{Tuple{Symbol, Symbol}}:
  (:g1, :a)
  (:g2, :a)
 
 julia> collect(keys(ds(:g1, :__).data))
-2-element Array{Tuple{Symbol,Symbol},1}:
+2-element Vector{Tuple{Symbol, Symbol}}:
  (:g1, :a)
  (:g1, :b)
 ```
