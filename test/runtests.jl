@@ -21,6 +21,6 @@ using Impute: ThresholdError
     include("functions.jl")
     include("impute.jl")
 
-    # Repl output changes across julia versions and architectures
-    Sys.WORD_SIZE == 64 && VERSION >= v"1.5" && doctest(AxisSets)
+    # The doctests fail on x86, so only run them on 64-bit hardware & Julia 1.6
+    Sys.WORD_SIZE == 64 && v"1.6" <= VERSION < v"1.7" && doctest(AxisSets)
 end

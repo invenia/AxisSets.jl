@@ -109,7 +109,7 @@ julia> ds = KeyedDataset(
        );
 
 julia> dimpaths(ds)
-6-element Array{Tuple{Symbol,Symbol},1}:
+6-element Vector{Tuple{Symbol, Symbol}}:
  (:val1, :time)
  (:val1, :loc)
  (:val1, :obj)
@@ -141,7 +141,7 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(constraintmap(ds))
-3-element Array{Pair{AxisSets.Pattern,Set{Tuple}},1}:
+3-element Vector{Pair{AxisSets.Pattern, Set{Tuple}}}:
  Pattern((:__, :time)) => Set([(:val2, :time), (:val1, :time)])
   Pattern((:__, :loc)) => Set([(:val1, :loc), (:val2, :loc)])
   Pattern((:__, :obj)) => Set([(:val2, :obj), (:val1, :obj)])
@@ -169,7 +169,7 @@ julia> ds = KeyedDataset(
        );
 
 julia> dimnames(ds)
-3-element Array{Symbol,1}:
+3-element Vector{Symbol}:
  :time
  :loc
  :obj

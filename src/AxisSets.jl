@@ -56,7 +56,7 @@ julia> A = KeyedArray(
        );
 
 julia> axiskeys(flatten(A, (:obj, :loc)), :objᵡloc)
-6-element Array{Symbol,1}:
+6-element Vector{Symbol}:
  :aᵡ1
  :bᵡ1
  :cᵡ1
