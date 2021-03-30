@@ -255,6 +255,22 @@
         @test startswith(s, "KeyedDataset")
         @test occursin("2 components", s)
         @test occursin("3 constraints", s)
+
+        # Having unused constraints is fine since we might add them later.
+        s = sprint(show, KeyedDataset(pairs(ds.data)...; constraints=Pattern[(:__, :foo)]))
+        @test occursin("2 components", s)
+        @test occursin("1 constraints", s)
+
+        # While possible to construct it's rather pointless to have a dimension path
+        # that can map to multiple constraints.
+        bad_ds = KeyedDataset(
+            pairs(ds.data)...;
+            constraints=Pattern[
+                (:__, :time),
+                (:val1, :time),
+            ],
+        )
+        @test_throws ArgumentError sprint(show, bad_ds)
     end
 
     @testset "dimpaths" begin
