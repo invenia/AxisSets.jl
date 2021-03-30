@@ -86,7 +86,9 @@ function Base.show(io::IO, ds::KeyedDataset{K, T}) where {K, T}
     push!(lines, "  $m constraints")
 
     for (i, c) in enumerate(constraints)
-        push!(lines, "    [$i] $(c.segments) ∈ $(sprint(summary, _only(axiskeys(ds, c))))")
+        _axiskeys = axiskeys(ds, c)
+        key_summary = isempty(_axiskeys) ? "NA" : sprint(summary, _only(_axiskeys))
+        push!(lines, "    [$i] $(c.segments) ∈ $key_summary")
     end
 
     print(io, join(lines, "\n"))
