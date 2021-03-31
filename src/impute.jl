@@ -112,7 +112,7 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time).data]
  (:predict, :load) => [9.0 9.9]
 
 julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time, pattern=Pattern(:train, :__)).data]
-4-element Array{Pair{Tuple{Symbol,Symbol},Array{Union{Missing, Float64},2}},1}:
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; 3.0 3.3]
    (:train, :load) => [7.0 7.7; 9.0 9.9]
  (:predict, :temp) => [1.0 missing; 3.0 3.3]
