@@ -90,6 +90,22 @@
         r = Impute.filter(ds; dims=:time)
         @test isequal(r, expected)
 
+        # All time axis are constraint but only :load is checked. :temp is updated to match
+        expected = KeyedDataset(
+            flatten([
+                :train => [
+                    :temp => KeyedArray([1.0 1.1; 3.0 3.3]; time=[1, 3], id=[:a, :b]),
+                    :load => KeyedArray([7.0 7.7; 9.0 9.9]; time=[1, 3], loc=[:x, :y]),
+                ],
+                :predict => [
+                    :temp => KeyedArray([1.0 missing; 3.0 3.3]; time=[1, 3], id=[:a, :b]),
+                    :load => KeyedArray([7.0 7.7; 9.0 9.9]; time=[1, 3], loc=[:x, :y]),
+                ]
+            ])...
+        );
+        r = Impute.filter(ds; dims=:time, pattern=Pattern(:__, :load, :__))
+        @test isequal(r, expected)
+
         # Only :load has a shared :loc axis, so we see that that :y location is dropped from
         # both train and predict.
         expected = KeyedDataset(
