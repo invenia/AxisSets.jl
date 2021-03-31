@@ -80,12 +80,10 @@ function Impute.impute!(ds::KeyedDataset, imp::Imputor; dims, kwargs...)
 end
 
 """
-    Impute.apply(ds, filter; dims, [pattern])
+    Impute.apply(ds, filter; dims)
 
 Filter out missing data along the `dims` for each component in the [`KeyedDataset`](@ref)
 with that dimension.
-
-Optionally a `Pattern` can be supplied to define which components should be filtered.
 
 # Example
 ```jldoctest
@@ -111,7 +109,7 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time).data]
  (:predict, :temp) => [3.0 3.3]
  (:predict, :load) => [9.0 9.9]
 
-julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time, pattern=Pattern(:train, :__)).data]
+julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=Pattern(:train, :__, :time)).data]
 4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; 3.0 3.3]
    (:train, :load) => [7.0 7.7; 9.0 9.9]
@@ -126,19 +124,29 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
  (:predict, :load) => [7.0; 8.1; 9.0]
 ```
 """
-function Impute.apply(ds::KeyedDataset, f::Filter; dims, pattern=Pattern(:__, dims))
-    return Impute.apply!(deepcopy(ds), f; dims=dims, pattern=pattern)
-end
+Impute.apply(ds::KeyedDataset, f::Filter; dims) = Impute.apply!(deepcopy(ds), f; dims=dims)
 
-function Impute.apply!(ds::KeyedDataset, f::Filter; dims, pattern=Pattern(:__, dims))
+_pattern(dims::Pattern) = dims
+_pattern(dims::Tuple) = Pattern(dims)
+_pattern(dims) = Pattern(:__, dims)
+
+function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
+    pattern = _pattern(dims)
+    dim = pattern.segments[end]
+
+    dim in (:_, :__) && throw(ArgumentError(
+        "$pattern points to an ambiguous dimension in the dataset. " *
+        "Kwarg `dims` must end with a dimname."
+    ))
     checkpaths = dimpaths(ds, pattern)
 
     # Limit our constraint map to paths containing the supplied dim
     cmap = filter(constraintmap(ds)) do (constraint, paths)
         # Because dimpath constraints only really make sense if they end with a shared
-        # dimname we can just filter out constraints that don't end with our desired dimname.
-        any(p -> p in checkpaths && p[end] === dims, paths)
+        # dimname we can just filter out constraints that don't match our desired paths.
+        any(p -> p in checkpaths, paths)
     end
+    # Extract component paths to be checked
     checkpaths = [p[1:end-1] for p in checkpaths]
 
     # Apply our shared filter mask for each set of constrained paths
@@ -154,7 +162,7 @@ function Impute.apply!(ds::KeyedDataset, f::Filter; dims, pattern=Pattern(:__, d
         # First pass to determine our shared key mask
         for (k, v) in selection
             if k in checkpaths
-                for (i, s) in enumerate(eachslice(v; dims=dims))
+                for (i, s) in enumerate(eachslice(v; dims=dim))
                     mask[i] &= f.func(s)
                 end
             end
@@ -163,7 +171,7 @@ function Impute.apply!(ds::KeyedDataset, f::Filter; dims, pattern=Pattern(:__, d
         # Second pass to use selectdim on each component with our mask
         for (k, v) in selection
             # copy is so we don't change the data element type to a view
-            ds.data[k] = copy(selectdim(v, NamedDims.dim(dimnames(v), dims), mask))
+            ds.data[k] = copy(selectdim(v, NamedDims.dim(dimnames(v), dim), mask))
         end
     end
 

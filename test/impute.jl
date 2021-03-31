@@ -103,8 +103,14 @@
                 ]
             ])...
         );
-        r = Impute.filter(ds; dims=:time, pattern=Pattern(:__, :load, :__))
+        r = Impute.filter(ds; dims=Pattern(:__, :load, :time))
         @test isequal(r, expected)
+
+        r = Impute.filter(ds; dims=(:__, :load, :time))
+        @test isequal(r, expected)
+
+        # Pattern must end in a dimname
+        @test_throws ArgumentError Impute.filter(ds; dims=Pattern(:__, :load, :_))
 
         # Only :load has a shared :loc axis, so we see that that :y location is dropped from
         # both train and predict.
