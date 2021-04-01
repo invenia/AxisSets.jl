@@ -138,18 +138,23 @@ function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
         "$pattern points to an ambiguous dimension in the dataset. " *
         "Kwarg `dims` must end with a dimname."
     ))
-    checkpaths = dimpaths(ds, pattern)
+    filter_paths = dimpaths(ds, pattern)
 
     # Limit our constraint map to paths containing the supplied dim
     cmap = filter(constraintmap(ds)) do (constraint, paths)
-        # Because dimpath constraints only really make sense if they end with a shared
-        # dimname we can just filter out constraints that don't match our desired paths.
-        any(p -> p in checkpaths, paths)
+        any(p -> p in filter_paths, paths)
     end
-    # Extract component paths to be checked
-    checkpaths = [p[1:end-1] for p in checkpaths]
 
-    # Apply our shared filter mask for each set of constrained paths
+    # Add remaining unconstrained components
+    constraint_paths = union(values(cmap))
+    for p in filter(!in(constraint_paths), filter_paths)
+        cmap[p] =  Set([p])
+    end
+
+    # Extract component paths
+    filter_paths = [p[1:end-1] for p in filter_paths]
+
+    # Apply our shared filter mask for each set of paths
     for (constraint, paths) in cmap
         @debug "$constraint => $paths"
         # We're assuming this dataset has already been validated so all dimpaths are
@@ -161,7 +166,8 @@ function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
 
         # First pass to determine our shared key mask
         for (k, v) in selection
-            if k in checkpaths
+            # Only filter components defined by dims
+            if k in filter_paths
                 for (i, s) in enumerate(eachslice(v; dims=dim))
                     mask[i] &= f.func(s)
                 end
