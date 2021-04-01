@@ -90,6 +90,28 @@
         r = Impute.filter(ds; dims=:time)
         @test isequal(r, expected)
 
+        # All time axis are constraint but only :load is checked. :temp is updated to match
+        expected = KeyedDataset(
+            flatten([
+                :train => [
+                    :temp => KeyedArray([1.0 1.1; 3.0 3.3]; time=[1, 3], id=[:a, :b]),
+                    :load => KeyedArray([7.0 7.7; 9.0 9.9]; time=[1, 3], loc=[:x, :y]),
+                ],
+                :predict => [
+                    :temp => KeyedArray([1.0 missing; 3.0 3.3]; time=[1, 3], id=[:a, :b]),
+                    :load => KeyedArray([7.0 7.7; 9.0 9.9]; time=[1, 3], loc=[:x, :y]),
+                ]
+            ])...
+        );
+        r = Impute.filter(ds; dims=Pattern(:__, :load, :time))
+        @test isequal(r, expected)
+
+        r = Impute.filter(ds; dims=(:__, :load, :time))
+        @test isequal(r, expected)
+
+        # Pattern must end in a dimname
+        @test_throws ArgumentError Impute.filter(ds; dims=Pattern(:__, :load, :_))
+
         # Only :load has a shared :loc axis, so we see that that :y location is dropped from
         # both train and predict.
         expected = KeyedDataset(
@@ -107,5 +129,40 @@
 
         r = Impute.filter(ds; dims=:loc)
         @test isequal(r, expected)
+
+        constrained_ds = KeyedDataset(
+            flatten([
+                :train => [
+                    :temp => KeyedArray([1.0 1.1; missing 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
+                    :load => KeyedArray([7.0 7.7; 8.0 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ],
+                :predict => [
+                    :temp => KeyedArray([1.0 missing; 2.0 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
+                    :load => KeyedArray([7.0 7.7; 8.1 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ]
+            ])...,
+            constraints = Pattern[(:__, :time), (:__, :loc), (:train, :__, :id)]
+        );
+
+        # :id for :train is included in the constraints and :predict is unconstrained
+        # Both drop only the :ids missing in their own table
+        expected = KeyedDataset(
+            flatten([
+                :train => [
+                    :temp => KeyedArray([1.1; 2.2; 3.3][:, :]; time=1:3, id=[:b]),
+                    :load => KeyedArray([7.0 7.7; 8.0 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ],
+                :predict => [
+                    :temp => KeyedArray([1.0; 2.0; 3.0][:, :]; time=1:3, id=[:a]),
+                    :load => KeyedArray([7.0 7.7; 8.1 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ]
+            ])...,
+            constraints = Pattern[(:__, :time), (:__, :loc),  (:train, :__, :id)]
+        );
+
+        r = Impute.filter(constrained_ds; dims=:id)
+        @test isequal(r, expected)
+
+
     end
 end

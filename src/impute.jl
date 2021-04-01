@@ -87,7 +87,7 @@ with that dimension.
 
 # Example
 ```jldoctest
-julia> using AxisKeys, Impute; using AxisSets: KeyedDataset, flatten;
+julia> using AxisKeys, Impute; using AxisSets: KeyedDataset, Pattern, flatten;
 
 julia> ds = KeyedDataset(
            flatten([
@@ -109,6 +109,13 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time).data]
  (:predict, :temp) => [3.0 3.3]
  (:predict, :load) => [9.0 9.9]
 
+julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=Pattern(:train, :__, :time)).data]
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
+   (:train, :temp) => [1.0 1.1; 3.0 3.3]
+   (:train, :load) => [7.0 7.7; 9.0 9.9]
+ (:predict, :temp) => [1.0 missing; 3.0 3.3]
+ (:predict, :load) => [7.0 7.7; 9.0 9.9]
+
 julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
 4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; missing 2.2; 3.0 3.3]
@@ -119,15 +126,35 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
 """
 Impute.apply(ds::KeyedDataset, f::Filter; dims) = Impute.apply!(deepcopy(ds), f; dims=dims)
 
+_pattern(dims::Pattern) = dims
+_pattern(dims::Tuple) = Pattern(dims)
+_pattern(dims) = Pattern(:__, dims)
+
 function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
+    pattern = _pattern(dims)
+    dim = pattern.segments[end]
+
+    dim in (:_, :__) && throw(ArgumentError(
+        "$pattern points to an ambiguous dimension in the dataset. " *
+        "Kwarg `dims` must end with a dimname."
+    ))
+    filter_paths = dimpaths(ds, pattern)
+
     # Limit our constraint map to paths containing the supplied dim
     cmap = filter(constraintmap(ds)) do (constraint, paths)
-        # Because dimpath constraints only really make sense if they end with a shared
-        # dimname we can just filter out constraints that don't end with our desired dimname.
-        constraint.segments[end] === dims
+        any(p -> p in filter_paths, paths)
     end
 
-    # Apply our shared filter mask for each set of constrained paths
+    # Add remaining unconstrained components
+    constraint_paths = union(values(cmap))
+    for p in filter(!in(constraint_paths), filter_paths)
+        cmap[p] =  Set([p])
+    end
+
+    # Extract component paths
+    filter_paths = [p[1:end-1] for p in filter_paths]
+
+    # Apply our shared filter mask for each set of paths
     for (constraint, paths) in cmap
         @debug "$constraint => $paths"
         # We're assuming this dataset has already been validated so all dimpaths are
@@ -139,15 +166,18 @@ function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
 
         # First pass to determine our shared key mask
         for (k, v) in selection
-            for (i, s) in enumerate(eachslice(v; dims=dims))
-                mask[i] &= f.func(s)
+            # Only filter components defined by dims
+            if k in filter_paths
+                for (i, s) in enumerate(eachslice(v; dims=dim))
+                    mask[i] &= f.func(s)
+                end
             end
         end
 
         # Second pass to use selectdim on each component with our mask
         for (k, v) in selection
             # copy is so we don't change the data element type to a view
-            ds.data[k] = copy(selectdim(v, NamedDims.dim(dimnames(v), dims), mask))
+            ds.data[k] = copy(selectdim(v, NamedDims.dim(dimnames(v), dim), mask))
         end
     end
 
