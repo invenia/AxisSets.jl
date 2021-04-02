@@ -1,33 +1,44 @@
 """
-    KeyedDataset{K, T}
+    KeyedDataset
 
 A `KeyedDataset` describes an associative collection of component `KeyedArray`s with constraints
 on their shared dimensions.
 
 # Fields
 - `constraints::OrderedSet{Pattern}` - Constraint [`Pattern`](@ref)s on shared dimensions.
-- `data::LittleDict{K, T}` - Flattened key paths as type `K <: Tuple` to each component array of type `T`.
+- `data::LittleDict{Tuple, KeyedArray}` - Flattened key paths as tuples component keyed arrays.
 """
-@auto_hash_equals struct KeyedDataset{K<:Tuple, T<:XArray}
+@auto_hash_equals struct KeyedDataset
     # Our constraints are a collection of pseudo path tuples typically with 1 or
     # more `:_` wildcard components
     constraints::OrderedSet{Pattern}
     # Data lookup can be by any type, but typically it'll either be symbol or tuple.
-    data::LittleDict{K, T}
+    data::LittleDict{Tuple, KeyedArray}
 
     function KeyedDataset(
         constraints::OrderedSet{Pattern},
-        data::LittleDict{K, T},
-        check=true,
-    ) where {K<:Tuple, T}
-        ds = new{K, T}(constraints, data)
+        data::LittleDict,
+        check=true
+    )
+        ds = new(constraints, data)
         check && validate(ds)
         return ds
     end
 end
 
-function KeyedDataset(pairs::Pair{T}...; constraints=Pattern[]) where T<:Tuple
-    data = LittleDict{T, XArray}(pairs...)
+function KeyedDataset(pairs::Pair...; constraints=Pattern[])
+    # Convert any non-tuple keys to tuples
+    tupled_pairs = map(pairs) do (k, v)
+        k isa Tuple && return k => v
+
+        if k isa Symbol
+            Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
+        else
+            (k,) => v
+        end
+    end
+
+    data = LittleDict(tupled_pairs)
 
     # If no constraints have been specified then we default to (:__, dimname)
     constraint_set = if isempty(constraints)
@@ -42,22 +53,16 @@ function KeyedDataset(pairs::Pair{T}...; constraints=Pattern[]) where T<:Tuple
     return result
 end
 
-# Taking pairs is the most general constructor as it doesn't make assumptions about the
-# data key type.
-function KeyedDataset(pairs::Pair{Symbol}...; constraints=Pattern[])
-    return KeyedDataset(
-        (
-            Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
-            for (k, v) in pairs
-        )...;
-        constraints=constraints,
-    )
+# Utility kwargs and empty constructor.
+function KeyedDataset(; constraints=Pattern[], kwargs...)
+    if isempty(kwargs)
+        return KeyedDataset(OrderedSet{Pattern}(constraints), LittleDict{Tuple, KeyedArray}())
+    else
+        return KeyedDataset(kwargs...; constraints=constraints)
+    end
 end
 
-# Utility kwargs constructor.
-KeyedDataset(; constraints=Pattern[], kwargs...) = KeyedDataset(kwargs...; constraints=constraints)
-
-function Base.show(io::IO, ds::KeyedDataset{K, T}) where {K, T}
+function Base.show(io::IO, ds::KeyedDataset)
     n = length(ds.data)
     m = length(ds.constraints)
 
