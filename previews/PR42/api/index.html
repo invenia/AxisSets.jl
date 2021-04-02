@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>API · AxisSets.jl</title><link rel="canonical" href="https://invenia.github.io/AxisSets.jl/api/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/invenia.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img class="docs-light-only" src="../assets/logo.png" alt="AxisSets.jl logo"/><img class="docs-dark-only" src="../assets/logo-dark.png" alt="AxisSets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">AxisSets.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li><a class="tocitem" href="../example/">Example</a></li><li class="is-active"><a class="tocitem" href>API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>API</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>API</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/invenia/AxisSets.jl/blob/master/docs/src/api.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="API"><a class="docs-heading-anchor" href="#API">API</a><a id="API-1"></a><a class="docs-heading-anchor-permalink" href="#API" title="Permalink"></a></h1><ul><li><a href="#AxisSets.DEFAULT_FLATTEN_DELIM"><code>AxisSets.DEFAULT_FLATTEN_DELIM</code></a></li><li><a href="#AxisSets.DEFAULT_PROD_DELIM"><code>AxisSets.DEFAULT_PROD_DELIM</code></a></li><li><a href="#AxisSets.KeyedDataset"><code>AxisSets.KeyedDataset</code></a></li><li><a href="#AxisSets.KeyedDataset-Tuple"><code>AxisSets.KeyedDataset</code></a></li><li><a href="#AxisSets.Pattern"><code>AxisSets.Pattern</code></a></li><li><a href="#AxisKeys.axiskeys-Tuple{KeyedDataset}"><code>AxisKeys.axiskeys</code></a></li><li><a href="#AxisSets.constraintmap-Tuple{KeyedDataset}"><code>AxisSets.constraintmap</code></a></li><li><a href="#AxisSets.dimpaths-Tuple{KeyedDataset, AxisSets.Pattern}"><code>AxisSets.dimpaths</code></a></li><li><a href="#AxisSets.flatten"><code>AxisSets.flatten</code></a></li><li><a href="#AxisSets.rekey-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}"><code>AxisSets.rekey</code></a></li><li><a href="#AxisSets.validate-Tuple{KeyedDataset}"><code>AxisSets.validate</code></a></li><li><a href="#Base.getindex-Tuple{KeyedDataset, Symbol}"><code>Base.getindex</code></a></li><li><a href="#Base.getproperty-Tuple{KeyedDataset, Symbol}"><code>Base.getproperty</code></a></li><li><a href="#Base.map-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}"><code>Base.map</code></a></li><li><a href="#Base.mapslices-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}"><code>Base.mapslices</code></a></li><li><a href="#Base.merge-Tuple{KeyedDataset, Vararg{KeyedDataset, N} where N}"><code>Base.merge</code></a></li><li><a href="#Base.setindex!-Tuple{KeyedDataset, Any, Symbol}"><code>Base.setindex!</code></a></li><li><a href="#Impute.apply-Tuple{KeyedDataset, Impute.DeclareMissings}"><code>Impute.apply</code></a></li><li><a href="#Impute.apply-Tuple{KeyedDataset, Impute.Filter}"><code>Impute.apply</code></a></li><li><a href="#Impute.impute-Tuple{KeyedDataset, Impute.Imputor}"><code>Impute.impute</code></a></li><li><a href="#Impute.validate-Tuple{KeyedDataset, Impute.Validator}"><code>Impute.validate</code></a></li><li><a href="#NamedDims.dimnames-Tuple{KeyedDataset}"><code>NamedDims.dimnames</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="AxisSets.DEFAULT_FLATTEN_DELIM" href="#AxisSets.DEFAULT_FLATTEN_DELIM"><code>AxisSets.DEFAULT_FLATTEN_DELIM</code></a> — <span class="docstring-category">Constant</span></header><section><div><pre><code class="language-julia">DEFAULT_FLATTEN_DELIM</code></pre><p><code>:⁻</code> (or <code>\^-</code>)</p><p>Separates the parent symbols of a nested <code>NamedTuple</code> that has been flattened. A less common symbol was used to avoid collisions with <code>:_</code> in the parent symbols.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisSets: flatten
+
+julia&gt; data = (
+           val1 = (a1 = 1, a2 = 2),
+           val2 = (b1 = 11, b2 = 22),
+           val3 = [111, 222],
+           val4 = 4.3,
+       );
+
+julia&gt; flatten(data)
+(val1⁻a1 = 1, val1⁻a2 = 2, val2⁻b1 = 11, val2⁻b2 = 22, val3 = [111, 222], val4 = 4.3)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/AxisSets.jl#LL14-L36">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.DEFAULT_PROD_DELIM" href="#AxisSets.DEFAULT_PROD_DELIM"><code>AxisSets.DEFAULT_PROD_DELIM</code></a> — <span class="docstring-category">Constant</span></header><section><div><pre><code class="language-julia">DEFAULT_PROD_DELIM</code></pre><p><code>:ᵡ</code> (or <code>\^x</code>)</p><p>Separates the parent symbols from an n-dimensional array that was flattened / reshaped. A less common symbol was used to avoid collisions with <code>:_</code> in the parent symbols.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys, Dates; using AxisSets: flatten
+
+julia&gt; A = KeyedArray(
+           reshape(1:24, (4, 3, 2));
+           time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+           obj=[:a, :b, :c],
+           loc=[1, 2],
+       );
+
+julia&gt; axiskeys(flatten(A, (:obj, :loc)), :objᵡloc)
+6-element Vector{Symbol}:
+ :aᵡ1
+ :bᵡ1
+ :cᵡ1
+ :aᵡ2
+ :bᵡ2
+ :cᵡ2</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/AxisSets.jl#LL39-L67">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.KeyedDataset" href="#AxisSets.KeyedDataset"><code>AxisSets.KeyedDataset</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">KeyedDataset</code></pre><p>A <code>KeyedDataset</code> describes an associative collection of component <code>KeyedArray</code>s with constraints on their shared dimensions.</p><p><strong>Fields</strong></p><ul><li><code>constraints::OrderedSet{Pattern}</code> - Constraint <a href="#AxisSets.Pattern"><code>Pattern</code></a>s on shared dimensions.</li><li><code>data::LittleDict{Tuple, KeyedArray}</code> - Flattened key paths as tuples component keyed arrays.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/dataset.jl#LL1-L10">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.KeyedDataset-Tuple" href="#AxisSets.KeyedDataset-Tuple"><code>AxisSets.KeyedDataset</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">(ds::KeyedDataset)(key) -&gt; KeyedDataset</code></pre><p>A collable syntax for selecting of filtering a subset of a <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset, flatten;
+
+julia&gt; ds = KeyedDataset(
+           flatten([
+               :g1 =&gt; [
+                   :a =&gt; KeyedArray(zeros(3); time=1:3),
+                   :b =&gt; KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+                ],
+                :g2 =&gt; [
+                    :a =&gt; KeyedArray(ones(3); time=1:3),
+                    :b =&gt; KeyedArray(zeros(3, 2); time=1:3, loc=[:x, :y]),
+                ]
+            ])...
+       );
+
+julia&gt; collect(keys(ds(:__, :a).data))
+2-element Vector{Tuple}:
+ (:g1, :a)
+ (:g2, :a)
+
+julia&gt; collect(keys(ds(:g1, :__).data))
+2-element Vector{Tuple}:
+ (:g1, :a)
+ (:g1, :b)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/indexing.jl#LL134-L166">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.Pattern" href="#AxisSets.Pattern"><code>AxisSets.Pattern</code></a> — <span class="docstring-category">Type</span></header><section><div><pre><code class="language-julia">Pattern</code></pre><p>A pattern is just a wrapper around a <code>Tuple</code> which enables searching and filtering for matching components and dimension paths in a <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. Special symbols <code>:_</code> and <code>:__</code> are used as wildcards, similar to <code>*</code> and <code>**</code> in glob pattern matching.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisSets: Pattern;
+
+julia&gt; items = [
+           (:train, :input, :load, :time),
+           (:train, :input, :load, :id),
+           (:train, :input, :temperature, :time),
+           (:train, :input, :temperature, :id),
+           (:train, :output, :load, :time),
+           (:train, :output, :load, :id),
+       ];
+
+julia&gt; filter(in(Pattern(:__, :time)), items)
+3-element Vector{NTuple{4, Symbol}}:
+ (:train, :input, :load, :time)
+ (:train, :input, :temperature, :time)
+ (:train, :output, :load, :time)
+
+julia&gt; filter(in(Pattern(:__, :load, :_)), items)
+4-element Vector{NTuple{4, Symbol}}:
+ (:train, :input, :load, :time)
+ (:train, :input, :load, :id)
+ (:train, :output, :load, :time)
+ (:train, :output, :load, :id)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/patterns.jl#LL1-L35">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisKeys.axiskeys-Tuple{KeyedDataset}" href="#AxisKeys.axiskeys-Tuple{KeyedDataset}"><code>AxisKeys.axiskeys</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">axiskeys(ds)
+axiskeys(ds, dimname)
+axiskeys(ds, pattern)
+axiskeys(ds, dimpath)</code></pre><p>Returns a list of unique axis keys within the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. A <code>Tuple</code> will always be returned unless you explicitly specify the <code>dimpath</code> you want.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset;
+
+julia&gt; ds = KeyedDataset(
+           :val1 =&gt; KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 =&gt; KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia&gt; axiskeys(ds)
+(1:4, -1:-1:-3, [:a, :b])
+
+julia&gt; axiskeys(ds, :time)
+(1:4,)
+
+julia&gt; axiskeys(ds, (:val1, :time))
+1:4</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/dataset.jl#LL189-L216">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.constraintmap-Tuple{KeyedDataset}" href="#AxisSets.constraintmap-Tuple{KeyedDataset}"><code>AxisSets.constraintmap</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">constraintmap(ds)</code></pre><p>Returns a mapping of constraint patterns to specific dimension paths. The returned dictionary has keys of type <a href="#AxisSets.Pattern"><code>Pattern</code></a> and the values are sets of <code>Tuple</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset, constraintmap;
+
+julia&gt; ds = KeyedDataset(
+           :val1 =&gt; KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 =&gt; KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia&gt; collect(constraintmap(ds))
+3-element Vector{Pair{AxisSets.Pattern, Set{Tuple}}}:
+ Pattern((:__, :time)) =&gt; Set([(:val2, :time), (:val1, :time)])
+  Pattern((:__, :loc)) =&gt; Set([(:val1, :loc), (:val2, :loc)])
+  Pattern((:__, :obj)) =&gt; Set([(:val2, :obj), (:val1, :obj)])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/dataset.jl#LL134-L156">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.dimpaths-Tuple{KeyedDataset, AxisSets.Pattern}" href="#AxisSets.dimpaths-Tuple{KeyedDataset, AxisSets.Pattern}"><code>AxisSets.dimpaths</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">dimpaths(ds, [pattern]) -&gt; Vector{&lt;:Tuple}</code></pre><p>Return a list of all dimension paths in the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. Optionally, you can filter the results using a <a href="#AxisSets.Pattern"><code>Pattern</code></a>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset, dimpaths;
+
+julia&gt; ds = KeyedDataset(
+           :val1 =&gt; KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 =&gt; KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia&gt; dimpaths(ds)
+6-element Vector{Tuple{Symbol, Symbol}}:
+ (:val1, :time)
+ (:val1, :loc)
+ (:val1, :obj)
+ (:val2, :time)
+ (:val2, :loc)
+ (:val2, :obj)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/dataset.jl#LL103-L127">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.flatten" href="#AxisSets.flatten"><code>AxisSets.flatten</code></a> — <span class="docstring-category">Function</span></header><section><div><pre><code class="language-julia">flatten(collection, [delim])</code></pre><p>Flatten a collection of nested associative types into a flat collection of pairs. If the input keys are symbols (ie: <code>NamedTuple</code>) then the ⁻  will be used, otherwise <code>Tuple</code> keys will be returned.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisSets: flatten
+
+julia&gt; data = (
+           val1 = (a1 = 1, a2 = 2),
+           val2 = (b1 = 11, b2 = 22),
+           val3 = [111, 222],
+           val4 = 4.3,
+       );
+
+julia&gt; flatten(data)
+(val1⁻a1 = 1, val1⁻a2 = 2, val2⁻b1 = 11, val2⁻b2 = 22, val3 = [111, 222], val4 = 4.3)</code></pre><pre><code class="language-none">flatten(A, dims, [delim])</code></pre><p>Flatten a <code>KeyedArray</code> along the specified consecutive dimensions. The <code>dims</code> argument can either be a <code>Tuple</code> of symbols or a <code>Pair{Tuple, Symbol}</code> if you&#39;d like to specify the desired flattened dimension name. If the <code>dims</code> is just a <code>Tuple</code> with no output dimension specified then ᵡ will be used to generate the new dimension name.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys, Dates, NamedDims; using AxisSets: flatten
+
+julia&gt; A = KeyedArray(
+           reshape(1:24, (4, 3, 2));
+           time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+           obj=[:a, :b, :c],
+           loc=[1, 2],
+       );
+
+julia&gt; dimnames(flatten(A, (:obj, :loc)))
+(:time, :objᵡloc)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/flatten.jl#LL8-L52">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.rekey-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}" href="#AxisSets.rekey-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}"><code>AxisSets.rekey</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">rekey(f, ds, dim)</code></pre><p>Apply function <code>f</code> to key values of each matching <code>dim</code> in the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. <code>dim</code> can either be a <code>Symbol</code> or a <a href="#AxisSets.Pattern"><code>Pattern</code></a> for the dimension paths.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset, rekey;
+
+julia&gt; ds = KeyedDataset(
+           :a =&gt; KeyedArray(zeros(3); time=1:3),
+           :b =&gt; KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+       );
+
+julia&gt; r = rekey(k -&gt; k .+ 1, ds, :time);
+
+julia&gt; r.time
+3-element ReadOnlyArrays.ReadOnlyArray{Int64, 1, UnitRange{Int64}}:
+ 2
+ 3
+ 4</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/functions.jl#LL122-L145">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="AxisSets.validate-Tuple{KeyedDataset}" href="#AxisSets.validate-Tuple{KeyedDataset}"><code>AxisSets.validate</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">validate(ds, [constraint])</code></pre><p>Validate that all constrained dimension paths within a <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a> have matching key values. Optionally, you can test an explicit constraint <a href="#AxisSets.Pattern"><code>Pattern</code></a>.</p><p><strong>Returns</strong></p><ul><li><code>true</code> if an error isn&#39;t thrown</li></ul><p><strong>Throws</strong></p><ul><li><code>ArgumentError</code>: If the constraints are not respected</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/dataset.jl#LL233-L244">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Base.getindex-Tuple{KeyedDataset, Symbol}" href="#Base.getindex-Tuple{KeyedDataset, Symbol}"><code>Base.getindex</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">getindex(ds::KeyedDataset, key)</code></pre><p>Lookup <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a> component by its <code>Tuple</code> key, or <code>Symbol</code> for keys of depth 1. Shared axis keys for the returned <code>KeyedArray</code> are wrapped in a <code>ReadOnlyArray</code> for safety.</p><p><strong>Example</strong></p><p>```jldoctest julia&gt; using AxisKeys; using AxisSets: KeyedDataset;</p><p>julia&gt; ds = KeyedDataset(            :val1 =&gt; KeyedArray(zeros(3, 2); time=1:3, obj=[:a, :b]),            :val2 =&gt; KeyedArray(ones(3, 2) .+ 1.0; time=1:3, loc=[:x, :y]),        );</p><p>julia&gt; ds[:val1] 2-dimensional KeyedArray(NamedDimsArray(...)) with keys:  ↓   time ∈ 3-element ReadOnlyArrays.ReadOnlyArray{Int64,...}   →   obj ∈ 2-element ReadOnlyArrays.ReadOnlyArray{Symbol,...}   And data, 3×2 Array{Float64,2}:        (:a)  (:b)   (1)   0.0   0.0   (2)   0.0   0.0   (3)   0.0   0.0</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/indexing.jl#LL53-L77">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Base.getproperty-Tuple{KeyedDataset, Symbol}" href="#Base.getproperty-Tuple{KeyedDataset, Symbol}"><code>Base.getproperty</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">getproperty(ds::KeyedDataset, sym::Symbol)</code></pre><p>Extract <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a> fields, dimension keys or components in that order. Shared axis keys are wrapped in a <code>ReadOnlyArray</code> for safety.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset;
+
+julia&gt; ds = KeyedDataset(
+           :val1 =&gt; KeyedArray(zeros(3, 2); time=1:3, obj=[:a, :b]),
+           :val2 =&gt; KeyedArray(ones(3, 2) .+ 1.0; time=1:3, loc=[:x, :y]),
+       );
+
+julia&gt; collect(keys(ds.data))
+2-element Vector{Tuple}:
+ (:val1,)
+ (:val2,)
+
+julia&gt; ds.time
+3-element ReadOnlyArrays.ReadOnlyArray{Int64, 1, UnitRange{Int64}}:
+ 1
+ 2
+ 3
+
+julia&gt; dimnames(ds.val1)
+(:time, :obj)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/indexing.jl#LL2-L31">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Base.map-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}" href="#Base.map-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}"><code>Base.map</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">map(f, ds, [key]) -&gt; KeyedDataset</code></pre><p>Apply function <code>f</code> to each component of the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. Returns a new dataset with the same constraints, but new components. The function can be applied to a subselection of components via a <a href="#AxisSets.Pattern"><code>Pattern</code></a> <code>key</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys, Statistics; using AxisSets: KeyedDataset, flatten;
+
+julia&gt; ds = KeyedDataset(
+           flatten([
+               :g1 =&gt; [
+                   :a =&gt; KeyedArray(zeros(3); time=1:3),
+                   :b =&gt; KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+                ],
+                :g2 =&gt; [
+                    :a =&gt; KeyedArray(ones(3); time=1:3),
+                    :b =&gt; KeyedArray(zeros(3, 2); time=1:3, loc=[:x, :y]),
+                ]
+            ])...
+       );
+
+julia&gt; r = map(a -&gt; a .+ 100, ds, (:__, :a, :_));  # The extra `:_` is to clarify that we don&#39;t care about the dimnames.
+
+julia&gt; [k =&gt; mean(v) for (k, v) in r.data]  # KeyedArray printing isn&#39;t consistent in jldoctests
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Float64}}:
+ (:g1, :a) =&gt; 100.0
+ (:g1, :b) =&gt; 1.0
+ (:g2, :a) =&gt; 101.0
+ (:g2, :b) =&gt; 0.0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/functions.jl#LL1-L34">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Base.mapslices-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}" href="#Base.mapslices-Tuple{Function, KeyedDataset, Vararg{Any, N} where N}"><code>Base.mapslices</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">mapslices(f, ds, [key]; dims) -&gt; KeyedDataset</code></pre><p>Apply the <code>mapslices</code> call to each of the desired components and returns a new <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. Selection <a href="#AxisSets.Pattern"><code>Pattern</code></a>s may be provided via <code>key</code>, but components are selected by the desired <code>dims</code> by default.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys, Statistics; using AxisSets: KeyedDataset;
+
+julia&gt; ds = KeyedDataset(
+           :val1 =&gt; KeyedArray(zeros(3, 2); time=1:3, obj=[:a, :b]),
+           :val2 =&gt; KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+       );
+
+julia&gt; r = mapslices(sum, ds; dims=:time);  # KeyedArray printing isn&#39;t consistent in jldoctests
+
+julia&gt; [k =&gt; parent(parent(v)) for (k, v) in r.data]
+2-element Vector{Pair{Tuple{Symbol}, Matrix{Float64}}}:
+ (:val1,) =&gt; [0.0 0.0]
+ (:val2,) =&gt; [3.0 3.0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/functions.jl#LL56-L78">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Base.merge-Tuple{KeyedDataset, Vararg{KeyedDataset, N} where N}" href="#Base.merge-Tuple{KeyedDataset, Vararg{KeyedDataset, N} where N}"><code>Base.merge</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">merge(ds::KeyedDataset, others::KeyedDataset...)</code></pre><p>Combine the constraints and data from multiple <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>s.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset;
+
+julia&gt; ds1 = KeyedDataset(
+           :a =&gt; KeyedArray(zeros(3); time=1:3),
+           :b =&gt; KeyedArray(ones(3, 2); time=1:3, loc=[:x, :y]),
+       );
+
+julia&gt; ds2 = KeyedDataset(
+           :c =&gt; KeyedArray(ones(3); time=1:3),
+           :d =&gt; KeyedArray(zeros(3, 2); time=1:3, loc=[:x, :y]),
+       );
+
+julia&gt; collect(keys(merge(ds1, ds2).data))
+4-element Vector{Tuple}:
+ (:a,)
+ (:b,)
+ (:c,)
+ (:d,)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/functions.jl#LL88-L114">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Base.setindex!-Tuple{KeyedDataset, Any, Symbol}" href="#Base.setindex!-Tuple{KeyedDataset, Any, Symbol}"><code>Base.setindex!</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">setindex!(ds::KeyedDataset{T}, val, key) -&gt; T</code></pre><p>Store the new <code>val</code> in the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>. If any new dimension names don&#39;t any existing constraints then <code>Pattern(:__, &lt;dimname&gt;)</code> is used by default. If the axis values of the new <code>val</code> doesn&#39;t meet the existing constraints in the dataset then an error will be throw.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using AxisSets: KeyedDataset, constraintmap;
+
+julia&gt; ds = KeyedDataset(:a =&gt; KeyedArray(zeros(3); time=1:3));
+
+julia&gt; ds[:b] = KeyedArray(ones(3, 2); time=1:3, lag=[-1, -2]);
+
+julia&gt; collect(constraintmap(ds))
+2-element Vector{Pair{AxisSets.Pattern, Set{Tuple}}}:
+ Pattern((:__, :time)) =&gt; Set([(:b, :time), (:a, :time)])
+  Pattern((:__, :lag)) =&gt; Set([(:b, :lag)])
+
+julia&gt; ds[:c] = KeyedArray(ones(3, 2); time=2:4, lag=[-1, -2])
+ERROR: ArgumentError: Shared dimensions don&#39;t have matching keys
+</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/indexing.jl#LL91-L116">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Impute.apply-Tuple{KeyedDataset, Impute.DeclareMissings}" href="#Impute.apply-Tuple{KeyedDataset, Impute.DeclareMissings}"><code>Impute.apply</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">Impute.apply(ds::KeyedDataset, imp::DeclareMissings)</code></pre><p>Declare missing values across all components in the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/impute.jl#LL16-L20">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Impute.apply-Tuple{KeyedDataset, Impute.Filter}" href="#Impute.apply-Tuple{KeyedDataset, Impute.Filter}"><code>Impute.apply</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">Impute.apply(ds, filter; dims)</code></pre><p>Filter out missing data along the <code>dims</code> for each component in the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a> with that dimension.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys, Impute; using AxisSets: KeyedDataset, Pattern, flatten;
+
+julia&gt; ds = KeyedDataset(
+           flatten([
+               :train =&gt; [
+                   :temp =&gt; KeyedArray([1.0 1.1; missing 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
+                   :load =&gt; KeyedArray([7.0 7.7; 8.0 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ],
+                :predict =&gt; [
+                   :temp =&gt; KeyedArray([1.0 missing; 2.0 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
+                   :load =&gt; KeyedArray([7.0 7.7; 8.1 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ]
+            ])...
+       );
+
+julia&gt; [k =&gt; parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:time).data]  # KeyedArray printing isn&#39;t consistent in jldoctests
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
+   (:train, :temp) =&gt; [3.0 3.3]
+   (:train, :load) =&gt; [9.0 9.9]
+ (:predict, :temp) =&gt; [3.0 3.3]
+ (:predict, :load) =&gt; [9.0 9.9]
+
+julia&gt; [k =&gt; parent(parent(v)) for (k, v) in Impute.filter(ds; dims=Pattern(:train, :__, :time)).data]
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
+   (:train, :temp) =&gt; [1.0 1.1; 3.0 3.3]
+   (:train, :load) =&gt; [7.0 7.7; 9.0 9.9]
+ (:predict, :temp) =&gt; [1.0 missing; 3.0 3.3]
+ (:predict, :load) =&gt; [7.0 7.7; 9.0 9.9]
+
+julia&gt; [k =&gt; parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
+   (:train, :temp) =&gt; [1.0 1.1; missing 2.2; 3.0 3.3]
+   (:train, :load) =&gt; [7.0; 8.0; 9.0]
+ (:predict, :temp) =&gt; [1.0 missing; 2.0 2.2; 3.0 3.3]
+ (:predict, :load) =&gt; [7.0; 8.1; 9.0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/impute.jl#LL82-L126">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Impute.impute-Tuple{KeyedDataset, Impute.Imputor}" href="#Impute.impute-Tuple{KeyedDataset, Impute.Imputor}"><code>Impute.impute</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">Impute.impute(ds, imp; dims)</code></pre><p>Apply the imputation algorithm <code>imp</code> along the <code>dims</code> for all components of the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a> with that dimension.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys, Impute; using AxisSets: KeyedDataset, flatten;
+
+julia&gt; ds = KeyedDataset(
+           flatten([
+               :train =&gt; [
+                   :temp =&gt; KeyedArray([1.0 1.1; missing 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
+                   :load =&gt; KeyedArray([7.0 7.7; 8.0 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ],
+                :predict =&gt; [
+                   :temp =&gt; KeyedArray([1.0 missing; 2.0 2.2; 3.0 3.3]; time=1:3, id=[:a, :b]),
+                   :load =&gt; KeyedArray([7.0 7.7; 8.1 missing; 9.0 9.9]; time=1:3, loc=[:x, :y]),
+                ]
+            ])...
+       );
+
+julia&gt; [k =&gt; parent(parent(v)) for (k, v) in Impute.substitute(ds; dims=:time).data]  # KeyedArray printing isn&#39;t consistent in jldoctests
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
+   (:train, :temp) =&gt; [1.0 1.1; 2.2 2.2; 3.0 3.3]
+   (:train, :load) =&gt; [7.0 7.7; 8.0 8.0; 9.0 9.9]
+ (:predict, :temp) =&gt; [1.0 1.0; 2.0 2.2; 3.0 3.3]
+ (:predict, :load) =&gt; [7.0 7.7; 8.1 8.1; 9.0 9.9]
+
+julia&gt; [k =&gt; parent(parent(v)) for (k, v) in Impute.substitute(ds; dims=:loc).data]
+4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
+   (:train, :temp) =&gt; [1.0 1.1; missing 2.2; 3.0 3.3]
+   (:train, :load) =&gt; [7.0 7.7; 8.0 8.8; 9.0 9.9]
+ (:predict, :temp) =&gt; [1.0 missing; 2.0 2.2; 3.0 3.3]
+ (:predict, :load) =&gt; [7.0 7.7; 8.1 8.8; 9.0 9.9]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/impute.jl#LL26-L63">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Impute.validate-Tuple{KeyedDataset, Impute.Validator}" href="#Impute.validate-Tuple{KeyedDataset, Impute.Validator}"><code>Impute.validate</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">Impute.validate(ds::KeyedDataset, validator::Validator; dims=:)</code></pre><p>Apply the validator to components in the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a> with the specified <code>dims</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/impute.jl#LL6-L10">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="NamedDims.dimnames-Tuple{KeyedDataset}" href="#NamedDims.dimnames-Tuple{KeyedDataset}"><code>NamedDims.dimnames</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia">dimnames(ds)</code></pre><p>Returns a list of the unique dimension names within the <a href="#AxisSets.KeyedDataset"><code>KeyedDataset</code></a>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl">julia&gt; using AxisKeys; using NamedDims; using AxisSets: KeyedDataset;
+
+julia&gt; ds = KeyedDataset(
+           :val1 =&gt; KeyedArray(rand(4, 3, 2); time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+           :val2 =&gt; KeyedArray(rand(4, 3, 2) .+ 1.0; time=1:4, loc=-1:-1:-3, obj=[:a, :b]),
+       );
+
+julia&gt; dimnames(ds)
+3-element Vector{Symbol}:
+ :time
+ :loc
+ :obj</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/invenia/AxisSets.jl/blob/45890549fef942ef6f5b8b25ed56e83313526aa3/src/dataset.jl#LL164-L184">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../example/">« Example</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 2 April 2021 22:58">Friday 2 April 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
