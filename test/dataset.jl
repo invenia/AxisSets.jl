@@ -21,6 +21,15 @@
             @test_throws ArgumentError validate(ds)
         end
 
+        @testset "Empty" begin
+            expected = KeyedDataset(OrderedSet{Pattern}(), LittleDict{Tuple, KeyedArray}())
+            @test KeyedDataset() == expected
+
+            patterns = Pattern[(:train, :_, :target)]
+            expected = KeyedDataset(OrderedSet(patterns), LittleDict{Tuple, KeyedArray}())
+            @test KeyedDataset(; constraints=patterns) == expected
+        end
+
         @testset "KeyedArrays" begin
             ds = KeyedDataset(
                 :val1 => KeyedArray(
@@ -49,6 +58,29 @@
 
             # Test that we have a data dict entry for each value column
             @test issetequal([(:val1,), (:val2,)], keys(ds.data))
+
+            @testset "Variable Keys" begin
+                # Test construction with different key types and lengths
+                ds = KeyedDataset(
+                    "val1" => KeyedArray(
+                        rand(4, 3, 2);
+                        time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                        loc=1:3,
+                        obj=[:a, :b],
+                    ),
+                    (:group1, 2) => KeyedArray(
+                        rand(4, 3, 2) .+ 1.0;
+                        time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                        loc=1:3,
+                        obj=[:a, :b],
+                    ),
+                )
+
+                # Test that we successfully extracted the dims
+                @test issetequal([:time, :loc, :obj], dimnames(ds))
+                # Test that we have a data dict entry for each value column
+                @test issetequal([("val1",), (:group1, 2)], keys(ds.data))
+            end
         end
 
         @testset "Flatten" begin

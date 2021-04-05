@@ -98,12 +98,12 @@ function flatten(x::Vector{<:Pair}, delim::Symbol)
     return [Symbol(join(k, delim)) => v for (k, v) in flatten(x)]
 end
 
-function flatten(A::XArray, dims::Tuple, delim=DEFAULT_PROD_DELIM)
+function flatten(A::KeyedArray, dims::Tuple, delim=DEFAULT_PROD_DELIM)
     new_name = Symbol(join(dims, delim))
     flatten(A, dims => new_name, delim)
 end
 
-function flatten(A::XArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
+function flatten(A::KeyedArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
     # Lookup our unnamed dimensions to flatten
     # We sort the result to ensure that the dimensions to flatten are consecutive
     fd = sort!(collect(NamedDims.dim(A, first(dims))))

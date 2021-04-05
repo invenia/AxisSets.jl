@@ -15,7 +15,7 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(keys(ds.data))
-2-element Vector{Tuple{Symbol}}:
+2-element Vector{Tuple}:
  (:val1,)
  (:val2,)
 
@@ -154,12 +154,12 @@ julia> ds = KeyedDataset(
        );
 
 julia> collect(keys(ds(:__, :a).data))
-2-element Vector{Tuple{Symbol, Symbol}}:
+2-element Vector{Tuple}:
  (:g1, :a)
  (:g2, :a)
 
 julia> collect(keys(ds(:g1, :__).data))
-2-element Vector{Tuple{Symbol, Symbol}}:
+2-element Vector{Tuple}:
  (:g1, :a)
  (:g1, :b)
 ```

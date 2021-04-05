@@ -67,9 +67,6 @@ julia> axiskeys(flatten(A, (:obj, :loc)), :objᵡloc)
 """
 const DEFAULT_PROD_DELIM = :ᵡ
 
-# Short hand type for complicated union of nested Keyed or NamedDims arrays
-const XArray{L, T, N} = Union{NamedDimsArray{L,T,N,<:KeyedArray}, KeyedArray{T,N,<:NamedDimsArray}}
-
 # There's a few places calling `only` is convenient, even for older Julia releases
 if VERSION < v"1.4"
     function _only(x)
