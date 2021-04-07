@@ -25,11 +25,11 @@ julia> ds = KeyedDataset(
 
 julia> p = Power(2);
 
-julia> [k => parent(parent(v)) for (k, v) in FeatureTransforms.apply(ds, p; dims=(:_, :price, :_)).data]
-4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Float64}}}:
-    (:train, :load) => [7.0 7.7; 8.0 8.2; 9.0 9.9]
+julia> r = FeatureTransforms.apply(ds, p; dims=(:_, :price, :_));
+
+julia> [k => parent(parent(v)) for (k, v) in r.data]
+2-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Float64}}}:
    (:train, :price) => [4.0 16.0; 9.0 4.0; 1.0 1.0]
-  (:predict, :load) => [7.0 7.7; 8.1 7.9; 9.0 9.9]
  (:predict, :price) => [0.25 1.0; 25.0 4.0; 0.0 1.0]
 ```
 """
@@ -47,10 +47,10 @@ function FeatureTransforms.apply(ds::KeyedDataset, t::Transform; dims, kwargs...
         apply_paths = unique(apply_paths)
     end
 
-    for path in apply_paths
+    pairs = map(apply_paths) do path
         component = ds.data[path]
-        ds.data[path] = FeatureTransforms.apply(component, t; dims=dim, kwargs...)
+        path => FeatureTransforms.apply(component, t; dims=dim, kwargs...)
     end
 
-    return ds
+    return KeyedDataset(pairs...)
 end
