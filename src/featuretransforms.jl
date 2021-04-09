@@ -1,6 +1,30 @@
 FeatureTransforms.is_transformable(::KeyedDataset) = true
 
 """
+    _apply_paths(ds::KeyedDataset, dims)
+
+Based on the pattern specified by `dims`, returns a Tuple of
+1. paths to components of `ds` that a `FeatureTransforms.Transform` should apply to,
+2. the dimension of the components to apply along.
+"""
+function _apply_paths(ds::KeyedDataset, dims)
+    pattern = _pattern(dims)
+
+    # Get paths to components
+    apply_paths = dimpaths(ds, pattern)
+    apply_paths = [p[1:end-1] for p in apply_paths]
+
+    dim = pattern.segments[end]
+    if dim in (:_, :__)
+        # Corresponds to element-wise apply in FeatureTransforms
+        dim = Colon()
+        apply_paths = unique(apply_paths)
+    end
+
+    return apply_paths, dim
+end
+
+"""
     FeatureTransforms.apply(ds::KeyedDataset, t::Transform; dims=:, kwargs...)
 
 Apply the `Transform` along the `dims` for each component in the [`KeyedDataset`](@ref)
@@ -34,22 +58,10 @@ julia> [k => parent(parent(v)) for (k, v) in r.data]
 ```
 """
 function FeatureTransforms.apply(ds::KeyedDataset, t::Transform; dims, kwargs...)
-    pattern = _pattern(dims)
-    dim = pattern.segments[end]
-
-    # Get paths to components
-    apply_paths = dimpaths(ds, pattern)
-    apply_paths = [p[1:end-1] for p in apply_paths]
-
-    if dim in (:_, :__)
-        # Corresponds to element-wise apply in FeatureTransforms
-        dim = Colon()
-        apply_paths = unique(apply_paths)
-    end
+    apply_paths, dim = _apply_paths(ds, dims)
 
     pairs = map(apply_paths) do path
-        component = ds.data[path]
-        path => FeatureTransforms.apply(component, t; dims=dim, kwargs...)
+        path => FeatureTransforms.apply(ds.data[path], t; dims=dim, kwargs...)
     end
 
     return KeyedDataset(pairs...)
