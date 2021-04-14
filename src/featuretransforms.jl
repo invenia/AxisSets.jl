@@ -1,39 +1,16 @@
 FeatureTransforms.is_transformable(::KeyedDataset) = true
 
-"""
-    _apply_paths(ds::KeyedDataset, dims)
-
-Based on the pattern specified by `dims`, returns a `Tuple` of
-1. paths to components of `ds` that a `FeatureTransforms.Transform` should apply to,
-2. the dimension of the components to apply along.
-"""
-function _apply_paths(ds::KeyedDataset, dims)
-    pattern = _pattern(dims)
-
-    # Get paths to components
-    apply_paths = dimpaths(ds, pattern)
-    apply_paths = [p[1:end-1] for p in apply_paths]
-
-    dim = pattern.segments[end]
-    if dim in (:_, :__)
-        # Corresponds to element-wise apply in FeatureTransforms
-        dim = Colon()
-        apply_paths = unique(apply_paths)
-    end
-
-    return apply_paths, dim
-end
+_pattern(::Colon) = Pattern[(:__,)]
+_pattern(dims::Symbol) = Pattern[(:__, dims)]
+_pattern(dims) = Pattern[(:__, d) for d in dims]
 
 """
-    FeatureTransforms.apply(ds::KeyedDataset, t::Transform; dims, kwargs...)
+    FeatureTransforms.apply(ds::KeyedDataset, t::Transform, [key]; dims=:, kwargs...)
 
-Apply the `Transform` along the `dims` for each component in the [`KeyedDataset`](@ref)
-with that dimension, and return a new [`KeyedDataset`](@ref) of the transformed components.
+Apply the `Transform` to components of the [`KeyedDataset`](@ref) along dimension `dims`.
+The transform can be applied to a subselection of components via a [`Pattern`](@ref) `key`.
 
-If `dims` is a path (`Pattern` or `Tuple`), transform the components that match the path.
-Otherwise, transform every component in the `KeyedDataset` that has a `dims` dimension.
-
-Keyword arguments are passed to the equivalent `FeatureTransforms` method.
+Keyword arguments are passed to the equivalent `FeatureTransforms` method for a component.
 
 # Example
 ```jldoctest
@@ -62,55 +39,44 @@ julia> [k => parent(parent(v)) for (k, v) in r.data]
  (:predict, :price) => [0.25 1.0; 25.0 4.0; 0.0 1.0]
 ```
 """
-function FeatureTransforms.apply(ds::KeyedDataset, t::Transform; dims, kwargs...)
-    apply_paths, dim = _apply_paths(ds, dims)
-
-    pairs = map(apply_paths) do path
-        path => FeatureTransforms.apply(ds.data[path], t; dims=dim, kwargs...)
-    end
-
-    return KeyedDataset(pairs...)
+function FeatureTransforms.apply(ds::KeyedDataset, t::Transform, keys...; dims=:, kwargs...)
+    patterns = isempty(keys) ? _pattern(dims) : Pattern[keys...]
+    return map(a -> FeatureTransforms.apply(a, t; dims=dims, kwargs...), ds, patterns...)
 end
 
 """
-    FeatureTransforms.apply!(ds::KeyedDataset, t::Transform; dims, kwargs...)
+    FeatureTransforms.apply!(ds::KeyedDataset, t::Transform, [key]; dims=:, kwargs...)
 
-Apply the `Transform` along the `dims` for each component in the [`KeyedDataset`](@ref)
-with that dimension, and return the mutated [`KeyedDataset`](@ref).
+Apply the `Transform` to components of the [`KeyedDataset`](@ref) along dimension `dims`,
+mutating the components in-place.
+The transform can be applied to a subselection of components via a [`Pattern`](@ref) `key`.
 
-If `dims` is a path (`Pattern` or `Tuple`), transform the components that match the path.
-Otherwise, transform every component in the `KeyedDataset` that has a `dims` dimension.
-
-Keyword arguments are passed to the equivalent `FeatureTransforms` method.
+Keyword arguments are passed to the equivalent `FeatureTransforms` method for a component.
 """
-function FeatureTransforms.apply!(ds::KeyedDataset, t::Transform; dims, kwargs...)
-    apply_paths, dim = _apply_paths(ds, dims)
-
-    for path in apply_paths
-        FeatureTransforms.apply!(ds.data[path], t; dims=dim, kwargs...)
-    end
-
-    return ds
+function FeatureTransforms.apply!(
+    ds::KeyedDataset, t::Transform, keys...;
+    dims=:, kwargs...
+)
+    patterns = isempty(keys) ? _pattern(dims) : Pattern[keys...]
+    return map(a -> FeatureTransforms.apply!(a, t; dims=dims, kwargs...), ds, patterns...)
 end
 
 """
-    FeatureTransforms.apply_append(ds::KeyedDataset, t::Transform; dims, kwargs...)
+    FeatureTransforms.apply_append(ds::KeyedDataset, t::Transform, [key]; dims=:, kwargs...)
 
-Apply the `Transform` along the `dims` for each component in the [`KeyedDataset`](@ref)
-with that dimension, and return a new [`KeyedDataset`](@ref) with the result of each
-transform appended to the original component.
+Apply the `Transform` to components of the [`KeyedDataset`](@ref) along dimension `dims`.
+The transform can be applied to a subselection of components via a [`Pattern`](@ref) `key`.
 
-If `dims` is a path (`Pattern` or `Tuple`), transform the components that match the path.
-Otherwise, transform every component in the `KeyedDataset` that has a `dims` dimension.
-
-Keyword arguments are passed to the equivalent `FeatureTransforms` method.
+Keyword arguments are passed to the equivalent `FeatureTransforms` method for a component.
 """
-function FeatureTransforms.apply_append(ds::KeyedDataset, t::Transform; dims, kwargs...)
-    apply_paths, dim = _apply_paths(ds, dims)
-
-    pairs = map(apply_paths) do path
-        path => FeatureTransforms.apply_append(ds.data[path], t; dims=dim, kwargs...)
+function FeatureTransforms.apply_append(
+    ds::KeyedDataset, t::Transform, keys...;
+    inner=false, dims=:, kwargs...
+)
+    patterns = isempty(keys) ? _pattern(dims) : Pattern[keys...]
+    if inner
+        return map(ds, patterns...) do a
+            FeatureTransforms.apply_append(a, t; dims=dims, kwargs...)
+        end
     end
-
-    return KeyedDataset(pairs...)
 end
