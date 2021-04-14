@@ -90,6 +90,5 @@ include("indexing.jl")
 include("functions.jl")
 include("impute.jl")
 include("featuretransforms.jl")
-include("utils.jl")
 
 end
