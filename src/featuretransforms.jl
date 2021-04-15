@@ -77,7 +77,7 @@ Keyword arguments are passed to the equivalent `FeatureTransforms` method for a 
 """
 function FeatureTransforms.apply_append(
     ds::KeyedDataset, t::Transform, keys...;
-    inner=false, component_name=nothing, dims=:, kwargs...
+    dims=:, inner=false, component_name=:component, kwargs...
 )
     patterns = _transform_pattern(keys, dims)
 
@@ -90,10 +90,7 @@ function FeatureTransforms.apply_append(
         selected = unique(x[1:end-1] for x in dimpaths(ds) if any(p -> x in p, patterns))
 
         # construct keys of new transformed components
-        new_keys = map(selected) do k
-            component_name = isnothing(component_name) ? :component : component_name
-            (k[1:end-1]..., component_name)
-        end
+        new_keys = [(k[1:end-1]..., component_name) for k in selected]
 
         # pair new keys with transformed components
         pairs = map(new_keys, selected) do new_k, k
