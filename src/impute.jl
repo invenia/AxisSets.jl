@@ -126,12 +126,12 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
 """
 Impute.apply(ds::KeyedDataset, f::Filter; dims) = Impute.apply!(deepcopy(ds), f; dims=dims)
 
-_pattern(dims::Pattern) = dims
-_pattern(dims::Tuple) = Pattern(dims)
-_pattern(dims) = Pattern(:__, dims)
+_impute_pattern(dims::Pattern) = dims
+_impute_pattern(dims::Tuple) = Pattern(dims)
+_impute_pattern(dims) = Pattern(:__, dims)
 
 function Impute.apply!(ds::KeyedDataset, f::Filter; dims)
-    pattern = _pattern(dims)
+    pattern = _impute_pattern(dims)
     dim = pattern.segments[end]
 
     dim in (:_, :__) && throw(ArgumentError(
