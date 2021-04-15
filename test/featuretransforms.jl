@@ -179,7 +179,7 @@
 
                 r = FeatureTransforms.apply_append(
                     ds, p, (:_, :price, :_);
-                    component_name=:price2, append_dim=2
+                    component_name=:price2
                 )
 
                 @test r isa KeyedDataset
