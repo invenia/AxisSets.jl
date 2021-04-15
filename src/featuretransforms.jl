@@ -1,8 +1,9 @@
 FeatureTransforms.is_transformable(::KeyedDataset) = true
 
-_pattern(::Colon) = Pattern[(:__,)]
-_pattern(dims::Symbol) = Pattern[(:__, dims)]
-_pattern(dims) = Pattern[(:__, d) for d in dims]
+_transform_pattern(keys, dims) = isempty(keys) ? _transform_pattern(dims) : Pattern[keys...]
+_transform_pattern(::Colon) = Pattern[(:__,)]
+_transform_pattern(dims::Symbol) = Pattern[(:__, dims)]
+_transform_pattern(dims) = Pattern[(:__, d) for d in dims]
 
 """
     FeatureTransforms.apply(ds::KeyedDataset, t::Transform, [key]; dims=:, kwargs...)
@@ -39,9 +40,13 @@ julia> [k => parent(parent(v)) for (k, v) in r.data]
  (:predict, :price) => [0.25 1.0; 25.0 4.0; 0.0 1.0]
 ```
 """
-function FeatureTransforms.apply(ds::KeyedDataset, t::Transform, keys...; dims=:, kwargs...)
-    patterns = isempty(keys) ? _pattern(dims) : Pattern[keys...]
-    return map(a -> FeatureTransforms.apply(a, t; dims=dims, kwargs...), ds, patterns...)
+function FeatureTransforms.apply(
+    ds::KeyedDataset, t::Transform, keys...;
+    dims=:, kwargs...
+)
+    return map(ds, _transform_pattern(keys, dims)...) do a
+        FeatureTransforms.apply(a, t; dims=dims, kwargs...)
+    end
 end
 
 """
@@ -57,8 +62,9 @@ function FeatureTransforms.apply!(
     ds::KeyedDataset, t::Transform, keys...;
     dims=:, kwargs...
 )
-    patterns = isempty(keys) ? _pattern(dims) : Pattern[keys...]
-    return map(a -> FeatureTransforms.apply!(a, t; dims=dims, kwargs...), ds, patterns...)
+    return map(ds, _transform_pattern(keys, dims)...) do a
+        FeatureTransforms.apply!(a, t; dims=dims, kwargs...)
+    end
 end
 
 """
@@ -73,8 +79,9 @@ function FeatureTransforms.apply_append(
     ds::KeyedDataset, t::Transform, keys...;
     inner=false, dims=:, kwargs...
 )
-    patterns = isempty(keys) ? _pattern(dims) : Pattern[keys...]
-    if inner
+    patterns = _transform_pattern(keys, dims)
+
+    if inner  # batched apply_append on each component
         return map(ds, patterns...) do a
             FeatureTransforms.apply_append(a, t; dims=dims, kwargs...)
         end
