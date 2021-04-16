@@ -154,5 +154,54 @@
             (t1, 1, "temperature", :time),
             (t1, 1, "temperature", :id),
         ]
+
+        @testset "Subtype matching" begin
+            t1 = Float64
+            t2 = Int
+            items = [
+                (t1, 1, "prices", :time),
+                (t1, 1, "prices", :id),
+                (t1, 1, "prices", :lag),
+                (t1, 1, "load", :time),
+                (t1, 1, "load", :id),
+                (t1, 1, "temperature", :time),
+                (t1, 1, "temperature", :id),
+                (t1, 2, "prices", :time),
+                (t1, 2, "prices", :id),
+                (t2, 1, "prices", :time),
+                (t2, 1, "prices", :id),
+                (t2, 1, "prices", :lag),
+                (t2, 1, "load", :time),
+                (t2, 1, "load", :id),
+                (t2, 1, "temperature", :time),
+                (t2, 1, "temperature", :id),
+                (t2, 2, "prices", :time),
+                (t2, 2, "prices", :id),
+            ]
+
+            pattern = Pattern(AbstractFloat, 1, :__)
+            @test filter(in(pattern), items) == [
+                (t1, 1, "prices", :time),
+                (t1, 1, "prices", :id),
+                (t1, 1, "prices", :lag),
+                (t1, 1, "load", :time),
+                (t1, 1, "load", :id),
+                (t1, 1, "temperature", :time),
+                (t1, 1, "temperature", :id),
+            ]
+
+            pattern = Pattern(Integer, 1, :__)
+            @test filter(in(pattern), items) == [
+                (t2, 1, "prices", :time),
+                (t2, 1, "prices", :id),
+                (t2, 1, "prices", :lag),
+                (t2, 1, "load", :time),
+                (t2, 1, "load", :id),
+                (t2, 1, "temperature", :time),
+                (t2, 1, "temperature", :id),
+            ]
+
+            @test filter(in(Pattern(Real, :__)), items) == items
+        end
     end
 end

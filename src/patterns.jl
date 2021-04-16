@@ -88,8 +88,12 @@ function Base.in(item::Tuple, pattern::Pattern)
         item_val, item_st = item_iter
         pat_val, pat_st = pat_iter
 
-        # Iterate as normal if the pattern value matches or it's :_
-        if item_val == pat_val || pat_val === :_
+        # Iterate as normal if the pattern value matches, is a subtype or it's :_
+        if (
+            (item_val isa Type && pat_val isa Type && item_val <: pat_val) ||
+            item_val == pat_val ||
+            pat_val === :_
+        )
             pat_iter = iterate(pattern.segments, pat_st)
             item_iter = iterate(item, item_st)
         # Look ahead when we see a multi-value wildcard to see if the next value matches
