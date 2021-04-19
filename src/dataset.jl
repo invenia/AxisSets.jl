@@ -1,3 +1,29 @@
+
+"""
+    KeyAlignmentError
+
+Is thrown when the constrained dimensions of components in a `KeyedDataset` have misaligned
+key values.
+
+# Fields
+* constraint::Pattern - The constraint descript all patch dimension keys
+* groups - An iterator of paths and keys for each non-matching group.
+"""
+struct KeyAlignmentError <: Exception
+    constraint::Pattern
+    groups
+end
+
+function Base.showerror(io::IO, err::KeyAlignmentError)
+    lines = ["KeyAlignmentError: Misaligned dimension keys on constraint $(err.constraint)"]
+
+    for (paths, keyvals) in err.groups
+        push!(lines, string("  $paths ∈ ", sprint(summary, keyvals)))
+    end
+
+    println(io, join(lines, "\n"))
+end
+
 """
     KeyedDataset
 
@@ -259,8 +285,19 @@ function validate(ds::KeyedDataset, constraint::Pattern, paths)
     if isempty(paths)
         @debug("No dimensions match the constraint $constraint")
     else
-        f, r = Iterators.peel(axiskeys(ds, p) for p in paths)
-        all(==(f), r) || throw(ArgumentError("Shared dimensions don't have matching keys"))
+        keys = unique(axiskeys(ds, p) for p in paths)
+        n = length(keys)
+        if n > 1
+            groups = Tuple(Vector{Tuple}() for i in 1:n)
+            for p in paths
+                for i in 1:n
+                    if axiskeys(ds, p) == keys[i]
+                        push!(groups[i], p)
+                    end
+                end
+            end
+            throw(KeyAlignmentError(constraint, zip(groups, keys)))
+        end
     end
     return true
 end
