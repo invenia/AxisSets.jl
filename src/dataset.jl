@@ -6,8 +6,8 @@ Is thrown when the constrained dimensions of components in a `KeyedDataset` have
 key values.
 
 # Fields
-* constraint::Pattern - The constraint descript all patch dimension keys
-* groups - An iterator of paths and keys for each non-matching group.
+* constraint::Pattern - Constraint pattern describing all dimensions that must align
+* groups - An iterator of paths and keys for each non-matching group
 """
 struct KeyAlignmentError <: Exception
     constraint::Pattern
