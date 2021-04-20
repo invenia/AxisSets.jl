@@ -110,8 +110,9 @@ julia> collect(constraintmap(ds))
   Pattern((:__, :lag)) => Set([(:b, :lag)])
 
 julia> ds[:c] = KeyedArray(ones(3, 2); time=2:4, lag=[-1, -2])
-ERROR: ArgumentError: Shared dimensions don't have matching keys
-
+ERROR: KeyAlignmentError: Misaligned dimension keys on constraint Pattern((:__, :time))
+  Tuple[(:b, :time), (:a, :time)] ∈ 3-element UnitRange{Int64}
+  Tuple[(:c, :time)] ∈ 3-element UnitRange{Int64}
 ```
 """
 Base.setindex!(ds::KeyedDataset, val, key::Symbol) = setindex!(ds, val, (key,))
