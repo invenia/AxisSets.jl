@@ -10,7 +10,14 @@ using Statistics
 using Test
 using TimeZones
 
-using AxisSets: Pattern, KeyedArray, constraintmap, dimpaths, flatten, validate
+using AxisSets:
+    Pattern,
+    KeyAlignmentError,
+    KeyedDataset,
+    constraintmap,
+    dimpaths,
+    flatten,
+    validate
 using Impute: ThresholdError
 
 @testset "AxisSets.jl" begin

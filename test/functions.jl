@@ -84,7 +84,7 @@ end
     end
 
     # Reducing over time will violate our :time dimension constraint
-    @test_throws ArgumentError mapslices(sum, ds, (:__, :b, :_); dims=:time)
+    @test_throws KeyAlignmentError mapslices(sum, ds, (:__, :b, :_); dims=:time)
     # Dimension doesn't exist in the selection
     @test_throws ArgumentError mapslices(sum, ds, (:__, :b, :_); dims=:foo)
 end
@@ -152,7 +152,7 @@ end
                 obj=[:a, :b],
             )
         )
-        @test_throws ArgumentError merge(ds1, ds2)
+        @test_throws KeyAlignmentError merge(ds1, ds2)
     end
 end
 

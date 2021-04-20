@@ -120,7 +120,7 @@ end
 
     # Test validation error if we try to add a component with a mismatched dimension
     # relative to our existing dimensions / constraints
-    @test_throws ArgumentError setindex!(ds, KeyedArray(rand(2); id=[1, 2]), :d)
+    @test_throws KeyAlignmentError setindex!(ds, KeyedArray(rand(2); id=[1, 2]), :d)
 end
 
 @testset "lookup" begin

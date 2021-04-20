@@ -2,7 +2,7 @@
     @testset "Construction" begin
         @testset "Invalid" begin
             # Test that you can construct an invalid dataset if you really want to
-            @test_throws ArgumentError KeyedDataset(
+            @test_throws KeyAlignmentError KeyedDataset(
                 OrderedSet(Pattern[(:__, :time)]),
                 LittleDict(
                     (:val1,) => KeyedArray(rand(4); time=1:4),
@@ -18,7 +18,7 @@
                 ),
                 false
             )
-            @test_throws ArgumentError validate(ds)
+            @test_throws KeyAlignmentError validate(ds)
         end
 
         @testset "Empty" begin
@@ -410,8 +410,8 @@
             obj=[:a, :b],
         )
 
-        @test_throws ArgumentError validate(ds)
-        @test_throws ArgumentError validate(ds, Pattern(:__, :time))
+        @test_throws KeyAlignmentError validate(ds)
+        @test_throws KeyAlignmentError validate(ds, Pattern(:__, :time))
         @test validate(ds, Pattern(:__, :obj))
     end
 end
