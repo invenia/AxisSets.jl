@@ -39,13 +39,12 @@ julia> [k => parent(parent(v)) for (k, v) in r.data]
  (:predict, :price) => [0.25 1.0; 25.0 4.0; 0.0 1.0]
 ```
 """
-function FeatureTransforms.apply(ds::KeyedDataset, t::Transform, keys...; dims=:, kwargs...)
-    return map(ds, _transform_pattern(keys, dims)...) do a
-        FeatureTransforms.apply(a, t; dims=dims, kwargs...)
+function FeatureTransforms.apply(ds::KeyedDataset, t::Transform, key=Pattern((:__,)); kwargs...)
+    return map(ds, _transform_pattern(key)) do a
+        FeatureTransforms.apply(a, t; kwargs...)
     end
 end
 
-_transform_pattern(keys, dims) = isempty(keys) ? _transform_pattern(dims) : Pattern[keys...]
-_transform_pattern(::Colon) = Pattern[(:__,)]
-_transform_pattern(dims::Symbol) = Pattern[(:__, dims)]
-_transform_pattern(dims) = Pattern[(:__, d) for d in dims]
+_transform_pattern(key::Pattern) = key
+_transform_pattern(key) = Pattern(:__, key)
+_transform_pattern(key::Tuple) = Pattern(key)
