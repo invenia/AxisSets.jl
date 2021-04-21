@@ -40,11 +40,7 @@ julia> [k => parent(parent(v)) for (k, v) in r.data]
 ```
 """
 function FeatureTransforms.apply(ds::KeyedDataset, t::Transform, key=Pattern((:__,)); kwargs...)
-    return map(ds, _transform_pattern(key)) do a
+    return map(ds, _pattern(key)) do a
         FeatureTransforms.apply(a, t; kwargs...)
     end
 end
-
-_transform_pattern(key::Pattern) = key
-_transform_pattern(key) = Pattern(:__, key)
-_transform_pattern(key::Tuple) = Pattern(key)
