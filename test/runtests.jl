@@ -3,6 +3,7 @@ using AxisSets
 using Dates
 using Documenter
 using FeatureTransforms
+using FeatureTransforms.TestUtils
 using Impute
 using Missings
 using OrderedCollections
