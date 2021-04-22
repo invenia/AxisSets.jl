@@ -2,6 +2,7 @@ module AxisSets
 
 using AutoHashEquals
 using AxisKeys
+using FeatureTransforms
 using Impute
 using NamedDims
 using OrderedCollections
@@ -88,5 +89,7 @@ include("dataset.jl")
 include("indexing.jl")
 include("functions.jl")
 include("impute.jl")
+include("featuretransforms.jl")
+include("utils.jl")
 
 end
