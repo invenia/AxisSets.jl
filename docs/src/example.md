@@ -54,8 +54,6 @@ function misrand(factor, id)::Union{Missing, Float64}
     return rand(rng)
 end
 
-
-
 data = (
     train = (
         input = (
@@ -111,7 +109,8 @@ To make things easier we're gonna flatten our nested structure and display the c
 
 ```@example full
 flattened = AxisSets.flatten(data)
-Dict(k => names(v) for (k, v) in pairs(flattened))
+d = Dict(flattened...)
+Dict(k => names(v) for (k, v) in flattened)
 ```
 
 Something you may notice about our data is that each component has a `:time` and `:id` column which uniquely identify each value.
@@ -120,7 +119,7 @@ Therefore we can more compactly represent our components as `AxisKeys.KeyedArray
 ```@example full
 components = (
     k => allowmissing(wrapdims(v, Tables.columnnames(v)[end], Tables.columnnames(v)[1:end-1]...))
-    for (k, v) in pairs(flattened)
+    for (k, v) in flattened
 )
 ```
 
@@ -132,15 +131,15 @@ For example, the `:time` columns across `train_input` tables align.
 Similarly the `:id` columns match for both `train_input_prices` and `train_output_prices`.
 
 ```@example full
-@assert issetequal(flattened.train_input_temp.time, flattened.train_input_load.time)
-@assert issetequal(flattened.train_input_prices.id, flattened.train_output_prices.id)
+@assert issetequal(d[(:train, :input, :temp)].time, d[(:train, :input, :load)].time)
+@assert issetequal(d[(:train, :input, :prices)].id, d[(:train, :output, :prices)].id)
 ```
 
 However, not all `time` or `id` columns need to align.
 
 ```@example full
-@assert !issetequal(flattened.train_input_prices.time, flattened.train_output_prices.time)
-@assert !issetequal(flattened.train_input_temp.id, flattened.train_input_load.id)
+@assert !issetequal(d[(:train, :input, :prices)].time, d[(:train, :output, :prices)].time)
+@assert !issetequal(d[(:train, :input, :temp)].id, d[(:train, :input, :load)].id)
 ```
 
 It turns out we can summarize these alignment "constraints" pretty concisely.
