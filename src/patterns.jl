@@ -106,7 +106,10 @@ function Base.in(item::Tuple, pattern::Pattern)
 
             # If the next value will match then bump the pattern iterator state
             # otherwise just bump the item iterate and we'll check again next time.
-            if item_val === next_val
+            if (
+                (item_val isa Type && next_val isa Type && item_val <: next_val) ||
+                item_val == next_val
+            )
                 pat_iter = next_iter
             else
                 item_iter = iterate(item, item_st)
