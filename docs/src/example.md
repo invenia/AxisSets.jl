@@ -128,19 +128,19 @@ This representation avoids storing duplicate `:time` and `:id` column values and
 
 If we look a little closer we'll also find that several of these "key" columns align across the dataframes, while others do not.
 
-For example, the `:time` columns across `train⁻input` tables align.
-Similarly the `:id` columns match for both `train⁻input⁻prices` and `train⁻output⁻prices`.
+For example, the `:time` columns across `train_input` tables align.
+Similarly the `:id` columns match for both `train_input_prices` and `train_output_prices`.
 
 ```@example full
-@assert issetequal(flattened.train⁻input⁻temp.time, flattened.train⁻input⁻load.time)
-@assert issetequal(flattened.train⁻input⁻prices.id, flattened.train⁻output⁻prices.id)
+@assert issetequal(flattened.train_input_temp.time, flattened.train_input_load.time)
+@assert issetequal(flattened.train_input_prices.id, flattened.train_output_prices.id)
 ```
 
 However, not all `time` or `id` columns need to align.
 
 ```@example full
-@assert !issetequal(flattened.train⁻input⁻prices.time, flattened.train⁻output⁻prices.time)
-@assert !issetequal(flattened.train⁻input⁻temp.id, flattened.train⁻input⁻load.id)
+@assert !issetequal(flattened.train_input_prices.time, flattened.train_output_prices.time)
+@assert !issetequal(flattened.train_input_temp.id, flattened.train_input_load.id)
 ```
 
 It turns out we can summarize these alignment "constraints" pretty concisely.

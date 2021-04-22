@@ -55,13 +55,7 @@ end
 function KeyedDataset(pairs::Pair...; constraints=Pattern[])
     # Convert any non-tuple keys to tuples
     tupled_pairs = map(pairs) do (k, v)
-        k isa Tuple && return k => v
-
-        if k isa Symbol
-            Tuple(Symbol.(split(string(k), string(DEFAULT_FLATTEN_DELIM)))) => v
-        else
-            (k,) => v
-        end
+        k isa Tuple ? k => v : (k,) => v
     end
 
     data = LittleDict(tupled_pairs)
