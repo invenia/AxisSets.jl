@@ -222,8 +222,7 @@
 
             @test r isa KeyedDataset
             @test isequal(r, expected)
-            # https://github.com/mcabbott/AxisKeys.jl/issues/61
-            @test_broken !isequal(ds, expected)
+            @test !isequal(ds, expected)
         end
 
         @testset "using pattern" begin
@@ -244,8 +243,7 @@
 
             @test r isa KeyedDataset
             @test isequal(r, expected)
-            # https://github.com/mcabbott/AxisKeys.jl/issues/61
-            @test_broken !isequal(ds, expected)
+            @test !isequal(ds, expected)
         end
 
         @testset "using symbol" begin
@@ -266,8 +264,7 @@
 
             @test r isa KeyedDataset
             @test isequal(r, expected)
-            # https://github.com/mcabbott/AxisKeys.jl/issues/61
-            @test_broken !isequal(ds, expected)
+            @test !isequal(ds, expected)
         end
     end
 
