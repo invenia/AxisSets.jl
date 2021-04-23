@@ -9,8 +9,6 @@ isassociative(x) = false
     flatten(collection, [delim])
 
 Flatten a collection of nested associative types into a flat collection of pairs.
-If the input keys are symbols (ie: `NamedTuple`) then the $DEFAULT_FLATTEN_DELIM  will be
-used, otherwise `Tuple` keys will be returned.
 
 # Example
 ```jldoctest
@@ -23,8 +21,8 @@ julia> data = (
            val4 = 4.3,
        );
 
-julia> flatten(data)
-(val1⁻a1 = 1, val1⁻a2 = 2, val2⁻b1 = 11, val2⁻b2 = 22, val3 = [111, 222], val4 = 4.3)
+julia> flatten(data, :_)
+(val1_a1 = 1, val1_a2 = 2, val2_b1 = 11, val2_b2 = 22, val3 = [111, 222], val4 = 4.3)
 ```
 
     flatten(A, dims, [delim])
@@ -32,8 +30,6 @@ julia> flatten(data)
 Flatten a `KeyedArray` along the specified consecutive dimensions.
 The `dims` argument can either be a `Tuple` of symbols or a `Pair{Tuple, Symbol}` if
 you'd like to specify the desired flattened dimension name.
-If the `dims` is just a `Tuple` with no output dimension specified then $DEFAULT_PROD_DELIM
-will be used to generate the new dimension name.
 
 # Example
 ```jldoctest
@@ -46,8 +42,8 @@ julia> A = KeyedArray(
            loc=[1, 2],
        );
 
-julia> dimnames(flatten(A, (:obj, :loc)))
-(:time, :objᵡloc)
+julia> dimnames(flatten(A, (:obj, :loc), :_))
+(:time, :obj_loc)
 ```
 """
 function flatten end
@@ -68,7 +64,7 @@ function flatten(x::Union{Vector{<:Pair}, Iterators.Pairs}, delim::Nothing)
                     put!(chnl, new_key => _v)
                 end
             else
-                put!(chnl, (k,) => v)
+                put!(chnl, (k isa Tuple ? k : (k,)) => v)
             end
         end
     end
@@ -76,8 +72,9 @@ function flatten(x::Union{Vector{<:Pair}, Iterators.Pairs}, delim::Nothing)
     return collect(result)
 end
 
-# NOTE: NamedTuples only support symbol names, so we use a simple :⁻ delimiter
-function flatten(x::NamedTuple, delim::Symbol=DEFAULT_FLATTEN_DELIM)::NamedTuple
+# NOTE: NamedTuples only support symbol names, so we fallback to a pairs iterator if a delimiter isn't provided
+flatten(x::NamedTuple, delim::Nothing) = flatten(pairs(x), delim)
+function flatten(x::NamedTuple, delim::Symbol)::NamedTuple
     kwargs = map(flatten(pairs(x))) do (k, v)
         _k = isa(k, Tuple) ? join(k, delim) : k
         return Symbol(_k) => v
@@ -98,7 +95,7 @@ function flatten(x::Vector{<:Pair}, delim::Symbol)
     return [Symbol(join(k, delim)) => v for (k, v) in flatten(x)]
 end
 
-function flatten(A::KeyedArray, dims::Tuple, delim=DEFAULT_PROD_DELIM)
+function flatten(A::KeyedArray, dims::Tuple, delim::Symbol)
     new_name = Symbol(join(dims, delim))
     flatten(A, dims => new_name, delim)
 end

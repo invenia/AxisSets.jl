@@ -88,7 +88,7 @@
             # to construct a KeyedDatasets from an existing nested structure of KeyedArrays.
             @testset "NamedTuples" begin
                 # In this case, the resulting keys from flatten need to be symbols with
-                # an `:ᵡ` delimiter
+                # an `:_` delimiter
                 data = (
                     group1 = (
                         a = KeyedArray(
@@ -117,7 +117,7 @@
                         )
                     )
                 )
-                ds = KeyedDataset(; flatten(data)...)
+                ds = KeyedDataset(flatten(data)...)
 
                 # Test that we successfully extracted the dims
                 @test issetequal([:time, :loc, :obj, :label], dimnames(ds))
@@ -143,7 +143,8 @@
                     [(:group1, :a), (:group1, :b), (:group2, :a), (:group2, :b)], keys(ds.data)
                 )
 
-                # Test an example where we don't use the default delimiter
+                # Test an example where we pass a delimiter to flatten to a named tuple,
+                # that we can use as kwargs...
                 ds = KeyedDataset(; flatten(data, :_)...)
 
                 @test constraintmap(ds) == LittleDict(

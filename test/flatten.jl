@@ -92,6 +92,7 @@ using AxisSets: flatten
                 (DateTime(2021, 1, 1, 14),) => 4.3,
             )
             @test flatten(data) == expected
+            @test flatten(expected) == expected
 
             expected = Dict(
                 "2021-01-01T11:00:00_1" => "a",
@@ -103,6 +104,7 @@ using AxisSets: flatten
             )
             # Test that we can flatten that to a string
             @test flatten(data, "_") == expected
+            @test flatten(expected, "_") == expected
         end
 
         @testset "NamedTuple" begin
@@ -112,16 +114,30 @@ using AxisSets: flatten
                 val3 = [111, 222],
                 val4 = 4.3,
             )
-            # Expected names for NamedTuple must be symbols. Default delimiter is `:⁻`
+            # Expected names for NamedTuple must be symbols. Default delimiter is `:_`
             expected = (
-                val1⁻a1 = 1,
-                val1⁻a2 = 2,
-                val2⁻b1 = 11,
-                val2⁻b2 = 22,
+                val1_a1 = 1,
+                val1_a2 = 2,
+                val2_b1 = 11,
+                val2_b2 = 22,
                 val3 = [111, 222],
                 val4 = 4.3,
             )
+            @test flatten(data, :_) == expected
+            @test flatten(expected, :_) == expected
+
+            # By default calling `flatten` on a named tuple without a delimiter will
+            # return pairs
+            expected = [
+                (:val1, :a1) => 1,
+                (:val1, :a2) => 2,
+                (:val2, :b1) => 11,
+                (:val2, :b2) => 22,
+                (:val3,) => [111, 222],
+                (:val4,) => 4.3,
+            ]
             @test flatten(data) == expected
+            @test flatten(expected) == expected
         end
 
         @testset "KeyedArray" begin
@@ -137,22 +153,22 @@ using AxisSets: flatten
                 expected = KeyedArray(
                     reshape(1:24, (4, 6));
                     time=dt,
-                    locᵡobj=[Symbol(join((l, o), :ᵡ)) for l in 1:3, o in [:a, :b]][:],
+                    loc_obj=[Symbol(join((l, o), :_)) for l in 1:3, o in [:a, :b]][:],
                 )
-                @test flatten(A, (:loc, :obj)) == expected
+                @test flatten(A, (:loc, :obj), :_) == expected
             end
 
             @testset "head dims" begin
                 expected = KeyedArray(
                     reshape(1:24, (12, 2));
-                    timeᵡloc=[Symbol(join((t, l), :ᵡ)) for t in dt, l in 1:3][:],
+                    time_loc=[Symbol(join((t, l), :_)) for t in dt, l in 1:3][:],
                     obj=[:a, :b],
                 )
-                @test flatten(A, (:time, :loc)) == expected
+                @test flatten(A, (:time, :loc), :_) == expected
             end
 
-            @test_throws ArgumentError flatten(A, (:time,))
-            @test_throws ArgumentError flatten(A, (:time, :obj))
+            @test_throws ArgumentError flatten(A, (:time,), :_)
+            @test_throws ArgumentError flatten(A, (:time, :obj), :_)
         end
 
         # TODO: Support group flatten operations
