@@ -92,6 +92,7 @@ using AxisSets: flatten
                 (DateTime(2021, 1, 1, 14),) => 4.3,
             )
             @test flatten(data) == expected
+            @test flatten(expected) == expected
 
             expected = Dict(
                 "2021-01-01T11:00:00_1" => "a",
@@ -103,6 +104,7 @@ using AxisSets: flatten
             )
             # Test that we can flatten that to a string
             @test flatten(data, "_") == expected
+            @test flatten(expected, "_") == expected
         end
 
         @testset "NamedTuple" begin
@@ -122,6 +124,20 @@ using AxisSets: flatten
                 val4 = 4.3,
             )
             @test flatten(data, :_) == expected
+            @test flatten(expected, :_) == expected
+
+            # By default calling `flatten` on a named tuple without a delimiter will
+            # return pairs
+            expected = [
+                (:val1, :a1) => 1,
+                (:val1, :a2) => 2,
+                (:val2, :b1) => 11,
+                (:val2, :b2) => 22,
+                (:val3,) => [111, 222],
+                (:val4,) => 4.3,
+            ]
+            @test flatten(data) == expected
+            @test flatten(expected) == expected
         end
 
         @testset "KeyedArray" begin

@@ -64,7 +64,7 @@ function flatten(x::Union{Vector{<:Pair}, Iterators.Pairs}, delim::Nothing)
                     put!(chnl, new_key => _v)
                 end
             else
-                put!(chnl, (k,) => v)
+                put!(chnl, (k isa Tuple ? k : (k,)) => v)
             end
         end
     end
