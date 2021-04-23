@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Example · AxisSets.jl</title><link rel="canonical" href="https://invenia.github.io/AxisSets.jl/example/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/invenia.css" rel="stylesheet" type="text/css"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img class="docs-light-only" src="../assets/logo.png" alt="AxisSets.jl logo"/><img class="docs-dark-only" src="../assets/logo-dark.png" alt="AxisSets.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">AxisSets.jl</span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Example</a><ul class="internal"><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#KeyedDataset"><span>KeyedDataset</span></a></li></ul></li><li><a class="tocitem" href="../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Example</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Example</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/invenia/AxisSets.jl/blob/master/docs/src/example.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Example"><a class="docs-heading-anchor" href="#Example">Example</a><a id="Example-1"></a><a class="docs-heading-anchor-permalink" href="#Example" title="Permalink"></a></h1><p>In this example, we&#39;re going to step through a set of common operations we typically perform when converting a collection of individually fetched features into a simple set of training features (X, y) and predict/testing features (X̂, ŷ).</p><p>Lets start by loading some packages we&#39;ll need.</p><pre><code class="language-julia">using AxisKeys, AxisSets, DataFrames, Dates, Impute, Random, Statistics, TimeZones
 using AxisSets: Pattern, flatten, rekey</code></pre><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><p>To see how we can use AxisSets.jl to aid with data wrangling problems, we&#39;re going to assume our dataset is a nested <code>NamedTuple</code> of <code>DataFrame</code>s. We&#39;re using DataFrames for simplicity, but we could also construct our <code>Dataset</code> from a <code>LibPQ.Result</code> or anything else that follows the Tables interface. Let&#39;s start by taking a look at what our data looks like. To make things easier we&#39;re gonna flatten our nested structure and display the column names for each dataframe.</p><pre><code class="language-julia">flattened = AxisSets.flatten(data)
-Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="documenter-example-output">Dict{Symbol, Vector{String}} with 8 entries:
-  :train⁻output⁻prices   =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;price&quot;]
-  :train⁻input⁻temp      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temp&quot;]
-  :predict⁻output⁻prices =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;price&quot;]
-  :predict⁻input⁻temp    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temp&quot;]
-  :train⁻input⁻load      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;load&quot;]
-  :predict⁻input⁻prices  =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;lag&quot;, &quot;price&quot;]
-  :train⁻input⁻prices    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;lag&quot;, &quot;price&quot;]
-  :predict⁻input⁻load    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;load&quot;]</pre><p>Something you may notice about our data is that each component has a <code>:time</code> and <code>:id</code> column which uniquely identify each value. Therefore we can more compactly represent our components as <code>AxisKeys.KeyedArray</code>s.</p><pre><code class="language-julia">components = (
+d = Dict(flattened...)
+Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documenter-example-output">Dict{Tuple{Symbol, Symbol, Symbol}, Vector{String}} with 8 entries:
+  (:train, :input, :temp)      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temp&quot;]
+  (:predict, :output, :prices) =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;price&quot;]
+  (:predict, :input, :load)    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;load&quot;]
+  (:predict, :input, :temp)    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;temp&quot;]
+  (:train, :output, :prices)   =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;price&quot;]
+  (:train, :input, :prices)    =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;lag&quot;, &quot;price&quot;]
+  (:train, :input, :load)      =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;load&quot;]
+  (:predict, :input, :prices)  =&gt; [&quot;time&quot;, &quot;id&quot;, &quot;lag&quot;, &quot;price&quot;]</pre><p>Something you may notice about our data is that each component has a <code>:time</code> and <code>:id</code> column which uniquely identify each value. Therefore we can more compactly represent our components as <code>AxisKeys.KeyedArray</code>s.</p><pre><code class="language-julia">components = (
     k =&gt; allowmissing(wrapdims(v, Tables.columnnames(v)[end], Tables.columnnames(v)[1:end-1]...))
-    for (k, v) in pairs(flattened)
-)</code></pre><pre class="documenter-example-output">Base.Generator{Base.Iterators.Pairs{Symbol, DataFrames.DataFrame, NTuple{8, Symbol}, NamedTuple{(:train⁻input⁻prices, :train⁻input⁻load, :train⁻input⁻temp, :train⁻output⁻prices, :predict⁻input⁻prices, :predict⁻input⁻load, :predict⁻input⁻temp, :predict⁻output⁻prices), NTuple{8, DataFrames.DataFrame}}}, Main.ex-full.var&quot;#19#20&quot;}(Main.ex-full.var&quot;#19#20&quot;(), Base.Iterators.Pairs{Symbol, DataFrames.DataFrame, NTuple{8, Symbol}, NamedTuple{(:train⁻input⁻prices, :train⁻input⁻load, :train⁻input⁻temp, :train⁻output⁻prices, :predict⁻input⁻prices, :predict⁻input⁻load, :predict⁻input⁻temp, :predict⁻output⁻prices), NTuple{8, DataFrames.DataFrame}}}(:train⁻input⁻prices =&gt; 2320×4 DataFrame
+    for (k, v) in flattened
+)</code></pre><pre class="documenter-example-output">Base.Generator{Vector{Pair}, Main.ex-full.var&quot;#19#20&quot;}(Main.ex-full.var&quot;#19#20&quot;(), Pair[(:train, :input, :prices) =&gt; 2320×4 DataFrame
   Row │ time                 id      lag        price
       │ DateTime…            Symbol  Dates.Day  Float64?
 ──────┼─────────────────────────────────────────────────────────
@@ -32,7 +33,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
  2318 │ 2021-01-06T22:00:00  d       -4 days          0.334544
  2319 │ 2021-01-06T23:00:00  d       -4 days          0.708389
  2320 │ 2021-01-07T00:00:00  d       -4 days          0.475858
-                                               2305 rows omitted, :train⁻input⁻load =&gt; 290×3 DataFrame
+                                               2305 rows omitted, (:train, :input, :load) =&gt; 290×3 DataFrame
  Row │ time                 id      load
      │ DateTime…            Symbol  Float64?
 ─────┼────────────────────────────────────────
@@ -52,7 +53,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
  288 │ 2021-01-06T22:00:00  q       0.258191
  289 │ 2021-01-06T23:00:00  q       0.908562
  290 │ 2021-01-07T00:00:00  q       0.0673735
-                              275 rows omitted, :train⁻input⁻temp =&gt; 435×3 DataFrame
+                              275 rows omitted, (:train, :input, :temp) =&gt; 435×3 DataFrame
  Row │ time                 id      temp
      │ DateTime…            Symbol  Float64?
 ─────┼──────────────────────────────────────────────
@@ -72,7 +73,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
  433 │ 2021-01-06T22:00:00  z             0.97443
  434 │ 2021-01-06T23:00:00  z             0.194879
  435 │ 2021-01-07T00:00:00  z       missing
-                                    420 rows omitted, :train⁻output⁻prices =&gt; 580×3 DataFrame
+                                    420 rows omitted, (:train, :output, :prices) =&gt; 580×3 DataFrame
  Row │ time                 id      price
      │ DateTime…            Symbol  Float64?
 ─────┼────────────────────────────────────────
@@ -92,7 +93,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
  578 │ 2021-01-07T22:00:00  d       0.278689
  579 │ 2021-01-07T23:00:00  d       0.423005
  580 │ 2021-01-08T00:00:00  d       0.99701
-                              565 rows omitted, :predict⁻input⁻prices =&gt; 400×4 DataFrame
+                              565 rows omitted, (:predict, :input, :prices) =&gt; 400×4 DataFrame
  Row │ time                 id      lag        price
      │ DateTime…            Symbol  Dates.Day  Float64?
 ─────┼──────────────────────────────────────────────────
@@ -112,7 +113,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
  398 │ 2021-01-07T22:00:00  d       -4 days    0.461396
  399 │ 2021-01-07T23:00:00  d       -4 days    0.599939
  400 │ 2021-01-08T00:00:00  d       -4 days    0.77756
-                                        385 rows omitted, :predict⁻input⁻load =&gt; 50×3 DataFrame
+                                        385 rows omitted, (:predict, :input, :load) =&gt; 50×3 DataFrame
  Row │ time                 id      load
      │ DateTime…            Symbol  Float64
 ─────┼────────────────────────────────────────
@@ -132,7 +133,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
   48 │ 2021-01-07T22:00:00  q       0.279987
   49 │ 2021-01-07T23:00:00  q       0.3156
   50 │ 2021-01-08T00:00:00  q       0.929448
-                               35 rows omitted, :predict⁻input⁻temp =&gt; 75×3 DataFrame
+                               35 rows omitted, (:predict, :input, :temp) =&gt; 75×3 DataFrame
  Row │ time                 id      temp
      │ DateTime…            Symbol  Float64?
 ─────┼───────────────────────────────────────
@@ -152,7 +153,7 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
   73 │ 2021-01-07T22:00:00  z       0.208576
   74 │ 2021-01-07T23:00:00  z       0.992507
   75 │ 2021-01-08T00:00:00  z       0.235793
-                              60 rows omitted, :predict⁻output⁻prices =&gt; 100×3 DataFrame
+                              60 rows omitted, (:predict, :output, :prices) =&gt; 100×3 DataFrame
  Row │ time                 id      price
      │ DateTime…            Symbol  Float64?
 ─────┼────────────────────────────────────────────────
@@ -172,9 +173,9 @@ Dict(k =&gt; names(v) for (k, v) in pairs(flattened))</code></pre><pre class="do
   98 │ 2021-01-08T22:00:00  d             0.558636
   99 │ 2021-01-08T23:00:00  d             0.929831
  100 │ 2021-01-09T00:00:00  d       missing
-                                       85 rows omitted))</pre><p>This representation avoids storing duplicate <code>:time</code> and <code>:id</code> column values and allows us to perform normal n-dimensional array operation over the dataset more efficiently.</p><p>If we look a little closer we&#39;ll also find that several of these &quot;key&quot; columns align across the dataframes, while others do not.</p><p>For example, the <code>:time</code> columns across <code>train⁻input</code> tables align. Similarly the <code>:id</code> columns match for both <code>train⁻input⁻prices</code> and <code>train⁻output⁻prices</code>.</p><pre><code class="language-julia">@assert issetequal(flattened.train⁻input⁻temp.time, flattened.train⁻input⁻load.time)
-@assert issetequal(flattened.train⁻input⁻prices.id, flattened.train⁻output⁻prices.id)</code></pre><p>However, not all <code>time</code> or <code>id</code> columns need to align.</p><pre><code class="language-julia">@assert !issetequal(flattened.train⁻input⁻prices.time, flattened.train⁻output⁻prices.time)
-@assert !issetequal(flattened.train⁻input⁻temp.id, flattened.train⁻input⁻load.id)</code></pre><p>It turns out we can summarize these alignment &quot;constraints&quot; pretty concisely.</p><ol><li>All <code>time</code> columns must align within each of the 4 <code>train</code>/<code>predict</code> x <code>input</code>/<code>output</code> combinations.</li><li>All <code>id</code> columns must align for each <code>prices</code>, <code>temp</code> and <code>load</code>.</li></ol><p>With AxisSets.jl we can declaratively state these alignment assumptions using <a href="../api/#AxisSets.Pattern"><code>Pattern</code></a>s.</p><p>Constraint patterns on <code>:time</code></p><pre><code class="language-julia">time_constraints = Pattern[
+                                       85 rows omitted])</pre><p>This representation avoids storing duplicate <code>:time</code> and <code>:id</code> column values and allows us to perform normal n-dimensional array operation over the dataset more efficiently.</p><p>If we look a little closer we&#39;ll also find that several of these &quot;key&quot; columns align across the dataframes, while others do not.</p><p>For example, the <code>:time</code> columns across <code>train_input</code> tables align. Similarly the <code>:id</code> columns match for both <code>train_input_prices</code> and <code>train_output_prices</code>.</p><pre><code class="language-julia">@assert issetequal(d[(:train, :input, :temp)].time, d[(:train, :input, :load)].time)
+@assert issetequal(d[(:train, :input, :prices)].id, d[(:train, :output, :prices)].id)</code></pre><p>However, not all <code>time</code> or <code>id</code> columns need to align.</p><pre><code class="language-julia">@assert !issetequal(d[(:train, :input, :prices)].time, d[(:train, :output, :prices)].time)
+@assert !issetequal(d[(:train, :input, :temp)].id, d[(:train, :input, :load)].id)</code></pre><p>It turns out we can summarize these alignment &quot;constraints&quot; pretty concisely.</p><ol><li>All <code>time</code> columns must align within each of the 4 <code>train</code>/<code>predict</code> x <code>input</code>/<code>output</code> combinations.</li><li>All <code>id</code> columns must align for each <code>prices</code>, <code>temp</code> and <code>load</code>.</li></ol><p>With AxisSets.jl we can declaratively state these alignment assumptions using <a href="../api/#AxisSets.Pattern"><code>Pattern</code></a>s.</p><p>Constraint patterns on <code>:time</code></p><pre><code class="language-julia">time_constraints = Pattern[
     # All train input time keys should match
     (:train, :input, :_, :time),
 
@@ -297,4 +298,4 @@ And data, 78×17 Matrix{Float64}:
    ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)       0.772407   0.0932628     0.620784
    ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)       0.528693   0.000701836   0.949602
    ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)       0.194426   0.280996      0.392469
-   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Thursday 22 April 2021 20:45">Thursday 22 April 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Friday 23 April 2021 21:35">Friday 23 April 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
