@@ -1,6 +1,7 @@
 
 isassociative(x::NamedTuple) = true
 isassociative(x::AbstractDict) = true
+isassociative(x::Pair) = true
 isassociative(x::Iterators.Pairs) = true
 isassociative(x::Vector{<:Pair}) = true
 isassociative(x) = false
@@ -51,6 +52,10 @@ function flatten end
 # Single arg version defaults to `nothing` delim
 # All other methods dispatch on the two arg form to be explicit
 flatten(x) = flatten(x, nothing)
+
+# For simplicity we just convert singleton `Pair` arguments to `Pair[x]`, even though it's
+# less efficient.
+flatten(x::Pair, delim::Nothing) = flatten([x], delim)
 
 # Primary flatten algorithm. Other methods should call this and adjust keys as necessary.
 function flatten(x::Union{Vector{<:Pair}, Iterators.Pairs}, delim::Nothing)
