@@ -56,6 +56,9 @@ using AxisSets: flatten
                 "val4" => 4.3,
             ]
             @test flatten(data, "_") == delimited
+
+            # Test a nested singleton pair
+            @test flatten("val1" => "a1" => 1) == [("val1", "a1") => 1]
         end
 
         @testset "Dict" begin
