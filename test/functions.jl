@@ -111,6 +111,19 @@ end
         )
         ds = merge(ds1, ds2)
         @test issetequal(keys(ds.data), [(:val1,), (:val2,)])
+
+        # Make sure merge works on >2 datasets
+        ds3 = KeyedDataset(
+            :val3 => KeyedArray(
+                rand(4, 3, 2) .+ 2.0;
+                time=DateTime(2021, 1, 1, 11):Hour(1):DateTime(2021, 1, 1, 14),
+                loc=1:3,
+                obj=[:a, :b],
+            )
+        )
+
+        ds = merge(ds1, ds2, ds3)
+        @test issetequal(keys(ds.data), [(:val1,), (:val2,), (:val3,)])
     end
     @testset "replace" begin
         ds1 = KeyedDataset(
