@@ -119,9 +119,9 @@ julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=Pattern(:tra
 julia> [k => parent(parent(v)) for (k, v) in Impute.filter(ds; dims=:loc).data]
 4-element Vector{Pair{Tuple{Symbol, Symbol}, Matrix{Union{Missing, Float64}}}}:
    (:train, :temp) => [1.0 1.1; missing 2.2; 3.0 3.3]
-   (:train, :load) => [7.0; 8.0; 9.0]
+   (:train, :load) => [7.0; 8.0; 9.0;;]
  (:predict, :temp) => [1.0 missing; 2.0 2.2; 3.0 3.3]
- (:predict, :load) => [7.0; 8.1; 9.0]
+ (:predict, :load) => [7.0; 8.1; 9.0;;]
 ```
 """
 Impute.apply(ds::KeyedDataset, f::Filter; dims) = Impute.apply!(deepcopy(ds), f; dims=dims)

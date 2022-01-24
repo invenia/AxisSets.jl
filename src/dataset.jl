@@ -169,7 +169,7 @@ julia> ds = KeyedDataset(
 
 julia> collect(constraintmap(ds))
 3-element Vector{Pair{AxisSets.Pattern, Set{Tuple}}}:
- Pattern((:__, :time)) => Set([(:val2, :time), (:val1, :time)])
+ Pattern((:__, :time)) => Set([(:val1, :time), (:val2, :time)])
   Pattern((:__, :loc)) => Set([(:val1, :loc), (:val2, :loc)])
   Pattern((:__, :obj)) => Set([(:val2, :obj), (:val1, :obj)])
 ```

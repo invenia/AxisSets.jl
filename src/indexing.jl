@@ -106,13 +106,25 @@ julia> ds[:b] = KeyedArray(ones(3, 2); time=1:3, lag=[-1, -2]);
 
 julia> collect(constraintmap(ds))
 2-element Vector{Pair{AxisSets.Pattern, Set{Tuple}}}:
- Pattern((:__, :time)) => Set([(:b, :time), (:a, :time)])
+ Pattern((:__, :time)) => Set([(:a, :time), (:b, :time)])
   Pattern((:__, :lag)) => Set([(:b, :lag)])
 
 julia> ds[:c] = KeyedArray(ones(3, 2); time=2:4, lag=[-1, -2])
 ERROR: KeyAlignmentError: Misaligned dimension keys on constraint Pattern((:__, :time))
-  Tuple[(:b, :time), (:a, :time)] ∈ 3-element UnitRange{Int64}
+  Tuple[(:a, :time), (:b, :time)] ∈ 3-element UnitRange{Int64}
   Tuple[(:c, :time)] ∈ 3-element UnitRange{Int64}
+
+Stacktrace:
+ [1] validate(ds::KeyedDataset, constraint::AxisSets.Pattern{Tuple{Symbol, Symbol}}, paths::Set{Tuple})
+   @ AxisSets ~/src/invenia/AxisSets.jl/src/dataset.jl:293
+ [2] validate(ds::KeyedDataset)
+   @ AxisSets ~/src/invenia/AxisSets.jl/src/dataset.jl:267
+ [3] setindex!(ds::KeyedDataset, val::KeyedArray{Float64, 2, NamedDimsArray{(:time, :lag), Float64, 2, Matrix{Float64}}, Tuple{UnitRange{Int64}, Vector{Int64}}}, key::Tuple{Symbol})
+   @ AxisSets ~/src/invenia/AxisSets.jl/src/indexing.jl:132
+ [4] setindex!(ds::KeyedDataset, val::KeyedArray{Float64, 2, NamedDimsArray{(:time, :lag), Float64, 2, Matrix{Float64}}, Tuple{UnitRange{Int64}, Vector{Int64}}}, key::Symbol)
+   @ AxisSets ~/src/invenia/AxisSets.jl/src/indexing.jl:118
+ [5] top-level scope
+   @ none:1
 ```
 """
 Base.setindex!(ds::KeyedDataset, val, key::Symbol) = setindex!(ds, val, (key,))
