@@ -97,7 +97,7 @@ If the axis values of the new `val` doesn't meet the existing constraints in the
 then an error will be thrown.
 
 # Example
-```jldoctest
+```jldoctest; filter = r"(?s)Stacktrace.*"
 julia> using AxisKeys; using AxisSets: KeyedDataset, constraintmap;
 
 julia> ds = KeyedDataset(:a => KeyedArray(zeros(3); time=1:3));
@@ -113,18 +113,6 @@ julia> ds[:c] = KeyedArray(ones(3, 2); time=2:4, lag=[-1, -2])
 ERROR: KeyAlignmentError: Misaligned dimension keys on constraint Pattern((:__, :time))
   Tuple[(:a, :time), (:b, :time)] ∈ 3-element UnitRange{Int64}
   Tuple[(:c, :time)] ∈ 3-element UnitRange{Int64}
-
-Stacktrace:
- [1] validate(ds::KeyedDataset, constraint::AxisSets.Pattern{Tuple{Symbol, Symbol}}, paths::Set{Tuple})
-   @ AxisSets ~/src/invenia/AxisSets.jl/src/dataset.jl:293
- [2] validate(ds::KeyedDataset)
-   @ AxisSets ~/src/invenia/AxisSets.jl/src/dataset.jl:267
- [3] setindex!(ds::KeyedDataset, val::KeyedArray{Float64, 2, NamedDimsArray{(:time, :lag), Float64, 2, Matrix{Float64}}, Tuple{UnitRange{Int64}, Vector{Int64}}}, key::Tuple{Symbol})
-   @ AxisSets ~/src/invenia/AxisSets.jl/src/indexing.jl:132
- [4] setindex!(ds::KeyedDataset, val::KeyedArray{Float64, 2, NamedDimsArray{(:time, :lag), Float64, 2, Matrix{Float64}}, Tuple{UnitRange{Int64}, Vector{Int64}}}, key::Symbol)
-   @ AxisSets ~/src/invenia/AxisSets.jl/src/indexing.jl:118
- [5] top-level scope
-   @ none:1
 ```
 """
 Base.setindex!(ds::KeyedDataset, val, key::Symbol) = setindex!(ds, val, (key,))
