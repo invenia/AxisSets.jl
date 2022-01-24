@@ -91,10 +91,10 @@ end
 """
     setindex!(ds::KeyedDataset{T}, val, key) -> T
 
-Store the new `val` in the [`KeyedDataset`](@ref). If any new dimension names don't any
-existing constraints then `Pattern(:__, <dimname>)` is used by default.
+Store the new `val` in the [`KeyedDataset`](@ref). If any new dimension names don't 
+match any existing constraints then `Pattern(:__, <dimname>)` is used by default.
 If the axis values of the new `val` doesn't meet the existing constraints in the dataset
-then an error will be throw.
+then an error will be thrown.
 
 # Example
 ```jldoctest
