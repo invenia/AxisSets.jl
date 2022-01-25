@@ -15,7 +15,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
     for (k, v) in flattened
 )</code></pre><pre class="documenter-example-output">Base.Generator{Vector{Pair}, Main.ex-full.var&quot;#19#20&quot;}(Main.ex-full.var&quot;#19#20&quot;(), Pair[(:train, :input, :prices) =&gt; 2320×4 DataFrame
   Row │ time                 id      lag        price
-      │ DateTime…            Symbol  Dates.Day  Float64?
+      │ DateTime             Symbol  Dates.Day  Float64?
 ──────┼─────────────────────────────────────────────────────────
     1 │ 2021-01-01T00:00:00  a       -1 day           0.766797
     2 │ 2021-01-01T01:00:00  a       -1 day           0.460085
@@ -35,7 +35,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
  2320 │ 2021-01-07T00:00:00  d       -4 days          0.475858
                                                2305 rows omitted, (:train, :input, :load) =&gt; 290×3 DataFrame
  Row │ time                 id      load
-     │ DateTime…            Symbol  Float64?
+     │ DateTime             Symbol  Float64?
 ─────┼────────────────────────────────────────
    1 │ 2021-01-01T00:00:00  p       0.498267
    2 │ 2021-01-01T01:00:00  p       0.767626
@@ -55,7 +55,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
  290 │ 2021-01-07T00:00:00  q       0.0673735
                               275 rows omitted, (:train, :input, :temp) =&gt; 435×3 DataFrame
  Row │ time                 id      temp
-     │ DateTime…            Symbol  Float64?
+     │ DateTime             Symbol  Float64?
 ─────┼──────────────────────────────────────────────
    1 │ 2021-01-01T00:00:00  x             0.0852417
    2 │ 2021-01-01T01:00:00  x             0.863001
@@ -75,7 +75,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
  435 │ 2021-01-07T00:00:00  z       missing
                                     420 rows omitted, (:train, :output, :prices) =&gt; 580×3 DataFrame
  Row │ time                 id      price
-     │ DateTime…            Symbol  Float64?
+     │ DateTime             Symbol  Float64?
 ─────┼────────────────────────────────────────
    1 │ 2021-01-02T00:00:00  a       0.303532
    2 │ 2021-01-02T01:00:00  a       0.25275
@@ -95,7 +95,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
  580 │ 2021-01-08T00:00:00  d       0.99701
                               565 rows omitted, (:predict, :input, :prices) =&gt; 400×4 DataFrame
  Row │ time                 id      lag        price
-     │ DateTime…            Symbol  Dates.Day  Float64?
+     │ DateTime             Symbol  Dates.Day  Float64?
 ─────┼──────────────────────────────────────────────────
    1 │ 2021-01-07T00:00:00  a       -1 day     0.827425
    2 │ 2021-01-07T01:00:00  a       -1 day     0.509469
@@ -115,7 +115,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
  400 │ 2021-01-08T00:00:00  d       -4 days    0.77756
                                         385 rows omitted, (:predict, :input, :load) =&gt; 50×3 DataFrame
  Row │ time                 id      load
-     │ DateTime…            Symbol  Float64
+     │ DateTime             Symbol  Float64
 ─────┼────────────────────────────────────────
    1 │ 2021-01-07T00:00:00  p       0.227583
    2 │ 2021-01-07T01:00:00  p       0.554615
@@ -135,7 +135,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
   50 │ 2021-01-08T00:00:00  q       0.929448
                                35 rows omitted, (:predict, :input, :temp) =&gt; 75×3 DataFrame
  Row │ time                 id      temp
-     │ DateTime…            Symbol  Float64?
+     │ DateTime             Symbol  Float64?
 ─────┼───────────────────────────────────────
    1 │ 2021-01-07T00:00:00  x       0.425157
    2 │ 2021-01-07T01:00:00  x       0.930817
@@ -155,7 +155,7 @@ Dict(k =&gt; names(v) for (k, v) in flattened)</code></pre><pre class="documente
   75 │ 2021-01-08T00:00:00  z       0.235793
                               60 rows omitted, (:predict, :output, :prices) =&gt; 100×3 DataFrame
  Row │ time                 id      price
-     │ DateTime…            Symbol  Float64?
+     │ DateTime             Symbol  Float64?
 ─────┼────────────────────────────────────────────────
    1 │ 2021-01-08T00:00:00  a             0.000600888
    2 │ 2021-01-08T01:00:00  a             0.232931
@@ -298,4 +298,4 @@ And data, 78×17 Matrix{Float64}:
    ZonedDateTime(2021, 1, 6, 13, tz&quot;UTC&quot;)       0.772407   0.0932628     0.620784
    ZonedDateTime(2021, 1, 6, 15, tz&quot;UTC&quot;)       0.528693   0.000701836   0.949602
    ZonedDateTime(2021, 1, 6, 19, tz&quot;UTC&quot;)       0.194426   0.280996      0.392469
-   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Wednesday 12 May 2021 14:51">Wednesday 12 May 2021</span>. Using Julia version 1.6.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+   ZonedDateTime(2021, 1, 6, 21, tz&quot;UTC&quot;)       0.462426   0.397736      0.308557</pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 25 January 2022 17:08">Tuesday 25 January 2022</span>. Using Julia version 1.6.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
