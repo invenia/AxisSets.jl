@@ -14,7 +14,7 @@ ReadOnlyArrays = "988b38a3-91fc-5605-94a2-ee2116b3bd83"
 
 [compat]
 AutoHashEquals = "0.2"
-AxisKeys = "0.1.16"
+AxisKeys = "0.1.16, 0.2"
 FeatureTransforms = "0.3.6"
 Impute = "0.6"
 NamedDims = "0.2"
