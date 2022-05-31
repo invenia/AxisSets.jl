@@ -91,7 +91,7 @@ function Base.in(item::Tuple, pattern::Pattern)
         # Iterate as normal if the pattern value matches, is a subtype or it's :_
         if (
             (item_val isa Type && pat_val isa Type && item_val <: pat_val) ||
-            item_val == pat_val ||
+            isequal(item_val, pat_val) ||
             pat_val === :_
         )
             pat_iter = iterate(pattern.segments, pat_st)
@@ -108,7 +108,7 @@ function Base.in(item::Tuple, pattern::Pattern)
             # otherwise just bump the item iterate and we'll check again next time.
             if (
                 (item_val isa Type && next_val isa Type && item_val <: next_val) ||
-                item_val == next_val
+                isequal(item_val, next_val)
             )
                 pat_iter = next_iter
             else

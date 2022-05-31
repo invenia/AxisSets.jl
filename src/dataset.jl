@@ -285,7 +285,7 @@ function validate(ds::KeyedDataset, constraint::Pattern, paths)
             groups = Tuple(Vector{Tuple}() for i in 1:n)
             for p in paths
                 for i in 1:n
-                    if axiskeys(ds, p) == keys[i]
+                    if isequal(axiskeys(ds, p), keys[i])
                         push!(groups[i], p)
                     end
                 end
