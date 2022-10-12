@@ -170,11 +170,7 @@ using AxisSets: flatten
                 @test flatten(A, (:time, :loc), :_) == expected
             end
 
-            if VERSION < v"1.8"
-                @test_throws ArgumentError flatten(A, (:time,), :_)
-            else
-                @test_throws MethodError flatten(A, (:time,), :_)
-            end
+            @test_throws ArgumentError flatten(A, (:time,), :_)
             @test_throws ArgumentError flatten(A, (:time, :obj), :_)
         end
 
