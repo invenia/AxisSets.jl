@@ -112,7 +112,9 @@ function flatten(A::KeyedArray, dims::Pair{<:Tuple, Symbol}, delim=nothing)
 
     # The max difference between the dimensions to flatten should be 1, otherwise we have
     # non-consecutive dimensions and should throw an error
-    maximum(diff(fd)) == 1 || throw(ArgumentError("Flatten dimensions must be consecutive"))
+    d = diff(fd)
+    isempty(d) && throw(ArgumentError("Flatten dimensions must be consecutive"))
+    maximum(d) == 1 || throw(ArgumentError("Flatten dimensions must be consecutive"))
 
     # The offset is equal to the number of dimensions that are being dropped
     # (ie: ndims(origin) - ndims(flattened))

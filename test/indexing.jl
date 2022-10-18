@@ -27,8 +27,13 @@
         @test isa(ds.time, ReadOnlyArray)
         @test isa(ds.val1.time, ReadOnlyArray)
 
-        @test_throws ErrorException ds.time[3] = DateTime(2020, 1, 1)
-        @test_throws ErrorException ds.val1.time[3] = DateTime(2020, 1, 1)
+        if VERSION < v"1.8"
+            @test_throws ErrorException ds.time[3] = DateTime(2020, 1, 1)
+            @test_throws ErrorException ds.val1.time[3] = DateTime(2020, 1, 1)
+        else
+            @test_throws CanonicalIndexError ds.time[3] = DateTime(2020, 1, 1)
+            @test_throws CanonicalIndexError ds.val1.time[3] = DateTime(2020, 1, 1)
+        end
 
         # Test that we can still modify non-shared keys
         ds.val1.obj[2] = :d
