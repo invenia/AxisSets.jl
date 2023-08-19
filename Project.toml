@@ -13,7 +13,7 @@ OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 ReadOnlyArrays = "988b38a3-91fc-5605-94a2-ee2116b3bd83"
 
 [compat]
-AutoHashEquals = "0.2"
+AutoHashEquals = "0.2, 1"
 AxisKeys = "0.1.16, 0.2"
 FeatureTransforms = "0.3.6, 0.4"
 Impute = "0.6"
